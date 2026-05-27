@@ -1136,7 +1136,7 @@ function FloatingChatBot() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [unread, setUnread] = useState(1);
-  const [groqKey, setGroqKey] = useState(localStorage.getItem('wanderhub_groq_key') || "");
+  const [groqKey, setGroqKey] = useState(localStorage.getItem('wanderhub_groq_key') || import.meta.env.VITE_GROQ_API_KEY || "");
   const [showSettings, setShowSettings] = useState(false);
   const bottomRef = useRef(null);
 
