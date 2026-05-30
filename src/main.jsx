@@ -171,7 +171,7 @@ function Logo() {
       </div>
       <div className="leading-tight">
         <div className="text-sm font-black tracking-[0.22em] text-[#1e4230]">WANDERHUB</div>
-        <div className="text-[10px] uppercase tracking-[0.24em] text-[#5a7a60]">Seek the new</div>
+        <div className="text-[10px] uppercase tracking-[0.24em] text-[#5a7a60]">Trải nghiệm đô thị</div>
       </div>
     </NavLink>
   );
@@ -210,7 +210,7 @@ function Navbar({ user, onLogout }) {
               <NavLink id="nav-btn-login" to="/auth" className="btn btn-ghost">
                 Đăng nhập
               </NavLink>
-              <NavLink id="nav-btn-planner" to="/planner" className="btn btn-primary">
+              <NavLink id="nav-btn-planner" to={user ? "/planner" : "/auth"} className="btn btn-primary">
                 Bắt đầu lên lịch trình
               </NavLink>
             </>
@@ -246,7 +246,7 @@ function Navbar({ user, onLogout }) {
                 <NavLink id="nav-mobile-btn-login" to="/auth" onClick={() => setOpen(false)} className="btn btn-ghost w-full justify-center">
                   Đăng nhập
                 </NavLink>
-                <NavLink id="nav-mobile-btn-planner" to="/planner" onClick={() => setOpen(false)} className="btn btn-primary w-full justify-center">
+                <NavLink id="nav-mobile-btn-planner" to={user ? "/planner" : "/auth"} onClick={() => setOpen(false)} className="btn btn-primary w-full justify-center">
                   Bắt đầu lên lịch trình
                 </NavLink>
               </div>
@@ -258,7 +258,7 @@ function Navbar({ user, onLogout }) {
   );
 }
 
-function Footer() {
+function Footer({ user }) {
   return (
     <footer className="border-t border-[#2d5a3d]/10 bg-[#f5f0e8]">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
@@ -279,7 +279,7 @@ function Footer() {
           <NavLink to="/faq" className="text-[#3d2b1a]/62 hover:text-cyan">FAQ</NavLink>
           <NavLink to="/terms" className="text-[#3d2b1a]/62 hover:text-cyan">Terms & Policies</NavLink>
           <NavLink to="/auth" className="text-[#3d2b1a]/62 hover:text-cyan">Login / Register</NavLink>
-          <NavLink to="/planner" className="text-[#3d2b1a]/62 hover:text-cyan">AI Trip Planner</NavLink>
+          <NavLink to={user ? "/planner" : "/auth"} className="text-[#3d2b1a]/62 hover:text-cyan">AI Trip Planner</NavLink>
         </div>
       </div>
     </footer>
@@ -1314,7 +1314,7 @@ function FloatingChatBot() {
 }
 
 
-function Home() {
+function Home({ user }) {
 
   return (
     <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="overflow-hidden bg-[#fdf8f3]">
@@ -1336,7 +1336,7 @@ function Home() {
               đúng gu của bạn.
             </p>
             <div className="flex gap-4 mt-8 pointer-events-auto">
-              <NavLink to="/planner" className="btn btn-primary hero-main-cta">
+              <NavLink to={user ? "/planner" : "/auth"} className="btn btn-primary hero-main-cta">
                 Lên lịch trình ngay <ArrowRight size={18} />
               </NavLink>
               <button 
@@ -1411,7 +1411,7 @@ function Home() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <NavLink to="/planner" className="btn btn-primary inline-flex items-center gap-2">
+            <NavLink to={user ? "/planner" : "/auth"} className="btn btn-primary inline-flex items-center gap-2">
               Thử tạo lịch trình ngay <ArrowRight size={16} />
             </NavLink>
           </div>
@@ -1433,7 +1433,7 @@ function Home() {
                 Bằng sự kết hợp giữa trí tuệ nhân tạo thông minh và kiến thức bản địa sâu sắc, WanderHUB tối ưu hóa từng tuyến đường di chuyển,
                 giúp bạn tiết kiệm thời gian mà vẫn tận hưởng trọn vẹn những điểm đến tinh tế nhất.
               </p>
-              <NavLink to="/planner" className="btn btn-primary">
+              <NavLink to={user ? "/planner" : "/auth"} className="btn btn-primary">
                 Trải Nghiệm Ngay <ChevronRight size={16} />
               </NavLink>
             </Reveal>
@@ -1712,7 +1712,7 @@ function Home() {
             <h2 className="section-title-large">Chọn gói phù hợp với bạn</h2>
             <p className="text-stone-600">Bắt đầu miễn phí, nâng cấp khi cần – không ràng buộc hợp đồng.</p>
           </div>
-          <PricingGrid preview />
+          <PricingGrid preview user={user} />
           <div className="text-center mt-10">
             <NavLink to="/pricing" className="btn btn-ghost inline-flex items-center gap-2">
               Xem chi tiết tất cả gói <ChevronRight size={16} />
@@ -1738,7 +1738,7 @@ function Home() {
               Bắt đầu hành trình thiết lập lịch trình trải nghiệm đô thị Sài Gòn trọn vẹn chỉ với 3 giây chọn mood cùng WanderHUB.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <NavLink to="/planner" className="btn bg-white text-[#1e4230] hover:bg-stone-100 border-none px-8 py-4 shadow-lg hover:shadow-xl transition-all font-bold">
+              <NavLink to={user ? "/planner" : "/auth"} className="btn bg-white text-[#1e4230] hover:bg-stone-100 border-none px-8 py-4 shadow-lg hover:shadow-xl transition-all font-bold">
                 Lên lịch trình ngay <ArrowRight size={18} />
               </NavLink>
               <NavLink to="/explore" className="btn btn-glass text-white border-white/20 hover:bg-white/10 px-8 py-4 backdrop-blur-md">
@@ -1753,7 +1753,7 @@ function Home() {
   );
 }
 
-function PricingGrid({ preview = false }) {
+function PricingGrid({ preview = false, user = null }) {
   return (
     <div className="grid gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
       {packages.map((plan) => (
@@ -1776,7 +1776,7 @@ function PricingGrid({ preview = false }) {
               </div>
             ))}
           </div>
-          <NavLink to="/planner" className="btn btn-glass mt-7 w-full justify-center">
+          <NavLink to={user ? "/planner" : "/auth"} className="btn btn-glass mt-7 w-full justify-center">
             {plan.highlight ? "Bắt đầu Premium" : "Chọn gói này"}
           </NavLink>
         </Reveal>
@@ -1809,8 +1809,8 @@ function About() {
           
           <div className="mt-8 rounded-2xl overflow-hidden shadow-md h-[200px]">
             <img 
-              src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=800&q=80" 
-              alt="Ho Chi Minh City Streets" 
+              src="/images/wanderhub-banner.png" 
+              alt="WanderHUB Banner" 
               className="w-full h-full object-cover" 
             />
           </div>
@@ -1853,10 +1853,10 @@ function About() {
   );
 }
 
-function Pricing() {
+function Pricing({ user }) {
   return (
     <PageShell eyebrow="Service Packages / Pricing" title="Gói dịch vụ rõ ràng cho từng kiểu khám phá.">
-      <PricingGrid />
+      <PricingGrid user={user} />
 
       {/* Guarantee banner */}
       <Reveal className="mt-12 rounded-2xl bg-[#2d5a3d]/5 border border-[#2d5a3d]/10 p-8 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
@@ -1869,7 +1869,7 @@ function Pricing() {
             Nếu Premium không đáp ứng kỳ vọng, chúng tôi hoàn tiền đầy đủ trong vòng 7 ngày đầu sử dụng. Không cần giải thích.
           </p>
         </div>
-        <NavLink to="/planner" className="btn btn-primary shrink-0">Thử ngay miễn phí</NavLink>
+        <NavLink to={user ? "/planner" : "/auth"} className="btn btn-primary shrink-0">Thử ngay miễn phí</NavLink>
       </Reveal>
 
       {/* Inline FAQ */}
@@ -2461,9 +2461,9 @@ function App() {
       <Navbar user={user} onLogout={handleLogout} />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home user={user} />} />
           <Route path="/about" element={<About />} />
-          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/pricing" element={<Pricing user={user} />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<FAQ />} />
@@ -2472,7 +2472,7 @@ function App() {
           <Route path="/planner" element={<Planner />} />
         </Routes>
       </AnimatePresence>
-      <Footer />
+      <Footer user={user} />
       <FloatingChatBot />
     </>
   );
