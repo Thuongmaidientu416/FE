@@ -7,8 +7,8 @@ Start with:
     # or: uvicorn main:app --reload --host 127.0.0.1 --port 8000
 """
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from fastapi.responses import Response
 
 from config import CORS_ORIGINS
 from database import init_db
@@ -22,16 +22,21 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_origin_regex=r"https?://.*",
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=3600,
-)
+_CORS_HEADERS = {
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+    "Access-Control-Allow-Headers": "*",
+    "Access-Control-Max-Age": "3600",
+}
+
+@app.middleware("http")
+async def cors_middleware(request: Request, call_next):
+    origin = request.headers.get("origin", "*")
+    if request.method == "OPTIONS":
+        return Response(status_code=200, headers={**_CORS_HEADERS, "Access-Control-Allow-Origin": origin})
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Methods"] = _CORS_HEADERS["Access-Control-Allow-Methods"]
+    return response
 
 # ── Register routers ─────────────────────────────────────────────
 app.include_router(auth.router)
