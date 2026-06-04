@@ -1,32 +1,45 @@
-import { getUserContext } from './Layer1_DataEngine';
-import { applyTravelRules } from './Layer2_KnowledgeEngine';
-import { generateRecommendations } from './Layer3_RecommendationEngine';
-import { generateAIResponse } from './Layer4_ConversationLayer';
+import { apiChat } from '../api';
 
 /**
- * Hàm Orchestrator kết nối 4 Layer của AI LLM Architecture.
- * Backend sau này sẽ gọi hàm tương tự để điều phối luồng dữ liệu.
+ * Orchestrator — kết nối FE chatbot với backend AI pipeline.
+ * Backend chạy 4 Layer (Data → Knowledge → Recommendation → Conversation) server-side.
+ * FE chỉ cần gửi message + history, backend trả lời đầy đủ.
  */
 export const processUserMessage = async (userMessage, messageHistory, groqKey) => {
-  // 1. Lấy Context người dùng
-  const context = getUserContext("user_w123", userMessage);
-  
-  // 2. Chạy qua Knowledge Engine để lấy các Rule nghiệp vụ
-  const rules = applyTravelRules(context);
-  
-  // 3. Chạy qua Recommendation Engine để sinh lộ trình
-  const recommendations = generateRecommendations(context, rules);
-  
-  // Đóng gói data lại gửi cho LLM
-  const systemData = {
-    userProfile: context.user,
-    liveContext: context.context,
-    businessRulesApplied: rules,
-    recommendations: recommendations
-  };
+  try {
+    const result = await apiChat(userMessage, messageHistory, groqKey);
+    return result.reply;
+  } catch (err) {
+    // Fallback: nếu backend không available, thử gọi Groq trực tiếp (legacy)
+    console.warn('[WanderBot] Backend unavailable, falling back to direct Groq:', err.message);
+    
+    if (!groqKey) {
+      return "WanderBot đang ở chế độ offline. Vui lòng khởi động backend (python main.py) hoặc nhập Groq API Key.";
+    }
 
-  // 4. Gọi LLM để biên dịch thành câu thoại tự nhiên
-  const aiReply = await generateAIResponse(userMessage, messageHistory, groqKey, systemData);
-  
-  return aiReply;
+    // Legacy direct call (giữ cho backward compatibility)
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${groqKey}`
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: "Bạn là WanderBot — trợ lý AI du lịch đô thị TP.HCM. Trả lời ngắn gọn bằng tiếng Việt." },
+            ...messageHistory.map(m => ({ role: m.from === "ai" ? "assistant" : "user", content: m.text })),
+            { role: "user", content: userMessage }
+          ],
+          temperature: 0.6,
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return data.choices[0].message.content;
+    } catch (fallbackErr) {
+      return `Lỗi kết nối: ${fallbackErr.message}`;
+    }
+  }
 };

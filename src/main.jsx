@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import { processUserMessage } from "./ai-llm/index";
+import { apiLogin, apiRegister, apiGenerateItinerary, apiRerouteItinerary, apiSubmitContact, apiTrackInteraction, clearToken, setToken } from "./api";
 
 const navItems = [
   ["Trang chủ", "/"],
@@ -2007,14 +2008,21 @@ function Contact() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       setStatus("Vui lòng điền đầy đủ Tên, Email và Nội dung tin nhắn.");
       return;
     }
-    setStatus("Gửi liên hệ thành công! Đội ngũ WanderHUB sẽ liên hệ lại qua email của bạn.");
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    try {
+      const result = await apiSubmitContact(formData.name, formData.email, formData.subject, formData.message);
+      setStatus(result.message);
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      // Fallback to mock if backend unavailable
+      setStatus("Gửi liên hệ thành công! Đội ngũ WanderHUB sẽ liên hệ lại qua email của bạn.");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    }
   };
 
   return (
@@ -2116,35 +2124,58 @@ function Auth({ setUser }) {
   const [status, setStatus] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) {
       setStatus("Vui lòng nhập đầy đủ Email và Mật khẩu.");
       return;
     }
-    const mockUser = { name: loginEmail.split("@")[0], email: loginEmail };
-    setUser(mockUser);
-    setStatus(`Đăng nhập thành công! Chào mừng ${mockUser.name} quay lại.`);
-    setTimeout(() => {
-      navigate("/");
-    }, 1200);
+    try {
+      const data = await apiLogin(loginEmail, loginPassword);
+      setUser(data.user);
+      setStatus(`Đăng nhập thành công! Chào mừng ${data.user.name} quay lại.`);
+      setTimeout(() => navigate("/"), 1200);
+    } catch (err) {
+      // Fallback to mock if backend unavailable
+      if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+        const mockUser = { id: 0, name: loginEmail.split("@")[0], email: loginEmail };
+        setUser(mockUser);
+        setStatus(`Đăng nhập thành công (offline mode)! Chào mừng ${mockUser.name}.`);
+        setTimeout(() => navigate("/"), 1200);
+      } else {
+        setStatus(err.message || "Đăng nhập thất bại.");
+      }
+    }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (!registerName || !registerEmail || !registerPassword) {
       setStatus("Vui lòng điền đầy đủ thông tin để đăng ký.");
       return;
     }
-    setStatus("Đăng ký tài khoản thành công! Bây giờ bạn có thể đăng nhập.");
-    setLoginEmail(registerEmail);
-    setRegisterName("");
-    setRegisterEmail("");
-    setRegisterPassword("");
+    try {
+      const data = await apiRegister(registerName, registerEmail, registerPassword);
+      setStatus("Đăng ký tài khoản thành công! Bây giờ bạn có thể đăng nhập.");
+      setLoginEmail(registerEmail);
+      setRegisterName("");
+      setRegisterEmail("");
+      setRegisterPassword("");
+    } catch (err) {
+      if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+        setStatus("Đăng ký thành công (offline mode)! Bây giờ bạn có thể đăng nhập.");
+        setLoginEmail(registerEmail);
+        setRegisterName("");
+        setRegisterEmail("");
+        setRegisterPassword("");
+      } else {
+        setStatus(err.message || "Đăng ký thất bại.");
+      }
+    }
   };
 
   const handleGoogleLogin = () => {
-    const mockUser = { name: "GoogleUser", email: "google@wanderhub.com" };
+    const mockUser = { id: 0, name: "GoogleUser", email: "google@wanderhub.com" };
     setUser(mockUser);
     setStatus("Đăng nhập bằng Google thành công!");
     setTimeout(() => {
@@ -2277,7 +2308,10 @@ function Planner() {
   const [routeCost, setRouteCost] = useState(currentPlan.cost);
   const [routeDuration, setRouteDuration] = useState(currentPlan.duration);
 
-  const handleGenerate = () => {
+  // Store the full AI response for rerouting
+  const [aiResponse, setAiResponse] = useState(null);
+
+  const handleGenerate = async () => {
     setIsGenerating(true);
     setShowResult(false);
     
@@ -2285,41 +2319,99 @@ function Planner() {
       "Layer 1 (Data Engine): Lấy dữ liệu hồ sơ & vị trí...",
       "Layer 2 (Knowledge Engine): Kiểm tra rules (thời tiết, ngân sách, traffic)...",
       "Layer 3 (Recommendation Engine): Tạo gợi ý lịch trình cá nhân hóa...",
-      "Layer 4 (LLM Conversation): Diễn giải ngôn ngữ tự nhiên..."
+      "Hoàn tất! Đang render kết quả..."
     ];
 
     let currentStepIdx = 0;
     setGenerationStep(steps[0]);
-
-    const interval = setInterval(() => {
+    const stepInterval = setInterval(() => {
       currentStepIdx++;
       if (currentStepIdx < steps.length) {
         setGenerationStep(steps[currentStepIdx]);
-      } else {
-        clearInterval(interval);
-        
-        // Grab the selected key or default
-        const matched = routesData[vibe] || {
-          cost: "280.000 VNĐ",
-          duration: "3h 00m",
-          stops: [
-            { title: `${food.split(",")[0] || "Điểm hẹn"} - ${district}`, time: time.split("-")[0].trim() || "18:30", desc: "Điểm khởi hành tối ưu theo vibe của bạn." },
-            { title: "Bến Bạch Đằng", time: "19:45", desc: "Đi dạo hít thở khí trời và ngắm Landmark 81." },
-            { title: "Secret Garden Rooftop", time: "21:00", desc: "Điểm kết thúc hành trình lý tưởng." }
-          ]
-        };
-
-        setRouteStops(matched.stops);
-        setRouteCost(matched.cost);
-        setRouteDuration(matched.duration);
-        setIsGenerating(false);
-        setShowResult(true);
       }
-    }, 700);
+    }, 600);
+
+    // Parse budget
+    const budgetMap = { "150K - 250K": 250000, "350K - 500K": 500000, "Không giới hạn": 1000000 };
+    const budgetMax = budgetMap[budget] || 500000;
+
+    // Parse time range
+    const timeParts = time.split("-").map(s => s.trim());
+    const timeStart = timeParts[0] || "18:00";
+    const timeEnd = timeParts[1] || "22:00";
+
+    try {
+      const result = await apiGenerateItinerary({
+        mood: vibe,
+        budget_max: budgetMax,
+        time_start: timeStart,
+        time_end: timeEnd,
+        district: district,
+        food_preference: food,
+        transport: transport,
+        max_stops: 4,
+      });
+
+      clearInterval(stepInterval);
+      setAiResponse(result);
+      setRouteStops(result.stops.map(s => ({
+        title: s.title,
+        time: s.arrival_time,
+        desc: s.reason,
+      })));
+      setRouteCost(result.total_cost);
+      setRouteDuration(result.total_duration);
+      setIsGenerating(false);
+      setShowResult(true);
+    } catch (err) {
+      clearInterval(stepInterval);
+      console.warn("[Planner] Backend unavailable, using mock:", err.message);
+      // Fallback to mock routes
+      const matched = routesData[vibe] || {
+        cost: "280.000 VNĐ",
+        duration: "3h 00m",
+        stops: [
+          { title: `${food.split(",")[0] || "Điểm hẹn"} - ${district}`, time: timeParts[0]?.trim() || "18:30", desc: "Điểm khởi hành tối ưu theo vibe của bạn." },
+          { title: "Bến Bạch Đằng", time: "19:45", desc: "Đi dạo hít thở khí trời và ngắm Landmark 81." },
+          { title: "Secret Garden Rooftop", time: "21:00", desc: "Điểm kết thúc hành trình lý tưởng." }
+        ]
+      };
+      setRouteStops(matched.stops);
+      setRouteCost(matched.cost);
+      setRouteDuration(matched.duration);
+      setIsGenerating(false);
+      setShowResult(true);
+    }
   };
 
-  const reroute = () => {
-    setRouteStops((prev) => [...prev.slice(1), prev[0]]);
+  const reroute = async () => {
+    if (aiResponse && aiResponse.stops && aiResponse.stops.length > 0) {
+      // Use backend reroute — replace a random stop
+      const replaceStep = Math.floor(Math.random() * aiResponse.stops.length) + 1;
+      try {
+        const result = await apiRerouteItinerary({
+          itinerary_id: aiResponse.itinerary_id,
+          stops: aiResponse.stops,
+          replace_step: replaceStep,
+          mood: vibe,
+          budget_max: 500000,
+          district: district,
+        });
+        setAiResponse(result);
+        setRouteStops(result.stops.map(s => ({
+          title: s.title,
+          time: s.arrival_time,
+          desc: s.reason,
+        })));
+        setRouteCost(result.total_cost);
+        setRouteDuration(result.total_duration);
+      } catch {
+        // Fallback: rotate stops
+        setRouteStops((prev) => [...prev.slice(1), prev[0]]);
+      }
+    } else {
+      setRouteStops((prev) => [...prev.slice(1), prev[0]]);
+    }
   };
 
   return (
@@ -2448,12 +2540,651 @@ function Planner() {
   );
 }
 
+function PlannerV2() {
+  const moodOptions = [
+    { code: "chill", label: "Chill", hint: "Cafe, dạo phố, nhịp nhẹ", icon: Coffee },
+    { code: "date", label: "Hẹn hò", hint: "Đẹp, riêng tư, ven sông", icon: Sparkles },
+    { code: "group", label: "Đi nhóm", hint: "Rộng rãi, vui, dễ tụ tập", icon: Headphones },
+    { code: "foodie", label: "Foodie", hint: "Ăn ngon, local, must-try", icon: Utensils },
+    { code: "nightlife", label: "Nightlife", hint: "Bar, phố đêm, city lights", icon: Star },
+    { code: "culture", label: "Văn hóa", hint: "Bảo tàng, phố cũ, nghệ thuật", icon: BadgeCheck },
+    { code: "checkin", label: "Check-in", hint: "Ảnh đẹp, landmark, view", icon: Camera },
+    { code: "hidden_gem", label: "Hidden gem", hint: "Ngóc ngách ít người biết", icon: Gem },
+    { code: "healing", label: "Healing", hint: "Yên tĩnh, xanh, hồi phục", icon: Compass },
+    { code: "premium", label: "Premium", hint: "Rooftop, fine dining, sang", icon: ShieldCheck },
+    { code: "budget", label: "Tiết kiệm", hint: "Vừa túi tiền, nhiều giá trị", icon: Wallet },
+    { code: "solo", label: "Solo", hint: "Tự do, dễ đi một mình", icon: Navigation },
+  ];
+
+  const districtOptions = [
+    { name: "Quận 1", hint: "523 điểm", backend: "Quận 1" },
+    { name: "Quận 2", hint: "Đang bổ sung", backend: "Thảo Điền", disabled: true },
+    { name: "Quận 3", hint: "137 điểm", backend: "Quận 3" },
+    { name: "Quận 4", hint: "23 điểm", backend: "Quận 4" },
+    { name: "Quận 5", hint: "124 điểm", backend: "Quận 5" },
+    { name: "Quận 10", hint: "43 điểm", backend: "Quận 10" },
+    { name: "Bình Thạnh", hint: "7 điểm", backend: "Bình Thạnh" },
+    { name: "Phú Nhuận", hint: "67 điểm", backend: "Phú Nhuận" },
+  ];
+
+  const budgetOptions = [
+    { label: "Tiết kiệm", value: 200000, display: "150K - 200K" },
+    { label: "Vừa đẹp", value: 500000, display: "300K - 500K" },
+    { label: "Thoải mái", value: 800000, display: "500K - 800K" },
+    { label: "Không giới hạn", value: 1200000, display: "Premium" },
+  ];
+
+  const timeOptions = [
+    { label: "Sáng nhẹ", start: "08:30", end: "11:30", hint: "Cafe + check-in" },
+    { label: "Trưa chiều", start: "13:30", end: "17:30", hint: "Indoor + văn hóa" },
+    { label: "Sau giờ làm", start: "18:30", end: "22:00", hint: "Ăn tối + dạo phố" },
+    { label: "Đêm Sài Gòn", start: "20:00", end: "23:30", hint: "Nightlife + ăn khuya" },
+    { label: "Nửa ngày", start: "15:00", end: "22:00", hint: "4-5 điểm dừng" },
+  ];
+
+  const interestOptions = [
+    { code: "checkin", label: "Chụp hình", icon: Camera },
+    { code: "cafe_drink", label: "Uống cafe", icon: Coffee },
+    { code: "food", label: "Trải nghiệm ẩm thực", icon: Utensils },
+    { code: "culture", label: "Văn hóa", icon: BadgeCheck },
+    { code: "nightlife", label: "Phố đêm", icon: Star },
+    { code: "entertainment", label: "Hoạt động vui chơi", icon: Sparkles },
+  ];
+
+  const [vibe, setVibe] = useState("chill");
+  const [budget, setBudget] = useState(budgetOptions[1]);
+  const [timeSlot, setTimeSlot] = useState(timeOptions[2]);
+  const [district, setDistrict] = useState(districtOptions[0]);
+  const [interests, setInterests] = useState(["cafe_drink", "food", "checkin"]);
+  const [transport, setTransport] = useState("Be / Xanh SM");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStep, setGenerationStep] = useState("");
+  const [showResult, setShowResult] = useState(true);
+  const [aiResponse, setAiResponse] = useState(null);
+  const [selectedProviderIds, setSelectedProviderIds] = useState(() => new Set());
+  const [commercialSuggestions, setCommercialSuggestions] = useState([]);
+  const [showRideBooking, setShowRideBooking] = useState(false);
+  const trackedHoverRef = useRef(new Set());
+  const didAutoGenerateRef = useRef(false);
+  const [routeCost, setRouteCost] = useState("552.500 VNĐ");
+  const [routeDuration, setRouteDuration] = useState("4h 45m");
+  const [routeStops, setRouteStops] = useState([
+    {
+      title: "Hana - Sinh Tố - Nước Ép",
+      time: "18:30",
+      desc: "Điểm mở đầu nhẹ nhàng cho mood chill, dễ ghép với cafe và ăn tối trong Quận 1.",
+      category: "Quán uống / cafe",
+      image_url: "https://commons.wikimedia.org/wiki/Special:FilePath/Coffee_in_Vietnam.jpg",
+      score: 94,
+      cost_estimated: 142500,
+      avg_price_vnd: 142500,
+      duration_min: 90,
+      district: "Quận 1",
+    },
+    {
+      title: "Nhà Hàng Royal Saigon",
+      time: "20:00",
+      desc: "Điểm ăn tối có điểm AI cao, phù hợp khi người dùng chọn trải nghiệm ẩm thực.",
+      category: "Quán ăn / nhà hàng",
+      image_url: "https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_food.jpg",
+      score: 92,
+      cost_estimated: 185000,
+      avg_price_vnd: 185000,
+      duration_min: 105,
+      district: "Quận 1",
+    },
+    {
+      title: "Bui Vien Walking Street",
+      time: "21:45",
+      desc: "Kết thúc bằng phố đêm năng lượng cao, hợp với khung giờ sau giờ làm.",
+      category: "Nightlife / bar",
+      image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bui_Vien_Walking_Street_1.jpg/3840px-Bui_Vien_Walking_Street_1.jpg",
+      score: 90,
+      cost_estimated: 225000,
+      avg_price_vnd: 225000,
+      duration_min: 90,
+      district: "Quận 1",
+    },
+    {
+      title: "Nguyen Hue Walking Street",
+      time: "19:10",
+      desc: "Không gian đi bộ trung tâm, dễ chụp hình và nối tuyến sang cafe hoặc ăn tối.",
+      category: "Check-in / tham quan",
+      image_url: "/images/nguyen-hue.jpg",
+      score: 89,
+      cost_estimated: 80000,
+      avg_price_vnd: 80000,
+      duration_min: 45,
+      district: "Quận 1",
+    },
+    {
+      title: "Secret Garden Rooftop",
+      time: "20:20",
+      desc: "Rooftop có không khí riêng tư, hợp hẹn hò hoặc nhóm nhỏ muốn ăn tối nhẹ.",
+      category: "Quán ăn / nhà hàng",
+      image_url: "/images/secret-garden.png",
+      score: 91,
+      cost_estimated: 220000,
+      avg_price_vnd: 220000,
+      duration_min: 90,
+      district: "Quận 1",
+    },
+    {
+      title: "Bến Thành Market",
+      time: "21:20",
+      desc: "Điểm kết route dễ nhận diện, có nhiều lựa chọn ăn vặt và mua sắm nhanh.",
+      category: "Check-in / tham quan",
+      image_url: "/images/ben-thanh.jpg",
+      score: 87,
+      cost_estimated: 100000,
+      avg_price_vnd: 100000,
+      duration_min: 50,
+      district: "Quận 1",
+    },
+  ]);
+
+  const selectedMood = moodOptions.find((item) => item.code === vibe) || moodOptions[0];
+  const selectedInterests = interests
+    .map((code) => interestOptions.find((item) => item.code === code)?.label)
+    .filter(Boolean)
+    .join(", ");
+
+  const fallbackImageForStop = (item) => {
+    const categoryCode = item?.category_code || "";
+    const categoryText = (item?.category || "").toLowerCase();
+    if (categoryCode === "food" || categoryText.includes("ăn") || categoryText.includes("nhà hàng")) return "/images/oc-dao.png";
+    if (categoryCode === "cafe_drink" || categoryText.includes("cafe") || categoryText.includes("uống")) return "/images/secret-garden.png";
+    if (categoryCode === "nightlife" || categoryText.includes("nightlife")) return "/images/nguyen-hue.jpg";
+    if (categoryCode === "culture" || categoryText.includes("văn hóa")) return "/images/war-museum.jpg";
+    if (categoryCode === "entertainment" || categoryText.includes("vui chơi")) return "/images/landmark-81.jpg";
+    return "/images/ben-thanh.jpg";
+  };
+
+  const mapStops = (stops) => stops.map((stop) => ({
+    provider_id: stop.provider_id,
+    title: stop.title,
+    time: stop.arrival_time,
+    desc: stop.description || stop.reason,
+    reason: stop.reason,
+    category: stop.category,
+    category_code: stop.category_code,
+    image_url: stop.image_url,
+    score: stop.score || stop.ai_score || Math.round(84 + Math.random() * 10),
+    cost_estimated: stop.cost_estimated,
+    avg_price_vnd: stop.avg_price_vnd || stop.cost_estimated,
+    duration_min: stop.duration_min,
+    district: stop.district,
+    price_min_vnd: stop.price_min_vnd,
+    price_max_vnd: stop.price_max_vnd,
+    latitude: stop.latitude,
+    longitude: stop.longitude,
+    business_tag: stop.business_tag,
+  }));
+
+  const trackStopInteraction = async (item, eventType, metadata = {}) => {
+    if (!aiResponse?.session_id && eventType !== "reroute") return;
+    if (!item?.provider_id && !["view", "reroute"].includes(eventType)) return;
+
+    if (eventType === "hover") {
+      const hoverKey = `${aiResponse.session_id}-${item.provider_id}`;
+      if (trackedHoverRef.current.has(hoverKey)) return;
+      trackedHoverRef.current.add(hoverKey);
+    }
+
+    try {
+      await apiTrackInteraction({
+        session_id: aiResponse?.session_id,
+        itinerary_id: aiResponse?.itinerary_id,
+        provider_id: item?.provider_id,
+        event_type: eventType,
+        metadata: {
+          title: item?.title,
+          category: item?.category_code || item?.category,
+          mood: vibe,
+          district: district.backend,
+          ...metadata,
+        },
+      });
+    } catch (err) {
+      console.warn("[Planner] Interaction tracking skipped:", err.message);
+    }
+  };
+
+  const isStopSelected = (item) => selectedProviderIds.has(item.provider_id || item.title);
+
+  const toggleStopSelection = (item, index) => {
+    const selectionKey = item.provider_id || item.title;
+    const nextSelected = !selectedProviderIds.has(selectionKey);
+    setSelectedProviderIds((prev) => {
+      const next = new Set(prev);
+      if (nextSelected) next.add(selectionKey);
+      else next.delete(selectionKey);
+      return next;
+    });
+    trackStopInteraction(item, nextSelected ? "choose" : "dislike", { step: index + 1 });
+  };
+
+  const selectedStops = routeStops.filter((item) => isStopSelected(item));
+  const rideStops = selectedStops.slice(0, 3);
+  const rideLegs = useMemo(() => {
+    const estimateMinutes = (from, to) => {
+      if (!from?.latitude || !from?.longitude || !to?.latitude || !to?.longitude) return 12;
+      const toRad = (value) => (value * Math.PI) / 180;
+      const earthKm = 6371;
+      const dLat = toRad(to.latitude - from.latitude);
+      const dLon = toRad(to.longitude - from.longitude);
+      const a = Math.sin(dLat / 2) ** 2
+        + Math.cos(toRad(from.latitude)) * Math.cos(toRad(to.latitude)) * Math.sin(dLon / 2) ** 2;
+      const distance = earthKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.max(6, Math.round((distance / 18) * 60 + 5));
+    };
+    return rideStops.map((stop, index) => ({
+      ...stop,
+      travelFromPrevious: index === 0 ? 0 : estimateMinutes(rideStops[index - 1], stop),
+      rideLabel: index === 0 ? "Điểm đón" : `Chặng ${index}`,
+    }));
+  }, [rideStops]);
+  const totalRideMinutes = rideLegs.reduce((sum, stop) => sum + stop.travelFromPrevious, 0);
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    setShowResult(false);
+    const steps = [
+      "Layer 1: đọc mood, khu vực, thời gian và sở thích đã chọn...",
+      "Layer 2: áp business rules theo ngân sách, buổi đi và độ gần nhau...",
+      "Layer 3: chấm điểm provider theo SQUAD, mood match và diversity...",
+      "Hoàn tất! Đang dựng route cá nhân hóa...",
+    ];
+
+    let currentStepIdx = 0;
+    setGenerationStep(steps[0]);
+    const stepInterval = setInterval(() => {
+      currentStepIdx += 1;
+      if (currentStepIdx < steps.length) setGenerationStep(steps[currentStepIdx]);
+    }, 600);
+
+    try {
+      const result = await apiGenerateItinerary({
+        mood: vibe,
+        budget_max: budget.value,
+        time_start: timeSlot.start,
+        time_end: timeSlot.end,
+        district: district.backend,
+        food_preference: selectedInterests,
+        transport,
+        max_stops: timeSlot.label === "Nửa ngày" ? 8 : 6,
+      });
+
+      clearInterval(stepInterval);
+      setAiResponse(result);
+      setSelectedProviderIds(new Set());
+      setCommercialSuggestions(mapStops(result.commercial_suggestions || []));
+      setShowRideBooking(false);
+      trackedHoverRef.current.clear();
+      setRouteStops(mapStops(result.stops));
+      setRouteCost(result.total_cost);
+      setRouteDuration(result.total_duration);
+      apiTrackInteraction({
+        session_id: result.session_id,
+        itinerary_id: result.itinerary_id,
+        event_type: "view",
+        metadata: {
+          mood: vibe,
+          district: district.backend,
+          result_count: result.stops?.length || 0,
+        },
+      }).catch((err) => console.warn("[Planner] View tracking skipped:", err.message));
+      setIsGenerating(false);
+      setShowResult(true);
+    } catch (err) {
+      clearInterval(stepInterval);
+      console.warn("[Planner] Backend unavailable, using fallback:", err.message);
+      setCommercialSuggestions([
+        {
+          title: "Hidden gem mới: Workshop cuối tuần",
+          time: "Pick later",
+          desc: "Điểm đề xuất thêm cho khách muốn trải nghiệm dịch vụ mới sau tuyến chính.",
+          category: "Partner discovery",
+          image_url: "/images/secret-garden.png",
+          score: 88,
+          cost_estimated: 180000,
+          avg_price_vnd: 180000,
+          duration_min: 75,
+          district: district.name,
+          business_tag: "partner_seed",
+        },
+      ]);
+      setShowRideBooking(false);
+      setRouteStops([
+        { title: `${selectedMood.label} starter - ${district.name}`, time: timeSlot.start, desc: `Điểm mở đầu tối ưu cho ${selectedMood.hint} và sở thích ${selectedInterests}.`, category: "AI matched", score: 86, district: district.name },
+        { title: `${selectedInterests.split(",")[0] || "Trải nghiệm"} nổi bật`, time: "19:45", desc: "AI ưu tiên điểm có chi phí vừa ngân sách, cùng khu vực và không lặp category liền kề.", category: "Personalized", score: 84, district: district.name },
+        { title: `Điểm kết route tại ${district.name}`, time: timeSlot.end, desc: "Chọn điểm kết phù hợp khung giờ để khách ít phải di chuyển ngược tuyến.", category: "Route ending", score: 82, district: district.name },
+      ]);
+      setRouteCost(budget.display);
+      setRouteDuration(timeSlot.hint);
+      setIsGenerating(false);
+      setShowResult(true);
+    }
+  };
+
+  useEffect(() => {
+    if (didAutoGenerateRef.current) return;
+    didAutoGenerateRef.current = true;
+    const timer = window.setTimeout(() => {
+      handleGenerate();
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const reroute = async () => {
+    if (aiResponse?.stops?.length) {
+      const replaceStep = Math.floor(Math.random() * aiResponse.stops.length) + 1;
+      trackStopInteraction(null, "reroute", { replace_step: replaceStep });
+      try {
+        const result = await apiRerouteItinerary({
+          itinerary_id: aiResponse.itinerary_id,
+          stops: aiResponse.stops,
+          replace_step: replaceStep,
+          mood: vibe,
+          budget_max: budget.value,
+          district: district.backend,
+        });
+        const nextResponse = { ...result, session_id: result.session_id || aiResponse.session_id };
+        setAiResponse(nextResponse);
+        setSelectedProviderIds(new Set());
+        setCommercialSuggestions(mapStops(nextResponse.commercial_suggestions || commercialSuggestions));
+        setShowRideBooking(false);
+        setRouteStops(mapStops(nextResponse.stops));
+        setRouteCost(nextResponse.total_cost);
+        setRouteDuration(nextResponse.total_duration);
+      } catch {
+        setRouteStops((prev) => [...prev.slice(1), prev[0]]);
+      }
+    } else {
+      setRouteStops((prev) => [...prev.slice(1), prev[0]]);
+    }
+  };
+
+  return (
+    <PageShell eyebrow="AI Trip Planner" title="Tạo lịch trình đi chơi theo mood trong vài giây.">
+      <div className="grid gap-7 lg:grid-cols-[0.9fr_1.1fr]">
+        <Reveal className="planner-panel planner-control-panel">
+          <div className="planner-field">
+            <div className="planner-field-head">
+              <span>Mood / Vibe</span>
+              <small>Theo bảng moods trong database</small>
+            </div>
+            <div className="choice-grid mood-choice-grid">
+              {moodOptions.map(({ code, label, hint, icon: Icon }) => (
+                <button key={code} type="button" className={`choice-card ${vibe === code ? "is-active" : ""}`} onClick={() => setVibe(code)}>
+                  <Icon size={17} />
+                  <strong>{label}</strong>
+                  <small>{hint}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="planner-field">
+            <div className="planner-field-head">
+              <span>Khu vực Sài Gòn</span>
+              <small>Chạm để chọn quận, không cần gõ</small>
+            </div>
+            <div className="district-grid">
+              {districtOptions.map((item) => (
+                <button key={item.name} type="button" disabled={item.disabled} className={`district-chip ${district.name === item.name ? "is-active" : ""} ${item.disabled ? "is-disabled" : ""}`} onClick={() => setDistrict(item)}>
+                  <strong>{item.name}</strong>
+                  <small>{item.hint}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="planner-two-col">
+            <div className="planner-field">
+              <div className="planner-field-head"><span>Ngân sách</span></div>
+              <div className="segmented-stack">
+                {budgetOptions.map((item) => (
+                  <button key={item.label} type="button" className={`segment-btn ${budget.label === item.label ? "is-active" : ""}`} onClick={() => setBudget(item)}>
+                    <span>{item.label}</span>
+                    <small>{item.display}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="planner-field">
+              <div className="planner-field-head"><span>Thời gian tối ưu</span></div>
+              <div className="segmented-stack">
+                {timeOptions.map((item) => (
+                  <button key={item.label} type="button" className={`segment-btn ${timeSlot.label === item.label ? "is-active" : ""}`} onClick={() => setTimeSlot(item)}>
+                    <span>{item.label}</span>
+                    <small>{item.start} - {item.end} · {item.hint}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="planner-field">
+            <div className="planner-field-head">
+              <span>Mình muốn ưu tiên</span>
+              <small>Checkbox chọn nhiều mục để cá nhân hóa route</small>
+            </div>
+            <div className="interest-grid">
+              {interestOptions.map(({ code, label, icon: Icon }) => {
+                const active = interests.includes(code);
+                return (
+                  <button key={code} type="button" className={`interest-chip ${active ? "is-active" : ""}`} onClick={() => setInterests((prev) => active ? prev.filter((item) => item !== code) : [...prev, code])}>
+                    <span className="interest-check">{active ? <Check size={13} /> : null}</span>
+                    <Icon size={16} />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="planner-field">
+            <div className="planner-field-head"><span>Phương tiện di chuyển</span></div>
+            <div className="transport-row">
+              {["Be / Xanh SM", "Đi bộ thong thả", "Tự lái xe máy"].map((item) => (
+                <button key={item} type="button" className={`transport-chip ${transport === item ? "is-active" : ""}`} onClick={() => setTransport(item)}>
+                  <Car size={16} /> {item}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button id="planner-btn-submit" onClick={handleGenerate} disabled={isGenerating} className="btn btn-primary w-full justify-center mt-2">
+            {isGenerating ? "Đang xử lý..." : "Lên lịch trình AI"} <Sparkles size={18} />
+          </button>
+        </Reveal>
+
+        <Reveal className="planner-output">
+          {isGenerating ? (
+            <div className="flex flex-col items-center justify-center min-h-[350px] gap-6 text-center">
+              <div className="w-12 h-12 border-4 border-[#2d5a3d] border-t-transparent rounded-full animate-spin"></div>
+              <div>
+                <h4 className="font-bold text-[#1e4230] text-lg">Đang tính toán...</h4>
+                <p className="text-sm text-stone-500 mt-2">{generationStep}</p>
+              </div>
+            </div>
+          ) : showResult ? (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="serif-h text-2xl text-[#1e4230]">Tuyến đường AI khuyên dùng</h2>
+                  <p className="planner-result-context">{selectedMood.label} · {district.name} · {selectedInterests}</p>
+                </div>
+                <button id="planner-btn-reroute" onClick={reroute} className="icon-btn" aria-label="Re-route"><RefreshCcw size={18} /></button>
+              </div>
+              <div className="route-summary flex gap-2">
+                <span className="flex items-center gap-1"><Wallet size={16} /> {routeCost}</span>
+                <span className="flex items-center gap-1"><Clock3 size={16} /> {routeDuration}</span>
+                <span className="flex items-center gap-1"><Car size={16} /> {transport}</span>
+              </div>
+              <div className="itinerary-card-grid">
+                {routeStops.map((item, index) => (
+                  <motion.div
+                    layout
+                    key={`${item.provider_id || item.title}-${index}`}
+                    className={`recommendation-card ${isStopSelected(item) ? "is-selected" : ""}`}
+                    onMouseEnter={() => trackStopInteraction(item, "hover", { step: index + 1 })}
+                    onClick={() => trackStopInteraction(item, "click", { step: index + 1 })}
+                  >
+                    <div className="recommendation-image-wrap">
+                      <img
+                        src={item.image_url || fallbackImageForStop(item)}
+                        alt={item.title}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = fallbackImageForStop(item);
+                        }}
+                      />
+                      <span className="recommendation-step">{String(index + 1).padStart(2, "0")}</span>
+                    </div>
+                    <div className="recommendation-body">
+                      <div className="recommendation-card-head">
+                        <b>{item.title}</b>
+                        <span>{item.time}</span>
+                      </div>
+                      <p>{item.desc}</p>
+                      <div className="place-meta-row">
+                        <small>{item.category || "AI pick"}</small>
+                        <small>{item.district || district.name}</small>
+                      </div>
+                      <div className="recommendation-metrics">
+                        <span><Wallet size={14} /> Giá TB {Number(item.avg_price_vnd || item.cost_estimated || 0).toLocaleString("vi-VN")} VNĐ</span>
+                        {item.duration_min ? <span><Clock3 size={14} /> {item.duration_min} phút</span> : null}
+                        <span><Sparkles size={14} /> {Math.round(item.score || 88)}/100</span>
+                      </div>
+                      <small className="recommendation-reason">{item.reason || "Đề xuất vì khớp mood, cùng khu vực ưu tiên và giúp route ít lặp trải nghiệm."}</small>
+                      <button
+                        type="button"
+                        className={`recommendation-check-row ${isStopSelected(item) ? "is-checked" : ""}`}
+                        aria-pressed={isStopSelected(item)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          toggleStopSelection(item, index);
+                        }}
+                      >
+                        <span className="recommendation-checkbox">{isStopSelected(item) ? <Check size={14} /> : null}</span>
+                        <span>{isStopSelected(item) ? "Đã thêm vào hành trình" : "Chọn điểm này"}</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+                {commercialSuggestions.length ? (
+                  <div className="commercial-suggestion-panel">
+                    <div className="commercial-suggestion-head">
+                      <div>
+                        <strong>Hidden gem / đối tác gợi ý thêm</strong>
+                        <small>Nằm ngoài 6 điểm AI chính, khách có thể chọn thêm nếu muốn trải nghiệm dịch vụ mới.</small>
+                      </div>
+                      <span>Partner seed</span>
+                    </div>
+                    <div className="commercial-suggestion-grid">
+                      {commercialSuggestions.map((item, index) => (
+                        <button
+                          key={`${item.provider_id || item.title}-partner-${index}`}
+                          type="button"
+                          className={`commercial-suggestion-card ${isStopSelected(item) ? "is-selected" : ""}`}
+                          onClick={() => toggleStopSelection(item, routeStops.length + index)}
+                        >
+                          <img
+                            src={item.image_url || fallbackImageForStop(item)}
+                            alt={item.title}
+                            onError={(event) => {
+                              event.currentTarget.onerror = null;
+                              event.currentTarget.src = fallbackImageForStop(item);
+                            }}
+                          />
+                          <span>
+                            <b>{item.title}</b>
+                            <small>{item.category || "Hidden gem"} · {Number(item.avg_price_vnd || item.cost_estimated || 0).toLocaleString("vi-VN")} VNĐ</small>
+                          </span>
+                          <i>{isStopSelected(item) ? "Đã chọn" : "Thêm"}</i>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                <div className="booking-next-panel">
+                  <div>
+                    <strong>{selectedStops.length ? `Đã chọn ${selectedStops.length} điểm` : "Chưa chọn điểm nào"}</strong>
+                    <small>{selectedStops.length ? selectedStops.map((item) => item.title).slice(0, 3).join(" · ") : "Tick vào checkbox trên card để đi tiếp sang đặt xe."}</small>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!selectedStops.length}
+                    className="booking-next-btn"
+                    onClick={() => {
+                      selectedStops.forEach((item, index) => trackStopInteraction(item, "save", { step: index + 1, next_stage: "ride_booking" }));
+                      setShowRideBooking(true);
+                    }}
+                  >
+                    <Car size={16} /> Tiếp tục đặt xe
+                  </button>
+                </div>
+                {showRideBooking ? (
+                  <div className="ride-booking-panel">
+                    <div className="ride-map">
+                      <div className="ride-map-line" />
+                      {rideLegs.map((item, index) => (
+                        <div key={`${item.provider_id || item.title}-map-${index}`} className={`ride-map-pin pin-${index + 1}`}>
+                          <MapPin size={16} />
+                          <span>{index + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="ride-booking-detail">
+                      <div className="ride-booking-head">
+                        <div>
+                          <strong>Bản đồ check-in {rideLegs.length} vị trí</strong>
+                          <small>Thời gian di chuyển được gán ở bước đặt xe để bên thứ ba nhận cuốc xử lý.</small>
+                        </div>
+                        <span>{totalRideMinutes || 0} phút di chuyển</span>
+                      </div>
+                      <div className="ride-leg-list">
+                        {rideLegs.map((item, index) => (
+                          <div key={`${item.provider_id || item.title}-ride-${index}`} className="ride-leg-row">
+                            <i>{index + 1}</i>
+                            <div>
+                              <b>{item.title}</b>
+                              <small>{item.rideLabel} · {index === 0 ? "bắt đầu tại điểm đã chọn" : `${item.travelFromPrevious} phút từ điểm trước`}</small>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <button type="button" className="ride-confirm-btn">
+                        <Car size={16} /> Gửi tuyến cho đối tác vận chuyển
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+              <div className="map-strip flex items-center gap-3 justify-center mt-2"><RouteIcon /> Sẵn sàng kết nối Xanh SM di chuyển</div>
+            </motion.div>
+          ) : (
+            <div className="flex flex-col items-center justify-center min-h-[350px] text-center text-stone-400">
+              <Compass size={48} className="stroke-1 mb-4" />
+              <p>Chọn vài hộp bên trái rồi bấm nút để bắt đầu thiết kế hành trình.</p>
+            </div>
+          )}
+        </Reveal>
+      </div>
+    </PageShell>
+  );
+}
+
 function App() {
   const location = useLocation();
   const [user, setUser] = useState(null);
 
   const handleLogout = () => {
     setUser(null);
+    clearToken();
   };
 
   return (
@@ -2469,7 +3200,7 @@ function App() {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/auth" element={<Auth setUser={setUser} />} />
-          <Route path="/planner" element={<Planner />} />
+          <Route path="/planner" element={<PlannerV2 />} />
         </Routes>
       </AnimatePresence>
       <Footer user={user} />

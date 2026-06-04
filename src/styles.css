@@ -1304,6 +1304,863 @@ select option {
   animation: routeMove 6s linear infinite;
 }
 
+.planner-control-panel {
+  align-content: start;
+  gap: 22px;
+}
+
+.planner-field {
+  display: grid;
+  gap: 12px;
+}
+
+.planner-field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: #1e4230;
+}
+
+.planner-field-head span {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.planner-field-head small {
+  color: rgba(30, 66, 48, 0.55);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.choice-grid,
+.district-grid,
+.interest-grid,
+.transport-row {
+  display: grid;
+  gap: 10px;
+}
+
+.mood-choice-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choice-card,
+.district-chip,
+.segment-btn,
+.interest-chip,
+.transport-chip {
+  border: 1px solid rgba(45, 90, 61, 0.14);
+  background: rgba(255, 255, 255, 0.78);
+  color: #1e4230;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.choice-card:hover,
+.district-chip:hover,
+.segment-btn:hover,
+.interest-chip:hover,
+.transport-chip:hover {
+  transform: translateY(-2px);
+  border-color: rgba(201, 100, 32, 0.38);
+  box-shadow: 0 12px 28px rgba(45, 90, 61, 0.12);
+}
+
+.choice-card.is-active,
+.district-chip.is-active,
+.segment-btn.is-active,
+.interest-chip.is-active,
+.transport-chip.is-active {
+  border-color: rgba(201, 100, 32, 0.62);
+  background: linear-gradient(135deg, rgba(45, 90, 61, 0.1), rgba(201, 100, 32, 0.11));
+  box-shadow: inset 0 0 0 1px rgba(45, 90, 61, 0.08), 0 14px 34px rgba(201, 100, 32, 0.13);
+}
+
+.choice-card {
+  display: grid;
+  min-height: 104px;
+  justify-items: start;
+  align-content: start;
+  gap: 7px;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: left;
+}
+
+.choice-card svg {
+  color: #c96420;
+}
+
+.choice-card strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.choice-card small {
+  color: rgba(30, 66, 48, 0.62);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.district-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.district-chip {
+  display: grid;
+  gap: 3px;
+  min-height: 66px;
+  border-radius: 14px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.district-chip strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.district-chip.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+  filter: grayscale(0.2);
+}
+
+.district-chip.is-disabled:hover {
+  transform: none;
+  border-color: rgba(45, 90, 61, 0.14);
+  box-shadow: none;
+}
+
+.district-chip small,
+.segment-btn small {
+  color: rgba(30, 66, 48, 0.58);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.planner-two-col {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.segmented-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.segment-btn {
+  display: grid;
+  gap: 2px;
+  border-radius: 14px;
+  padding: 11px 12px;
+  text-align: left;
+}
+
+.segment-btn span {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.interest-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.interest-chip,
+.transport-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.interest-check {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(45, 90, 61, 0.22);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #c96420;
+}
+
+.transport-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.transport-chip {
+  justify-content: center;
+  border-radius: 14px;
+}
+
+.planner-result-context {
+  margin-top: 6px;
+  color: rgba(30, 66, 48, 0.6);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.itinerary-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.recommendation-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(45, 90, 61, 0.13);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(30, 66, 48, 0.06);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.recommendation-card:hover {
+  border-color: rgba(45, 90, 61, 0.32);
+  box-shadow: 0 18px 38px rgba(30, 66, 48, 0.1);
+  transform: translateY(-2px);
+}
+
+.recommendation-card.is-selected {
+  border-color: rgba(201, 100, 32, 0.74);
+  box-shadow: 0 0 0 3px rgba(201, 100, 32, 0.16), 0 18px 42px rgba(30, 66, 48, 0.12);
+}
+
+.recommendation-image-wrap {
+  position: relative;
+  height: 145px;
+  background: rgba(45, 90, 61, 0.08);
+}
+
+.recommendation-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.recommendation-image-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(45, 90, 61, 0.55);
+}
+
+.recommendation-step {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(253, 248, 243, 0.94);
+  color: #2d5a3d;
+  font-size: 12px;
+  font-weight: 950;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.recommendation-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.recommendation-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.recommendation-card-head b {
+  color: #1e4230;
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1.25;
+}
+
+.recommendation-card-head span {
+  flex: 0 0 auto;
+  color: #c96420;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.recommendation-body p {
+  margin: 0;
+  color: rgba(30, 66, 48, 0.72);
+  font-size: 13px;
+  line-height: 1.48;
+}
+
+.recommendation-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.recommendation-metrics span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  background: rgba(201, 100, 32, 0.08);
+  color: #8b4517;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.recommendation-reason {
+  display: block;
+  margin-top: auto;
+  color: rgba(30, 66, 48, 0.62);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.recommendation-choose-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(45, 90, 61, 0.18);
+  border-radius: 12px;
+  background: #fdf8f3;
+  color: #1e4230;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.recommendation-choose-btn:hover,
+.recommendation-choose-btn.is-chosen {
+  border-color: rgba(201, 100, 32, 0.55);
+  background: #c96420;
+  color: #ffffff;
+}
+
+.recommendation-check-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(45, 90, 61, 0.18);
+  border-radius: 12px;
+  background: #fdf8f3;
+  color: #1e4230;
+  padding: 8px 11px;
+  font-size: 13px;
+  font-weight: 950;
+  text-align: left;
+}
+
+.recommendation-check-row:hover {
+  border-color: rgba(201, 100, 32, 0.44);
+  background: rgba(201, 100, 32, 0.08);
+}
+
+.recommendation-check-row.is-checked {
+  border-color: rgba(201, 100, 32, 0.72);
+  background: rgba(201, 100, 32, 0.12);
+  color: #8b4517;
+}
+
+.recommendation-checkbox {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border: 2px solid rgba(45, 90, 61, 0.35);
+  border-radius: 6px;
+  background: #ffffff;
+  color: #c96420;
+}
+
+.recommendation-check-row.is-checked .recommendation-checkbox {
+  border-color: #c96420;
+}
+
+.booking-next-panel {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid rgba(45, 90, 61, 0.14);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 14px;
+  box-shadow: 0 10px 28px rgba(30, 66, 48, 0.06);
+}
+
+.booking-next-panel strong {
+  display: block;
+  color: #1e4230;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.booking-next-panel small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(30, 66, 48, 0.58);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.booking-next-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid rgba(201, 100, 32, 0.48);
+  border-radius: 12px;
+  background: #c96420;
+  color: #ffffff;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.booking-next-btn:disabled {
+  border-color: rgba(45, 90, 61, 0.12);
+  background: rgba(45, 90, 61, 0.08);
+  color: rgba(30, 66, 48, 0.42);
+  cursor: not-allowed;
+}
+
+.commercial-suggestion-panel,
+.ride-booking-panel {
+  grid-column: 1 / -1;
+}
+
+.commercial-suggestion-panel {
+  border: 1px solid rgba(201, 100, 32, 0.22);
+  border-radius: 14px;
+  background: #fffaf5;
+  padding: 14px;
+}
+
+.commercial-suggestion-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.commercial-suggestion-head strong,
+.ride-booking-head strong {
+  display: block;
+  color: #1e4230;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.commercial-suggestion-head small,
+.ride-booking-head small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(30, 66, 48, 0.62);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.commercial-suggestion-head > span,
+.ride-booking-head > span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: rgba(201, 100, 32, 0.12);
+  color: #8b4517;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.commercial-suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.commercial-suggestion-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 82px;
+  border: 1px solid rgba(45, 90, 61, 0.14);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 8px;
+  text-align: left;
+}
+
+.commercial-suggestion-card.is-selected {
+  border-color: rgba(201, 100, 32, 0.68);
+  box-shadow: 0 0 0 3px rgba(201, 100, 32, 0.12);
+}
+
+.commercial-suggestion-card img {
+  width: 72px;
+  height: 62px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.commercial-suggestion-card b {
+  display: block;
+  color: #1e4230;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.25;
+}
+
+.commercial-suggestion-card small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(30, 66, 48, 0.58);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.commercial-suggestion-card i {
+  border-radius: 999px;
+  background: rgba(45, 90, 61, 0.08);
+  color: #2d5a3d;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.ride-booking-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.15fr);
+  gap: 14px;
+  border: 1px solid rgba(45, 90, 61, 0.14);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 14px;
+  box-shadow: 0 12px 30px rgba(30, 66, 48, 0.08);
+}
+
+.ride-map {
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, rgba(45, 90, 61, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(45, 90, 61, 0.08) 1px, transparent 1px),
+    #f3efe7;
+  background-size: 34px 34px;
+}
+
+.ride-map-line {
+  position: absolute;
+  inset: 42px 52px 54px 50px;
+  border-left: 3px solid rgba(201, 100, 32, 0.55);
+  border-bottom: 3px solid rgba(201, 100, 32, 0.55);
+  transform: skew(-10deg);
+}
+
+.ride-map-pin {
+  position: absolute;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: #2d5a3d;
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(30, 66, 48, 0.22);
+}
+
+.ride-map-pin span {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #c96420;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.ride-map-pin.pin-1 { left: 30px; top: 32px; }
+.ride-map-pin.pin-2 { left: 52%; top: 48%; }
+.ride-map-pin.pin-3 { right: 32px; bottom: 34px; }
+
+.ride-booking-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ride-booking-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ride-leg-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ride-leg-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  border: 1px solid rgba(45, 90, 61, 0.1);
+  border-radius: 10px;
+  padding: 9px;
+}
+
+.ride-leg-row i {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(45, 90, 61, 0.1);
+  color: #2d5a3d;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.ride-leg-row b {
+  display: block;
+  color: #1e4230;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.ride-leg-row small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(30, 66, 48, 0.58);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ride-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid rgba(45, 90, 61, 0.28);
+  border-radius: 12px;
+  background: #2d5a3d;
+  color: #ffffff;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.itinerary-place-card {
+  position: relative;
+  min-height: 124px;
+  overflow: hidden;
+  align-items: flex-start;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+}
+
+.itinerary-place-card.is-selected {
+  border-color: rgba(201, 100, 32, 0.72);
+  box-shadow: 0 0 0 3px rgba(201, 100, 32, 0.16), 0 16px 38px rgba(30, 66, 48, 0.12);
+}
+
+.itinerary-place-card .itinerary-main {
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.place-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.place-meta-row small {
+  border-radius: 999px;
+  background: rgba(45, 90, 61, 0.08);
+  color: rgba(30, 66, 48, 0.76);
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.place-hover-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, rgba(30, 66, 48, 0.96), rgba(18, 38, 28, 0.93));
+  color: #fff8ef;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.24s ease, transform 0.24s ease;
+  pointer-events: auto;
+}
+
+.itinerary-place-card:hover .place-hover-layer,
+.itinerary-place-card:focus-within .place-hover-layer {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.place-hover-layer strong {
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.place-hover-layer p {
+  margin: 0;
+  color: rgba(255, 248, 239, 0.82);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.place-hover-layer small {
+  color: rgba(255, 248, 239, 0.66);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.hover-score-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.itinerary-step .hover-score-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  height: auto;
+  border-radius: 999px;
+  background: rgba(255, 248, 239, 0.12);
+  color: #fff8ef;
+  padding: 7px 9px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.hover-choose-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  border: 1px solid rgba(255, 248, 239, 0.28);
+  border-radius: 12px;
+  background: #fff8ef;
+  color: #1e4230;
+  padding: 8px 11px;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.hover-choose-btn:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 980px) {
+  .mood-choice-grid,
+  .district-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .planner-two-col,
+  .transport-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .mood-choice-grid,
+  .district-grid,
+  .interest-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .itinerary-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-next-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .booking-next-btn {
+    width: 100%;
+  }
+
+  .planner-field-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .choice-card {
+    min-height: 86px;
+  }
+
+  .itinerary-place-card {
+    min-height: 150px;
+  }
+
+  .place-hover-layer {
+    padding: 16px;
+  }
+
+  .hover-score-row {
+    gap: 6px;
+  }
+}
+
 @keyframes drift {
   to { transform: translate3d(-4%, 3%, 0) rotate(8deg); }
 }
@@ -2143,6 +3000,31 @@ select option {
 }
 
 @media (max-width: 640px) {
+  .commercial-suggestion-grid,
+  .ride-booking-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .commercial-suggestion-head,
+  .ride-booking-head,
+  .booking-next-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .commercial-suggestion-card {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .commercial-suggestion-card i {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+
+  .ride-map {
+    min-height: 180px;
+  }
+
   .wb-panel {
     width: calc(100vw - 32px);
     height: 480px;
