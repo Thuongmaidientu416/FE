@@ -5,6 +5,7 @@ Scores providers and builds optimized itineraries using real database data.
 
 from __future__ import annotations
 import hashlib
+import random
 import sqlite3
 
 from utils.geo import haversine_km, estimate_travel_minutes
@@ -96,16 +97,16 @@ def _stable_rank_offset(context: dict, provider_id: int, step_idx: int) -> float
 
 
 def _pick_balanced_candidate(scored: list[tuple[float, float, dict]], context: dict, step_idx: int) -> tuple[float, float, dict]:
-    """Pick a strong but not over-repeated candidate from a near-top shortlist."""
+    """Weighted-random selection from near-top candidates so each generation feels fresh."""
     scored.sort(key=lambda x: x[0], reverse=True)
     top_score = scored[0][0]
     shortlist = [item for item in scored if item[0] >= top_score - 9.0][:8]
     if len(shortlist) <= 1:
         return scored[0]
-    return max(
-        shortlist,
-        key=lambda item: item[0] + _stable_rank_offset(context, item[2]["provider_id"], step_idx),
-    )
+    # Rank-based weights: position 1 gets weight N, position N gets weight 1.
+    # Higher quality candidates are still more likely, but all have a real chance.
+    weights = [len(shortlist) - i for i in range(len(shortlist))]
+    return random.choices(shortlist, weights=weights, k=1)[0]
 
 
 def _fetch_candidates(
