@@ -110,12 +110,116 @@ const faqItems = [
   },
 ];
 
-const blogCards = [
-  ["Secret Garden Rooftop", "Rooftop ẩn giữa Q1 với view phố cổ, món Việt gia truyền và không khí riêng tư.", "/images/secret-garden.png"],
-  ["Phố đi bộ Nguyễn Huệ", "Trục kết nối trung tâm – cafe, check-in và dạo phố đêm hợp mood Gen Z.", "/images/nguyen-hue.jpg"],
-  ["Ốc Đào – Seafood local", "Quán ốc huyền thoại Sài Gòn, trải nghiệm ăn uống đường phố đúng chất.", "/images/oc-dao.png"],
-  ["Landmark 81 skyline", "Tòa tháp biểu tượng TP.HCM – check-in, ngắm sông Sài Gòn và city view đêm.", "/images/landmark-81.jpg"],
-  ["Bưu điện & War Museum", "Hai điểm văn hóa – lịch sử phải ghé khi khám phá Quận 1 Sài Gòn.", "/images/buu-dien.jpg"],
+// --- MOCK DATABASE TẠM THỜI (Chuẩn bị thay bằng API/Database thật) ---
+const mockExploreDB = [
+  {
+    id: "loc-001",
+    title: "Secret Garden Rooftop",
+    summary: "Rooftop ẩn giữa Q1 với view phố cổ, món Việt gia truyền và không khí riêng tư.",
+    image: "/images/secret-garden.png",
+    readTime: "4 phút đọc",
+    author: "Minh Thư (Travel Blogger)",
+    content: "Nằm ẩn mình trên tầng thượng của một khu chung cư cũ trên đường Pasteur, Secret Garden đưa du khách vào một không gian đậm chất làng quê Việt Nam thanh bình. Với giàn dây leo xanh mát, những bộ bàn ghế gỗ mộc mạc và ánh đèn vàng ấm áp, đây là địa điểm lý tưởng để thưởng thức các món ăn gia đình truyền thống sau một ngày làm việc căng thẳng.\n\nKhông khí tại quán vô cùng trong lành và tách biệt hoàn toàn khỏi nhịp xe cộ hối hả của Quận 1 bên dưới. Bạn có thể gọi một đĩa thịt kho quẹt đậm đà, vài món rau luộc giản dị và một ly nước thảo mộc mát lành để khép lại một ngày thật nhẹ nhõm."
+  },
+  {
+    id: "loc-002",
+    title: "Phố đi bộ Nguyễn Huệ",
+    summary: "Trục kết nối trung tâm – cafe, check-in và dạo phố đêm hợp mood Gen Z.",
+    image: "/images/nguyen-hue.jpg",
+    readTime: "3 phút đọc",
+    author: "Hoàng Nam (Urban Photographer)",
+    content: "Phố đi bộ Nguyễn Huệ luôn là tâm điểm giải trí của người dân và du khách tại TP.HCM. Từ các buổi biểu diễn âm nhạc đường phố đầy ngẫu hứng đến những quán cà phê chung cư 42 Nguyễn Huệ có ban công ngắm phố từ trên cao, nơi đây mang đậm hơi thở năng động và cởi mở của Sài Gòn.\n\nVào ban đêm, toàn bộ khu phố bừng sáng dưới ánh đèn neon rực rỡ. Đây là nơi bạn có thể thưởng thức trà dâu, ăn bánh tráng trộn và ngắm dòng người qua lại hoặc đón một chiếc xe điện Xanh SM để bắt đầu hành trình vi vu đêm của mình."
+  },
+  {
+    id: "loc-003",
+    title: "Ốc Đào – Seafood local",
+    summary: "Quán ốc huyền thoại Sài Gòn, trải nghiệm ăn uống đường phố đúng chất.",
+    image: "/images/oc-dao.png",
+    readTime: "5 phút đọc",
+    author: "Kiệt Anh (Food Reviewer)",
+    content: "Đối với người Sài Gòn, đi ăn ốc không chỉ là thưởng thức ẩm thực mà còn là một nét văn hóa giao tiếp. Ốc Đào từ lâu đã khẳng định vị thế huyền thoại với nước sốt bơ tỏi thơm lừng, ốc móng tay xào rau muống giòn rụm và các món ốc hương, sò lông nướng mỡ hành.\n\nNằm trong một con hẻm trên đường Nguyễn Trãi, quán luôn tấp nập thực khách ra vào từ chiều tối. Vị cay xè của ớt hòa quyện với vị béo của bơ tỏi và vị ngọt của hải sản tươi rói sẽ khiến bất kỳ ai cũng phải xiêu lòng ngay từ lần thử đầu tiên."
+  },
+  {
+    id: "loc-004",
+    title: "Landmark 81 skyline",
+    summary: "Tòa tháp biểu tượng TP.HCM – check-in, ngắm sông Sài Gòn và city view đêm.",
+    image: "/images/landmark-81.jpg",
+    readTime: "4 phút đọc",
+    author: "Thảo Vy (Luxury Travel Guide)",
+    content: "Tòa nhà cao nhất Việt Nam không chỉ là trung tâm mua sắm sầm uất mà còn là nơi sở hữu đài quan sát Skyview ở độ cao hơn 400m. Tại đây, bạn có thể ngắm nhìn dòng sông Sài Gòn uốn lượn mềm mại và toàn bộ cảnh quan thành phố chìm dần vào ánh hoàng hôn rực rỡ.\n\nBên cạnh đó, việc nhâm nhi một ly thức uống tại các lounge sang trọng ở tầng cao hoặc tản bộ trong công viên ven sông Landmark 81 dưới bóng râm của những hàng cây xanh mướt là một trải nghiệm đô thị đẳng cấp không thể bỏ qua."
+  },
+  {
+    id: "loc-005",
+    title: "Bưu điện & War Museum",
+    summary: "Hai điểm văn hóa – lịch sử phải ghé khi khám phá Quận 1 Sài Gòn.",
+    image: "/images/buu-dien.jpg",
+    readTime: "6 phút đọc",
+    author: "Alex Nguyen (History Enthusiast)",
+    content: "Bưu điện Trung tâm Thành phố với kiến trúc Phục Hưng Gothic độc đáo do Gustave Eiffel thiết kế là điểm giao thoa lịch sử tuyệt đẹp. Ngay bên cạnh Nhà thờ Đức Bà, đây là nơi lưu giữ những hòm thư cổ kính và những bức bản đồ lịch sử quý giá.\n\nTiếp nối hành trình lịch sử, Bảo tàng Chứng tích Chiến tranh sẽ mang lại những cảm xúc sâu lắng về lịch sử đấu tranh kiên cường của nhân dân Việt Nam. Sự kết hợp giữa hai địa danh này mang lại một cái nhìn sâu sắc và toàn diện về quá khứ lẫn hiện tại của Sài Gòn."
+  },
+  {
+    id: "loc-006",
+    title: "Cà phê vợt Cheo Leo",
+    summary: "Quán cà phê vợt có tuổi đời hơn 80 năm mang đậm nét văn hóa Sài Gòn xưa.",
+    image: "https://images.unsplash.com/photo-1551631580-ff6fcd00cc9e?auto=format&fit=crop&w=800&q=80",
+    readTime: "3 phút đọc",
+    author: "WanderHUB Squad",
+    content: "Nằm sâu trong con hẻm nhỏ ở quận 3, Cheo Leo là một trong những quán cà phê vợt hiếm hoi còn sót lại của Sài Gòn. Mùi cà phê thơm lừng quyện với không gian xưa cũ, chiếc vợt vải nhuốm màu thời gian và lò đất nung đun than củi tạo nên một trải nghiệm không thể lẫn vào đâu được.\n\nĐến đây từ sáng sớm, bạn sẽ cảm nhận được nhịp sống chậm rãi hiếm hoi của thành phố, nghe những câu chuyện đời thường từ các bậc cao niên và nhâm nhi ly 'bạc xỉu' đúng điệu."
+  },
+  {
+    id: "loc-007",
+    title: "Khu Phố Người Hoa (Chợ Lớn)",
+    summary: "Thưởng thức ẩm thực Trung Hoa và khám phá kiến trúc đền chùa đặc trưng.",
+    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+    readTime: "6 phút đọc",
+    author: "Hải Đăng (Culture Explorer)",
+    content: "Khu Chợ Lớn là nơi giao thoa văn hóa Việt - Hoa vô cùng độc đáo. Dạo bước qua các con phố lồng đèn đỏ, bạn sẽ bị cuốn hút bởi mùi thuốc Bắc thơm lừng, những quầy vịt quay đỏ au và các món dimsum nóng hổi.\n\nĐừng quên ghé thăm Chùa Bà Thiên Hậu - một trong những ngôi chùa cổ nhất với kiến trúc tinh xảo và hàng trăm vòng nhang vòng treo lơ lửng trên trần, tạo nên một không gian linh thiêng và đầy tính nghệ thuật."
+  },
+  {
+    id: "loc-008",
+    title: "Bảo tàng Mỹ Thuật TP.HCM",
+    summary: "Kiến trúc Pháp cổ kính cùng hàng ngàn tác phẩm nghệ thuật đặc sắc.",
+    image: "https://images.unsplash.com/photo-1563200989-bb0d42129e92?auto=format&fit=crop&w=800&q=80",
+    readTime: "5 phút đọc",
+    author: "Lan Anh (Art Enthusiast)",
+    content: "Nằm trong một tòa nhà mang đậm dấu ấn kiến trúc Art Deco kết hợp Đông Dương, Bảo tàng Mỹ thuật sở hữu một không gian tĩnh lặng, tách biệt hoàn toàn với sự ồn ào bên ngoài. Hành lang ốp gạch bông rực rỡ, những ô cửa kính màu và cầu thang uốn lượn đã trở thành điểm check-in quen thuộc của giới trẻ.\n\nTuy nhiên, giá trị cốt lõi vẫn là hàng ngàn tác phẩm hội họa, điêu khắc trải dài từ mỹ thuật dân gian đến nghệ thuật đương đại Việt Nam."
+  },
+  {
+    id: "loc-009",
+    title: "Chợ Bến Thành",
+    summary: "Biểu tượng giao thương lâu đời và thiên đường ẩm thực đường phố tại TP.HCM.",
+    image: "/images/ben-thanh.png",
+    readTime: "4 phút đọc",
+    author: "WanderHUB Squad",
+    content: "Chợ Bến Thành không chỉ là điểm đến mua sắm sầm uất mà còn là nơi lưu giữ những giá trị lịch sử của thành phố. Cửa Nam của chợ với tháp đồng hồ từ lâu đã trở thành biểu tượng không thể thiếu của Sài Gòn.\n\nVào ban đêm, các khu vực ẩm thực xung quanh chợ nhộn nhịp hẳn lên, cung cấp vô số món ngon đường phố từ bánh xèo, bún riêu, đến các loại chè ba màu ngọt lịm. Đây là địa điểm lý tưởng để nếm thử trọn vẹn hương vị Việt."
+  },
+  {
+    id: "loc-010",
+    title: "Bến Bạch Đằng Waterbus",
+    summary: "Trải nghiệm ngắm hoàng hôn trên sông Sài Gòn cực chill với vé chỉ 15k.",
+    image: "https://images.unsplash.com/photo-1583417657208-c44ebdb5e9fa?auto=format&fit=crop&w=800&q=80",
+    readTime: "3 phút đọc",
+    author: "Tuấn Kiệt (Local Guide)",
+    content: "Không cần du thuyền đắt tiền, tuyến Waterbus số 1 từ Bến Bạch Đằng mang lại cho bạn một góc nhìn hoàn toàn khác về TP.HCM. Xuất phát từ trung tâm Quận 1, con tàu rẽ sóng đưa bạn đi ngang qua những tòa nhà chọc trời và cập bến tại các quận lân cận.\n\nThời điểm đẹp nhất để trải nghiệm là vào buổi chiều muộn (khoảng 17:00). Bạn sẽ được chiêm ngưỡng bầu trời chuyển màu rực rỡ, gió sông lồng lộng và ánh đèn thành phố bắt đầu rực sáng."
+  },
+  {
+    id: "loc-011",
+    title: "Chung cư Tôn Thất Đạm",
+    summary: "Một chút hoài niệm Sài Gòn thập niên cũ giữa khu trung tâm hiện đại.",
+    image: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=800&q=80",
+    readTime: "4 phút đọc",
+    author: "WanderHUB Squad",
+    content: "Dù nằm ngay trung tâm thành phố và được bao quanh bởi các cao ốc chọc trời, chung cư Tôn Thất Đạm vẫn giữ trọn vẹn nét rêu phong, cổ kính. Những cầu thang sắt hoen rỉ, mảng tường bong tróc và không gian sinh hoạt đậm chất cư xá cũ mang đến một cảm giác hoài cổ khó tả.\n\nNơi đây còn là 'thủ phủ' của những tiệm cà phê indie, vintage clothing shop và các studio nhỏ lẩn khuất, luôn chờ đợi những tâm hồn yêu nghệ thuật đến khám phá."
+  },
+  {
+    id: "loc-012",
+    title: "Công Viên Tao Đàn",
+    summary: "Lá phổi xanh mát giữa trung tâm, nơi hội tụ của chim cảnh và cà phê sáng.",
+    image: "/images/tao-dan.png",
+    readTime: "3 phút đọc",
+    author: "Phương Trinh (Nature Lover)",
+    content: "Công viên Tao Đàn với hàng ngàn cây cổ thụ rợp bóng mát là nơi lý tưởng để chạy bộ buổi sáng hoặc tản bộ thư giãn cuối tuần. Đặc biệt, khu vực cà phê chim cảnh là nét văn hóa độc đáo không thể bỏ qua.\n\nBạn có thể nhâm nhi ly cà phê đen đá, lắng nghe tiếng chim hót líu lo và quan sát nhịp sống bình dị của người dân Sài Gòn ngay giữa lòng đô thị tấp nập."
+  }
 ];
 
 const teamMembers = [
@@ -151,8 +255,8 @@ const teamMembers = [
   },
   {
     name: "Quốc lơ",
-    role: "Ở Không",
-    bio: "Không có thông tin cụ thể, vai trò chủ yếu là tận hưởng cuộc sống.",
+    role: "Content Creator",
+    bio: "Chuyên gia sáng tạo và hoạch định nội dung số. Định hình tiếng nói thương hiệu và phát triển cộng đồng người dùng.",
     avatar: "/images/team/5.jpg",
   },
 ];
@@ -1173,21 +1277,13 @@ function FloatingChatBot() {
     setInput("");
     setIsTyping(true);
 
-    if (groqKey) {
-      try {
-        const aiReply = await processUserMessage(msg, newMessages, groqKey);
-        setIsTyping(false);
-        setMessages((p) => [...p, { from: "ai", text: aiReply }]);
-      } catch (err) {
-        setIsTyping(false);
-        setMessages((p) => [...p, { from: "ai", text: `Lỗi kết nối AI Engine: ${err.message}` }]);
-      }
-    } else {
-      // Mock mode fallback
-      setTimeout(() => {
-        setIsTyping(false);
-        setMessages((p) => [...p, { from: "ai", text: getReply(msg) }]);
-      }, 800 + Math.random() * 500);
+    try {
+      const aiReply = await processUserMessage(msg, newMessages, groqKey || null);
+      setIsTyping(false);
+      setMessages((p) => [...p, { from: "ai", text: aiReply }]);
+    } catch (err) {
+      setIsTyping(false);
+      setMessages((p) => [...p, { from: "ai", text: `Lỗi kết nối AI Engine: ${err.message}` }]);
     }
   };
 
@@ -1892,57 +1988,19 @@ function Pricing({ user }) {
 function Explore() {
   const [selectedPost, setSelectedPost] = useState(null);
 
-  const postsContent = {
-    "Secret Garden Rooftop": {
-      title: "Secret Garden Rooftop - Góc bình yên trốn phố thị",
-      image: "/images/secret-garden.png",
-      readTime: "4 phút đọc",
-      author: "Minh Thư (Travel Blogger)",
-      content: "Nằm ẩn mình trên tầng thượng của một khu chung cư cũ trên đường Pasteur, Secret Garden đưa du khách vào một không gian đậm chất làng quê Việt Nam thanh bình. Với giàn dây leo xanh mát, những bộ bàn ghế gỗ mộc mạc và ánh đèn vàng ấm áp, đây là địa điểm lý tưởng để thưởng thức các món ăn gia đình truyền thống sau một ngày làm việc căng thẳng.\n\nKhông khí tại quán vô cùng trong lành và tách biệt hoàn toàn khỏi nhịp xe cộ hối hả của Quận 1 bên dưới. Bạn có thể gọi một đĩa thịt kho quẹt đậm đà, vài món rau luộc giản dị và một ly nước thảo mộc mát lành để khép lại một ngày thật nhẹ nhõm."
-    },
-    "Phố đi bộ Nguyễn Huệ": {
-      title: "Phố đi bộ Nguyễn Huệ - Nhịp đập sôi động về đêm",
-      image: "/images/nguyen-hue.png",
-      readTime: "3 phút đọc",
-      author: "Hoàng Nam (Urban Photographer)",
-      content: "Phố đi bộ Nguyễn Huệ luôn là tâm điểm giải trí của người dân và du khách tại TP.HCM. Từ các buổi biểu diễn âm nhạc đường phố đầy ngẫu hứng đến những quán cà phê chung cư 42 Nguyễn Huệ có ban công ngắm phố từ trên cao, nơi đây mang đậm hơi thở năng động và cởi mở của Sài Gòn.\n\nVào ban đêm, toàn bộ khu phố bừng sáng dưới ánh đèn neon rực rỡ. Đây là nơi bạn có thể thưởng thức trà dâu, ăn bánh tráng trộn và ngắm dòng người qua lại hoặc đón một chiếc xe điện Xanh SM để bắt đầu hành trình vi vu đêm của mình."
-    },
-    "Ốc Đào – Seafood local": {
-      title: "Ốc Đào - Trải nghiệm ẩm thực ốc vỉa hè đúng gu Sài Gòn",
-      image: "/images/oc-dao.png",
-      readTime: "5 phút đọc",
-      author: "Kiệt Anh (Food Reviewer)",
-      content: "Đối với người Sài Gòn, đi ăn ốc không chỉ là thưởng thức ẩm thực mà còn là một nét văn hóa giao tiếp. Ốc Đào từ lâu đã khẳng định vị thế huyền thoại với nước sốt bơ tỏi thơm lừng, ốc móng tay xào rau muống giòn rụm và các món ốc hương, sò lông nướng mỡ hành.\n\nNằm trong một con hẻm trên đường Nguyễn Trãi, quán luôn tấp nập thực khách ra vào từ chiều tối. Vị cay xè của ớt hòa quyện với vị béo của bơ tỏi và vị ngọt của hải sản tươi rói sẽ khiến bất kỳ ai cũng phải xiêu lòng ngay từ lần thử đầu tiên."
-    },
-    "Landmark 81 skyline": {
-      title: "Ngắm thành phố từ đỉnh Landmark 81",
-      image: "/images/landmark-81.jpg",
-      readTime: "4 phút đọc",
-      author: "Thảo Vy (Luxury Travel Guide)",
-      content: "Tòa nhà cao nhất Việt Nam không chỉ là trung tâm mua sắm sầm uất mà còn là nơi sở hữu đài quan sát Skyview ở độ cao hơn 400m. Tại đây, bạn có thể ngắm nhìn dòng sông Sài Gòn uốn lượn mềm mại và toàn bộ cảnh quan thành phố chìm dần vào ánh hoàng hôn rực rỡ.\n\nBên cạnh đó, việc nhâm nhi một ly thức uống tại các lounge sang trọng ở tầng cao hoặc tản bộ trong công viên ven sông Landmark 81 dưới bóng râm của những hàng cây xanh mướt là một trải nghiệm đô thị đẳng cấp không thể bỏ qua."
-    },
-    "Bưu điện & War Museum": {
-      title: "Hành trình di sản: Bưu điện Trung tâm & Bảo tàng Chiến tích",
-      image: "/images/buu-dien.jpg",
-      readTime: "6 phút đọc",
-      author: "Alex Nguyen (History Enthusiast)",
-      content: "Bưu điện Trung tâm Thành phố với kiến trúc Phục Hưng Gothic độc đáo do Gustave Eiffel thiết kế là điểm giao thoa lịch sử tuyệt đẹp. Ngay bên cạnh Nhà thờ Đức Bà, đây là nơi lưu giữ những hòm thư cổ kính và những bức bản đồ lịch sử quý giá.\n\nTiếp nối hành trình lịch sử, Bảo tàng Chứng tích Chiến tranh sẽ mang lại những cảm xúc sâu lắng về lịch sử đấu tranh kiên cường của nhân dân Việt Nam. Sự kết hợp giữa hai địa danh này mang lại một cái nhìn sâu sắc và toàn diện về quá khứ lẫn hiện tại của Sài Gòn."
-    }
-  };
-
   return (
     <PageShell eyebrow="Explore / Blog / POV" title="POV thành phố theo vibe của bạn.">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {blogCards.map(([title, text, img]) => (
-          <Reveal key={title} className="blog-card bg-white border border-[#2d5a3d]/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col">
-            <div className="blog-visual h-48 bg-stone-100" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        {mockExploreDB.map((post) => (
+          <Reveal key={post.id} className="blog-card bg-white border border-[#2d5a3d]/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col">
+            <div className="blog-visual h-48 bg-stone-100" style={{ backgroundImage: `url(${post.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
             <div className="p-5 flex-1 flex flex-col justify-between">
               <div>
-                <h3 className="font-bold text-[#1e4230] text-xl mb-2">{title}</h3>
-                <p className="text-sm text-stone-600 leading-relaxed mb-4">{text}</p>
+                <h3 className="font-bold text-[#1e4230] text-xl mb-2">{post.title}</h3>
+                <p className="text-sm text-stone-600 leading-relaxed mb-4">{post.summary}</p>
               </div>
               <button 
-                onClick={() => setSelectedPost(postsContent[title] || { title, image: img, readTime: "3 phút", author: "WanderHUB Squad", content: text })}
+                onClick={() => setSelectedPost(post)}
                 className="text-link text-sm font-bold text-[#2d5a3d] hover:text-[#c96420] inline-flex items-center gap-1 transition mt-auto"
               >
                 Đọc POV <ChevronRight size={16} />
