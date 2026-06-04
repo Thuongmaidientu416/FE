@@ -78,7 +78,7 @@ def _fetch_exposure_penalties(conn: sqlite3.Connection) -> dict[int, float]:
 
 
 def _stable_rank_offset(context: dict, provider_id: int, step_idx: int) -> float:
-    """Small deterministic jitter so close candidates rotate instead of always picking top 1."""
+    """Jitter per-session so near-top candidates rotate on each new generation."""
     seed = "|".join(
         [
             str(context.get("mood_input", "")),
@@ -87,6 +87,7 @@ def _stable_rank_offset(context: dict, provider_id: int, step_idx: int) -> float
             str(context.get("budget_max", "")),
             str(step_idx),
             str(provider_id),
+            str(context.get("session_seed", "")),
         ]
     )
     digest = hashlib.sha256(seed.encode("utf-8")).hexdigest()

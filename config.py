@@ -9,7 +9,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR
 SEED_DB_PATH = PROJECT_ROOT / "wanderhub.db"
-DB_PATH = Path("/tmp/wanderhub.db") if os.getenv("VERCEL") else SEED_DB_PATH
+DB_PATH = Path("/tmp/wanderhub.db") if (os.getenv("VERCEL") or os.getenv("RENDER")) else SEED_DB_PATH
 
 # ── Auth ───────────────────────────────────────────────────────────
 JWT_SECRET = os.getenv("WANDERHUB_JWT_SECRET", "wanderhub-dev-secret-change-in-prod")

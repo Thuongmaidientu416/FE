@@ -4,6 +4,7 @@ WanderHUB Backend — Itinerary Router (AI Custom Tour Generation)
 
 from __future__ import annotations
 import json
+import random
 import sqlite3
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -67,6 +68,8 @@ def generate(
         food_preference=body.food_preference,
         transport=body.transport,
     )
+
+    context["session_seed"] = random.random()
 
     # Layer 2: Apply rules
     rules = apply_rules(context)
