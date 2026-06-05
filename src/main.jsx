@@ -53,6 +53,19 @@ const navItems = [
 
 const packages = [
   {
+    name: "Explorer 7 Ngày",
+    price: "49.000 VNĐ/7 ngày",
+    note: "Trải nghiệm gần như full Premium trong 7 ngày — lý tưởng cho cuối tuần hoặc du khách ngắn ngày.",
+    features: [
+      "Không giới hạn lịch trình AI",
+      "Mở khóa 100% Hidden Gems",
+      "Re-route thông minh realtime",
+      "Hỗ trợ chat 24/7",
+      "Bản đồ theo dõi hành trình",
+    ],
+    notIncluded: ["Ưu tiên tài xế giờ cao điểm"],
+  },
+  {
     name: "Premium",
     price: "89.000 VNĐ/tháng",
     note: "Gói tốt nhất cho người đi chơi thường xuyên tại TP.HCM.",
@@ -1852,7 +1865,7 @@ function Home({ user }) {
 
 function PricingGrid({ preview = false, user = null }) {
   return (
-    <div className="grid gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
+    <div className="grid gap-8 lg:grid-cols-3 max-w-7xl mx-auto">
       {packages.map((plan) => (
         <Reveal key={plan.name} className={`price-card ${plan.highlight ? "featured" : ""}`}>
           <div className="flex items-center justify-between">
