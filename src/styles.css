@@ -1753,8 +1753,7 @@ select option {
   cursor: not-allowed;
 }
 
-.commercial-suggestion-panel,
-.ride-booking-panel {
+.commercial-suggestion-panel {
   grid-column: 1 / -1;
 }
 
@@ -1773,16 +1772,14 @@ select option {
   margin-bottom: 12px;
 }
 
-.commercial-suggestion-head strong,
-.ride-booking-head strong {
+.commercial-suggestion-head strong {
   display: block;
   color: #1e4230;
   font-size: 15px;
   font-weight: 950;
 }
 
-.commercial-suggestion-head small,
-.ride-booking-head small {
+.commercial-suggestion-head small {
   display: block;
   margin-top: 4px;
   color: rgba(30, 66, 48, 0.62);
@@ -1791,8 +1788,7 @@ select option {
   line-height: 1.4;
 }
 
-.commercial-suggestion-head > span,
-.ride-booking-head > span {
+.commercial-suggestion-head > span {
   flex: 0 0 auto;
   border-radius: 999px;
   background: rgba(201, 100, 32, 0.12);
@@ -1857,138 +1853,6 @@ select option {
   padding: 6px 8px;
   font-size: 11px;
   font-style: normal;
-  font-weight: 950;
-}
-
-.ride-booking-panel {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.15fr);
-  gap: 14px;
-  border: 1px solid rgba(45, 90, 61, 0.14);
-  border-radius: 14px;
-  background: #ffffff;
-  padding: 14px;
-  box-shadow: 0 12px 30px rgba(30, 66, 48, 0.08);
-}
-
-.ride-map {
-  position: relative;
-  min-height: 220px;
-  overflow: hidden;
-  border-radius: 12px;
-  background:
-    linear-gradient(90deg, rgba(45, 90, 61, 0.08) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(45, 90, 61, 0.08) 1px, transparent 1px),
-    #f3efe7;
-  background-size: 34px 34px;
-}
-
-.ride-map-line {
-  position: absolute;
-  inset: 42px 52px 54px 50px;
-  border-left: 3px solid rgba(201, 100, 32, 0.55);
-  border-bottom: 3px solid rgba(201, 100, 32, 0.55);
-  transform: skew(-10deg);
-}
-
-.ride-map-pin {
-  position: absolute;
-  display: inline-grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  background: #2d5a3d;
-  color: #ffffff;
-  box-shadow: 0 10px 22px rgba(30, 66, 48, 0.22);
-}
-
-.ride-map-pin span {
-  position: absolute;
-  right: -6px;
-  bottom: -6px;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  background: #c96420;
-  font-size: 11px;
-  font-weight: 950;
-}
-
-.ride-map-pin.pin-1 { left: 30px; top: 32px; }
-.ride-map-pin.pin-2 { left: 52%; top: 48%; }
-.ride-map-pin.pin-3 { right: 32px; bottom: 34px; }
-
-.ride-booking-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ride-booking-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ride-leg-list {
-  display: grid;
-  gap: 8px;
-}
-
-.ride-leg-row {
-  display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
-  gap: 10px;
-  align-items: start;
-  border: 1px solid rgba(45, 90, 61, 0.1);
-  border-radius: 10px;
-  padding: 9px;
-}
-
-.ride-leg-row i {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  background: rgba(45, 90, 61, 0.1);
-  color: #2d5a3d;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 950;
-}
-
-.ride-leg-row b {
-  display: block;
-  color: #1e4230;
-  font-size: 13px;
-  font-weight: 950;
-}
-
-.ride-leg-row small {
-  display: block;
-  margin-top: 3px;
-  color: rgba(30, 66, 48, 0.58);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.ride-confirm-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 42px;
-  border: 1px solid rgba(45, 90, 61, 0.28);
-  border-radius: 12px;
-  background: #2d5a3d;
-  color: #ffffff;
-  padding: 0 14px;
-  font-size: 13px;
   font-weight: 950;
 }
 
@@ -3000,13 +2864,11 @@ select option {
 }
 
 @media (max-width: 640px) {
-  .commercial-suggestion-grid,
-  .ride-booking-panel {
+  .commercial-suggestion-grid {
     grid-template-columns: 1fr;
   }
 
   .commercial-suggestion-head,
-  .ride-booking-head,
   .booking-next-panel {
     align-items: stretch;
     flex-direction: column;
@@ -3019,10 +2881,6 @@ select option {
   .commercial-suggestion-card i {
     grid-column: 1 / -1;
     text-align: center;
-  }
-
-  .ride-map {
-    min-height: 180px;
   }
 
   .wb-panel {
