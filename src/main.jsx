@@ -1865,7 +1865,7 @@ function Home({ user }) {
 
 function PricingGrid({ preview = false, user = null }) {
   return (
-    <div className="grid gap-8 lg:grid-cols-3 max-w-7xl mx-auto">
+    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
       {packages.map((plan) => (
         <Reveal key={plan.name} className={`price-card ${plan.highlight ? "featured" : ""}`}>
           <div className="flex items-center justify-between">
