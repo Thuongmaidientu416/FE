@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -2336,8 +2338,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes }) {
   const [activeIndex] = useState(0);
 
   useEffect(() => {
-    const L = window.L;
-    if (!L || !mapContainerRef.current) return;
+    if (!mapContainerRef.current) return;
 
     if (leafletInstanceRef.current) {
       leafletInstanceRef.current.remove();
