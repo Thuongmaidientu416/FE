@@ -2508,10 +2508,41 @@ const HCM_FALLBACK_COORDS = [
   [10.7760, 106.7070],
 ];
 
+const MOCK_DRIVERS = [
+  { name: "Anh Minh", rating: 4.9, plate: "51F-789.01", eta: "6 phút", distance: "2.3km" },
+  { name: "Chị Lan", rating: 4.8, plate: "51F-234.56", eta: "4 phút", distance: "1.8km" },
+  { name: "Anh Tuấn", rating: 4.9, plate: "51F-567.89", eta: "8 phút", distance: "3.1km" },
+];
+
 function JourneyTracker({ rideLegs, transport, totalRideMinutes }) {
   const mapContainerRef = useRef(null);
   const leafletInstanceRef = useRef(null);
   const [activeIndex] = useState(0);
+  // "checking" | "available" | "unavailable" | "booking" | "booked"
+  const [vehicleStatus, setVehicleStatus] = useState("checking");
+  const [bookedDriver, setBookedDriver] = useState(null);
+
+  const isRide = transport === "Be / Xanh SM";
+  const isWalk = transport === "Đi bộ thong thả";
+
+  // Simulate WanderHUB vehicle availability check on mount (only for ride mode)
+  useEffect(() => {
+    if (!isRide) return;
+    setVehicleStatus("checking");
+    const t = setTimeout(() => {
+      // 75% chance WanderHUB has a car available
+      setVehicleStatus(Math.random() < 0.75 ? "available" : "unavailable");
+    }, 1300);
+    return () => clearTimeout(t);
+  }, [isRide]);
+
+  const handleBookWanderHub = () => {
+    setVehicleStatus("booking");
+    setTimeout(() => {
+      setBookedDriver(MOCK_DRIVERS[Math.floor(Math.random() * MOCK_DRIVERS.length)]);
+      setVehicleStatus("booked");
+    }, 1800);
+  };
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -2572,8 +2603,6 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes }) {
     };
   }, [rideLegs]);
 
-  const isRide = transport === "Be / Xanh SM";
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -2611,33 +2640,75 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes }) {
           })}
 
           <div className="journey-tracker-booking">
-            {isRide ? (
-              <>
-                <p className="journey-tracker-booking-note">
-                  Ứng dụng sẽ nhận danh sách điểm dừng — copy tên điểm để nhập nhanh vào app.
-                </p>
-                <a
-                  href="https://be.com.vn"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="journey-tracker-btn-be"
-                >
+            {/* ── Ride mode: WanderHUB xe trước, fallback Be/Xanh ── */}
+            {isRide && vehicleStatus === "checking" && (
+              <div className="jt-vehicle-check">
+                <div className="jt-spinner" />
+                <span>Đang kiểm tra xe WanderHUB...</span>
+              </div>
+            )}
+
+            {isRide && vehicleStatus === "available" && (
+              <div className="jt-vehicle-available">
+                <div className="jt-vehicle-header">
+                  <span className="jt-dot-green" /> Xe WanderHUB sẵn sàng
+                </div>
+                <p className="jt-vehicle-sub">Tài xế gần nhất đang ở khu vực của bạn</p>
+                <button className="jt-book-btn" onClick={handleBookWanderHub}>
+                  <Car size={14} /> Đặt xe WanderHUB ngay
+                </button>
+              </div>
+            )}
+
+            {isRide && vehicleStatus === "booking" && (
+              <div className="jt-vehicle-check">
+                <div className="jt-spinner" />
+                <span>Đang xác nhận tài xế...</span>
+              </div>
+            )}
+
+            {isRide && vehicleStatus === "booked" && bookedDriver && (
+              <div className="jt-vehicle-booked">
+                <div className="jt-vehicle-header">
+                  <span className="jt-dot-green" /> Tài xế đã xác nhận!
+                </div>
+                <div className="jt-driver-row">
+                  <Car size={14} />
+                  <span><b>{bookedDriver.name}</b> · ⭐ {bookedDriver.rating}</span>
+                </div>
+                <div className="jt-driver-row">
+                  <span className="jt-plate">{bookedDriver.plate}</span>
+                  <span>· đến trong <b>{bookedDriver.eta}</b></span>
+                </div>
+              </div>
+            )}
+
+            {isRide && vehicleStatus === "unavailable" && (
+              <div className="jt-vehicle-unavailable">
+                <div className="jt-vehicle-header">
+                  <span className="jt-dot-amber" /> Xe WanderHUB hiện hết chỗ
+                </div>
+                <p className="jt-vehicle-sub">Kết nối đối tác vận chuyển:</p>
+                <a href="https://be.com.vn" target="_blank" rel="noopener noreferrer" className="journey-tracker-btn-be">
                   <Car size={15} /> Mở Be
                 </a>
-                <a
-                  href="https://xanhsm.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="journey-tracker-btn-xanh"
-                >
+                <a href="https://xanhsm.com" target="_blank" rel="noopener noreferrer" className="journey-tracker-btn-xanh">
                   <Car size={15} /> Mở Xanh SM
                 </a>
-              </>
-            ) : (
+              </div>
+            )}
+
+            {/* ── Walk mode: chỉ bản đồ, không có booking ── */}
+            {isWalk && (
               <div className="journey-tracker-walk-note">
-                {transport === "Đi bộ thong thả"
-                  ? "Bắt đầu đi bộ và theo dõi tiến độ từng điểm trên bản đồ."
-                  : "Khởi động xe và theo dõi hành trình trên bản đồ."}
+                Bắt đầu đi bộ và theo dõi tiến độ từng điểm trên bản đồ.
+              </div>
+            )}
+
+            {/* ── Tự lái: bản đồ + note ── */}
+            {!isRide && !isWalk && (
+              <div className="journey-tracker-walk-note">
+                Khởi động xe và theo dõi hành trình trên bản đồ.
               </div>
             )}
           </div>
@@ -3301,18 +3372,26 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                 <div className="booking-next-panel">
                   <div>
                     <strong>{selectedStops.length ? `Đã chọn ${selectedStops.length} điểm` : "Chưa chọn điểm nào"}</strong>
-                    <small>{selectedStops.length ? selectedStops.map((item) => item.title).slice(0, 3).join(" · ") : "Tick vào checkbox trên card để đi tiếp sang đặt xe."}</small>
+                    <small>
+                      {selectedStops.length
+                        ? selectedStops.map((item) => item.title).slice(0, 3).join(" · ")
+                        : transport === "Be / Xanh SM"
+                        ? "Tick vào card để tiến hành đặt xe."
+                        : "Tick vào card để xem hành trình trên bản đồ."}
+                    </small>
                   </div>
                   <button
                     type="button"
                     disabled={!selectedStops.length}
                     className="booking-next-btn"
                     onClick={() => {
-                      selectedStops.forEach((item, index) => trackStopInteraction(item, "save", { step: index + 1, next_stage: "ride_booking" }));
+                      selectedStops.forEach((item, index) => trackStopInteraction(item, "save", { step: index + 1, next_stage: transport === "Be / Xanh SM" ? "ride_booking" : "map_view" }));
                       setShowRideBooking(true);
                     }}
                   >
-                    <Car size={16} /> Tiếp tục đặt xe
+                    {transport === "Be / Xanh SM"
+                      ? <><Car size={16} /> Tiếp tục đặt xe</>
+                      : <><MapPin size={16} /> Xem bản đồ hành trình</>}
                   </button>
                 </div>
                 {showRideBooking && rideLegs.length > 0 ? (
