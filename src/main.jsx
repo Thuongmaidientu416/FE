@@ -55,17 +55,21 @@ const navItems = [
 
 const packages = [
   {
-    name: "Explorer 7 Ngày",
-    price: "49.000 VNĐ/7 ngày",
-    note: "Trải nghiệm gần như full Premium trong 7 ngày — lý tưởng cho cuối tuần hoặc du khách ngắn ngày.",
+    name: "Basic",
+    price: "Miễn phí",
+    note: "Dành cho người mới trải nghiệm WanderHUB — giới hạn 2 lịch trình AI mỗi tháng.",
     features: [
-      "Không giới hạn lịch trình AI",
-      "Mở khóa 100% Hidden Gems",
-      "Re-route thông minh realtime",
-      "Hỗ trợ chat 24/7",
-      "Bản đồ theo dõi hành trình",
+      "Tạo lịch trình AI (2 lần/tháng)",
+      "Khám phá địa điểm cơ bản",
+      "Gợi ý theo mood & khu vực",
+      "Bản đồ hành trình",
     ],
-    notIncluded: ["Ưu tiên tài xế giờ cao điểm"],
+    notIncluded: [
+      "Hidden Gems & địa điểm độc quyền",
+      "Re-route thông minh realtime",
+      "Ưu tiên tài xế giờ cao điểm",
+      "Hỗ trợ chat 24/7",
+    ],
   },
   {
     name: "Premium",
@@ -1889,7 +1893,7 @@ function PricingGrid({ preview = false, user = null }) {
             ))}
           </div>
           <NavLink to={user ? "/planner" : "/auth"} className="btn btn-glass mt-7 w-full justify-center">
-            {plan.highlight ? "Bắt đầu Premium" : "Chọn gói này"}
+            {plan.price === "Miễn phí" ? "Dùng miễn phí" : plan.highlight ? "Bắt đầu Premium" : "Chọn gói này"}
           </NavLink>
         </Reveal>
       ))}
@@ -2471,6 +2475,21 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes }) {
   );
 }
 
+const FREE_MONTHLY_LIMIT = 2;
+
+function getFreeUsageData() {
+  try {
+    const raw = localStorage.getItem("wh_free_usage");
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    if (!raw) return { count: 0, month: currentMonth };
+    const data = JSON.parse(raw);
+    if (data.month !== currentMonth) return { count: 0, month: currentMonth };
+    return data;
+  } catch {
+    return { count: 0, month: new Date().toISOString().slice(0, 7) };
+  }
+}
+
 function PlannerV2() {
   const moodOptions = [
     { code: "chill", label: "Chill", hint: "Cafe, dạo phố, nhịp nhẹ", icon: Coffee },
@@ -2537,6 +2556,8 @@ function PlannerV2() {
   const [showRideBooking, setShowRideBooking] = useState(false);
   const trackedHoverRef = useRef(new Set());
   const didAutoGenerateRef = useRef(false);
+  const [freeUsageCount, setFreeUsageCount] = useState(() => getFreeUsageData().count);
+  const limitReached = freeUsageCount >= FREE_MONTHLY_LIMIT;
   const [routeCost, setRouteCost] = useState("552.500 VNĐ");
   const [routeDuration, setRouteDuration] = useState("4h 45m");
   const [routeStops, setRouteStops] = useState([
@@ -2717,7 +2738,9 @@ function PlannerV2() {
   }, [rideStops]);
   const totalRideMinutes = rideLegs.reduce((sum, stop) => sum + stop.travelFromPrevious, 0);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (isAutoGenerate = false) => {
+    if (!isAutoGenerate && limitReached) return;
+
     setIsGenerating(true);
     setShowResult(false);
     const steps = [
@@ -2767,6 +2790,12 @@ function PlannerV2() {
       }).catch((err) => console.warn("[Planner] View tracking skipped:", err.message));
       setIsGenerating(false);
       setShowResult(true);
+      if (!isAutoGenerate) {
+        const usage = getFreeUsageData();
+        const newCount = usage.count + 1;
+        localStorage.setItem("wh_free_usage", JSON.stringify({ count: newCount, month: usage.month }));
+        setFreeUsageCount(newCount);
+      }
     } catch (err) {
       clearInterval(stepInterval);
       console.warn("[Planner] Backend unavailable, using fallback:", err.message);
@@ -2795,6 +2824,12 @@ function PlannerV2() {
       setRouteDuration(timeSlot.hint);
       setIsGenerating(false);
       setShowResult(true);
+      if (!isAutoGenerate) {
+        const usage = getFreeUsageData();
+        const newCount = usage.count + 1;
+        localStorage.setItem("wh_free_usage", JSON.stringify({ count: newCount, month: usage.month }));
+        setFreeUsageCount(newCount);
+      }
     }
   };
 
@@ -2802,7 +2837,7 @@ function PlannerV2() {
     if (didAutoGenerateRef.current) return;
     didAutoGenerateRef.current = true;
     const timer = window.setTimeout(() => {
-      handleGenerate();
+      handleGenerate(true);
     }, 250);
     return () => window.clearTimeout(timer);
   }, []);
@@ -2927,9 +2962,23 @@ function PlannerV2() {
             </div>
           </div>
 
-          <button id="planner-btn-submit" onClick={handleGenerate} disabled={isGenerating} className="btn btn-primary w-full justify-center mt-2">
+          <button id="planner-btn-submit" onClick={() => handleGenerate(false)} disabled={isGenerating || limitReached} className="btn btn-primary w-full justify-center mt-2">
             {isGenerating ? "Đang xử lý..." : "Lên lịch trình AI"} <Sparkles size={18} />
           </button>
+          {!limitReached && (
+            <p className="text-xs text-center text-stone-400 mt-2">
+              Gói Basic: còn <strong>{FREE_MONTHLY_LIMIT - freeUsageCount}</strong> lần tạo miễn phí tháng này
+            </p>
+          )}
+          {limitReached && (
+            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-center text-sm">
+              <p className="font-semibold text-amber-700">Đã dùng hết {FREE_MONTHLY_LIMIT} lượt miễn phí tháng này.</p>
+              <p className="text-amber-600 mt-1">Nâng cấp Premium để tạo lịch trình không giới hạn.</p>
+              <NavLink to="/pricing" className="btn btn-primary mt-3 w-full justify-center text-sm">
+                Xem gói Premium <ChevronRight size={14} />
+              </NavLink>
+            </div>
+          )}
         </Reveal>
 
         <Reveal className="planner-output">
