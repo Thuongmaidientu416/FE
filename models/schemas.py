@@ -195,8 +195,10 @@ class PlanResponse(BaseModel):
     plan_name: str
     plan_key: str
     selected_at: str
-    usage_this_month: int
-    monthly_limit: Optional[int] = None  # None = unlimited
+    usage_this_month: int        # uses in current period (0 or 1 for basic)
+    monthly_limit: Optional[int] = None   # None = unlimited
+    period_reset_at: Optional[str] = None  # ISO datetime when basic slot resets
+    period_days: int = 20        # period length in days (basic = 20)
 
 
 # Fix forward reference

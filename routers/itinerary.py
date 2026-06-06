@@ -56,25 +56,33 @@ def generate(
       Layer 2 (Knowledge Engine) → apply business rules
       Layer 3 (Recommendation Engine) → score & build itinerary
     """
-    # Enforce Basic plan limit (skip for auto-generated previews)
+    # Enforce Basic plan limit: 1 itinerary per 20 days (skip for auto-generated previews)
     if user_id and not body.is_auto_generate:
         plan_row = conn.execute(
             "SELECT plan_key FROM user_plans WHERE user_id = ?",
             (user_id,),
         ).fetchone()
         if plan_row and plan_row["plan_key"] == "basic":
-            usage = conn.execute(
+            from datetime import datetime, timezone, timedelta
+            last_row = conn.execute(
                 """
-                SELECT COUNT(*) AS cnt FROM itineraries
+                SELECT created_at FROM itineraries
                 WHERE user_id = ?
-                  AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+                  AND datetime(created_at) > datetime('now', '-20 days')
+                ORDER BY created_at DESC LIMIT 1
                 """,
                 (user_id,),
-            ).fetchone()["cnt"]
-            if usage >= 2:
+            ).fetchone()
+            if last_row:
+                last_dt = datetime.fromisoformat(last_row["created_at"])
+                if last_dt.tzinfo is None:
+                    last_dt = last_dt.replace(tzinfo=timezone.utc)
+                reset_at = last_dt + timedelta(days=20)
+                now = datetime.now(timezone.utc)
+                days_left = max(1, (reset_at - now).days + 1)
                 raise HTTPException(
                     status_code=429,
-                    detail="Đã hết 2 lịch trình miễn phí tháng này. Nâng cấp Premium để tiếp tục.",
+                    detail=f"Gói Basic giới hạn 1 lịch trình mỗi 20 ngày. Reset sau {days_left} ngày.",
                 )
 
     # Layer 1: Build context
