@@ -56,6 +56,27 @@ def generate(
       Layer 2 (Knowledge Engine) → apply business rules
       Layer 3 (Recommendation Engine) → score & build itinerary
     """
+    # Enforce Basic plan limit (skip for auto-generated previews)
+    if user_id and not body.is_auto_generate:
+        plan_row = conn.execute(
+            "SELECT plan_key FROM user_plans WHERE user_id = ?",
+            (user_id,),
+        ).fetchone()
+        if plan_row and plan_row["plan_key"] == "basic":
+            usage = conn.execute(
+                """
+                SELECT COUNT(*) AS cnt FROM itineraries
+                WHERE user_id = ?
+                  AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+                """,
+                (user_id,),
+            ).fetchone()["cnt"]
+            if usage >= 2:
+                raise HTTPException(
+                    status_code=429,
+                    detail="Đã hết 2 lịch trình miễn phí tháng này. Nâng cấp Premium để tiếp tục.",
+                )
+
     # Layer 1: Build context
     context = get_user_context(
         conn=conn,
@@ -135,9 +156,9 @@ def generate(
     primary_mood = rules["primary_mood"]
     title = f"{mood_titles.get(primary_mood, 'Custom Tour')} — {body.district}"
 
-    # Save to DB if user is authenticated
+    # Save to DB if user is authenticated and this is a real (non-auto) generation
     itinerary_id = None
-    if user_id:
+    if user_id and not body.is_auto_generate:
         cursor = conn.execute(
             """
             INSERT INTO itineraries (

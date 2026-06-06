@@ -110,6 +110,16 @@ CREATE INDEX IF NOT EXISTS idx_user_interactions_session
 CREATE INDEX IF NOT EXISTS idx_user_interactions_event
     ON user_interactions(event_type);
 
+-- User plan subscriptions
+CREATE TABLE IF NOT EXISTS user_plans (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    plan_name TEXT NOT NULL,
+    plan_key TEXT NOT NULL,
+    selected_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id)
+);
+
 -- Keep an audit trail of which recommendations were shown and why.
 CREATE TABLE IF NOT EXISTS recommendation_logs (
     id INTEGER PRIMARY KEY,

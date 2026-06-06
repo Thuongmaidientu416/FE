@@ -12,7 +12,7 @@ from fastapi.responses import Response
 
 from config import CORS_ORIGINS
 from database import init_db
-from routers import auth, providers, landing, itinerary, chat, contact, interactions
+from routers import auth, providers, landing, itinerary, chat, contact, interactions, plans
 
 # ── Create app ────────────────────────────────────────────────────
 app = FastAPI(
@@ -46,6 +46,7 @@ app.include_router(itinerary.router)
 app.include_router(chat.router)
 app.include_router(contact.router)
 app.include_router(interactions.router)
+app.include_router(plans.router)
 
 
 # ── Startup ──────────────────────────────────────────────────────

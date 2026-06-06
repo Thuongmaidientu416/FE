@@ -78,6 +78,7 @@ class ItineraryGenerateRequest(BaseModel):
     food_preference: Optional[str] = Field(None, description="Food preferences")
     transport: str = Field("Be / Xanh SM", description="Transport mode")
     max_stops: int = Field(6, ge=2, le=8)
+    is_auto_generate: bool = Field(False, description="Auto-generated on page load, skip limit & DB save")
 
 
 class ItineraryStop(BaseModel):
@@ -181,6 +182,21 @@ class InteractionResponse(BaseModel):
     success: bool
     interaction_id: int
     message: str
+
+
+# ── Plans ─────────────────────────────────────────────────────────
+
+class PlanSelectRequest(BaseModel):
+    plan_name: str
+    plan_key: str
+
+
+class PlanResponse(BaseModel):
+    plan_name: str
+    plan_key: str
+    selected_at: str
+    usage_this_month: int
+    monthly_limit: Optional[int] = None  # None = unlimited
 
 
 # Fix forward reference
