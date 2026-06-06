@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import { processUserMessage } from "./ai-llm/index";
-import { apiLogin, apiRegister, apiGenerateItinerary, apiRerouteItinerary, apiSubmitContact, apiTrackInteraction, apiSelectPlan, apiGetMyPlan, apiGetMe, clearToken, setToken } from "./api";
+import { apiLogin, apiRegister, apiGenerateItinerary, apiRerouteItinerary, apiSubmitContact, apiTrackInteraction, apiSelectPlan, apiGetMyPlan, apiGetMe, apiGetVehicleAvailability, apiBookVehicle, clearToken, setToken } from "./api";
 
 const navItems = [
   ["Trang chủ", "/"],
@@ -2514,34 +2514,40 @@ const MOCK_DRIVERS = [
   { name: "Anh Tuấn", rating: 4.9, plate: "51F-567.89", eta: "8 phút", distance: "3.1km" },
 ];
 
-function JourneyTracker({ rideLegs, transport, totalRideMinutes }) {
+function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) {
   const mapContainerRef = useRef(null);
   const leafletInstanceRef = useRef(null);
   const [activeIndex] = useState(0);
   // "checking" | "available" | "unavailable" | "booking" | "booked"
   const [vehicleStatus, setVehicleStatus] = useState("checking");
   const [bookedDriver, setBookedDriver] = useState(null);
+  const [vehicleFleet, setVehicleFleet] = useState([]);
 
   const isRide = transport === "Be / Xanh SM";
   const isWalk = transport === "Đi bộ thong thả";
 
-  // Simulate WanderHUB vehicle availability check on mount (only for ride mode)
+  // Fetch real WanderHUB vehicle availability (ride mode only)
   useEffect(() => {
     if (!isRide) return;
     setVehicleStatus("checking");
-    const t = setTimeout(() => {
-      // 75% chance WanderHUB has a car available
-      setVehicleStatus(Math.random() < 0.75 ? "available" : "unavailable");
-    }, 1300);
-    return () => clearTimeout(t);
+    apiGetVehicleAvailability()
+      .then((data) => {
+        setVehicleFleet(data.fleet ?? []);
+        setVehicleStatus(data.has_wanderhub ? "available" : "unavailable");
+      })
+      .catch(() => setVehicleStatus("unavailable"));
   }, [isRide]);
 
-  const handleBookWanderHub = () => {
+  const handleBookWanderHub = async (vehicleType) => {
     setVehicleStatus("booking");
-    setTimeout(() => {
-      setBookedDriver(MOCK_DRIVERS[Math.floor(Math.random() * MOCK_DRIVERS.length)]);
+    try {
+      const result = await apiBookVehicle(vehicleType, itineraryId ?? null);
+      setBookedDriver(result.driver);
+      setVehicleFleet(result.remaining.fleet ?? []);
       setVehicleStatus("booked");
-    }, 1800);
+    } catch {
+      setVehicleStatus("unavailable");
+    }
   };
 
   useEffect(() => {
@@ -2648,17 +2654,37 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes }) {
               </div>
             )}
 
-            {isRide && vehicleStatus === "available" && (
-              <div className="jt-vehicle-available">
-                <div className="jt-vehicle-header">
-                  <span className="jt-dot-green" /> Xe WanderHUB sẵn sàng
+            {isRide && vehicleStatus === "available" && (() => {
+              const moto = vehicleFleet.find(v => v.vehicle_type === "motorbike");
+              const car7 = vehicleFleet.find(v => v.vehicle_type === "car7");
+              return (
+                <div className="jt-vehicle-available">
+                  <div className="jt-vehicle-header">
+                    <span className="jt-dot-green" /> Xe WanderHUB sẵn sàng
+                  </div>
+                  <p className="jt-vehicle-sub">Chọn loại xe phù hợp với nhóm của bạn</p>
+                  {moto && (
+                    <button
+                      className="jt-book-btn"
+                      onClick={() => handleBookWanderHub("motorbike")}
+                      disabled={moto.available_count === 0}
+                    >
+                      <Car size={14} /> Xe máy — Còn {moto.available_count} chiếc
+                    </button>
+                  )}
+                  {car7 && (
+                    <button
+                      className="jt-book-btn"
+                      style={{ marginTop: "8px" }}
+                      onClick={() => handleBookWanderHub("car7")}
+                      disabled={car7.available_count === 0}
+                    >
+                      <Car size={14} /> Xe 7 chỗ — Còn {car7.available_count} chiếc
+                    </button>
+                  )}
                 </div>
-                <p className="jt-vehicle-sub">Tài xế gần nhất đang ở khu vực của bạn</p>
-                <button className="jt-book-btn" onClick={handleBookWanderHub}>
-                  <Car size={14} /> Đặt xe WanderHUB ngay
-                </button>
-              </div>
-            )}
+              );
+            })()}
 
             {isRide && vehicleStatus === "booking" && (
               <div className="jt-vehicle-check">
@@ -2678,8 +2704,9 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes }) {
                 </div>
                 <div className="jt-driver-row">
                   <span className="jt-plate">{bookedDriver.plate}</span>
-                  <span>· đến trong <b>{bookedDriver.eta}</b></span>
+                  <span>· đến trong <b>{bookedDriver.eta_minutes} phút</b></span>
                 </div>
+                <p className="jt-vehicle-sub" style={{ marginTop: "6px" }}>{bookedDriver.vehicle_label}</p>
               </div>
             )}
 
@@ -3399,6 +3426,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     rideLegs={rideLegs}
                     transport={transport}
                     totalRideMinutes={totalRideMinutes}
+                    itineraryId={aiResponse?.itinerary_id ?? null}
                   />
                 ) : null}
               </div>

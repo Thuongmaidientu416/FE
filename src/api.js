@@ -160,6 +160,19 @@ export async function apiGetMyPlan() {
   return request('/api/plans/me');
 }
 
+// ── Vehicles ─────────────────────────────────────────────────────
+
+export async function apiGetVehicleAvailability() {
+  return request('/api/vehicles/availability');
+}
+
+export async function apiBookVehicle(vehicleType, itineraryId = null) {
+  return request('/api/vehicles/book', {
+    method: 'POST',
+    body: JSON.stringify({ vehicle_type: vehicleType, itinerary_id: itineraryId }),
+  });
+}
+
 // ── Contact ──────────────────────────────────────────────────────
 
 export async function apiSubmitContact(name, email, subject, message) {
