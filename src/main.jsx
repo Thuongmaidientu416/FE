@@ -2843,6 +2843,8 @@ function Auth({ setUser }) {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [status, setStatus] = useState("");
+  const [isLoadingLogin, setIsLoadingLogin] = useState(false);
+  const [isLoadingRegister, setIsLoadingRegister] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -2851,6 +2853,7 @@ function Auth({ setUser }) {
       setStatus("Vui lòng nhập đầy đủ Email và Mật khẩu.");
       return;
     }
+    setIsLoadingLogin(true);
     try {
       const data = await apiLogin(loginEmail, loginPassword);
       setUser(data.user);
@@ -2866,6 +2869,8 @@ function Auth({ setUser }) {
       } else {
         setStatus(err.message || "Đăng nhập thất bại.");
       }
+    } finally {
+      setIsLoadingLogin(false);
     }
   };
 
@@ -2875,6 +2880,7 @@ function Auth({ setUser }) {
       setStatus("Vui lòng điền đầy đủ thông tin để đăng ký.");
       return;
     }
+    setIsLoadingRegister(true);
     try {
       const data = await apiRegister(registerName, registerEmail, registerPassword);
       setStatus("Đăng ký tài khoản thành công! Bây giờ bạn có thể đăng nhập.");
@@ -2892,6 +2898,8 @@ function Auth({ setUser }) {
       } else {
         setStatus(err.message || "Đăng ký thất bại.");
       }
+    } finally {
+      setIsLoadingRegister(false);
     }
   };
 
@@ -2933,7 +2941,7 @@ function Auth({ setUser }) {
               onChange={(e) => setLoginPassword(e.target.value)}
               className="border border-stone-200 rounded-xl p-3 bg-stone-50/50 w-full"
             />
-            <button type="submit" id="auth-btn-login" className="btn btn-primary w-full justify-center">Đăng nhập</button>
+            <button type="submit" id="auth-btn-login" disabled={isLoadingLogin} className="btn btn-primary w-full justify-center">{isLoadingLogin ? "Đang đăng nhập..." : "Đăng nhập"}</button>
           </form>
           <button id="auth-btn-google" onClick={handleGoogleLogin} className="btn btn-glass w-full justify-center text-stone-700 hover:text-stone-900 border border-stone-200"><Globe2 size={18} /> Đăng nhập với Google</button>
         </Reveal>
@@ -2964,7 +2972,7 @@ function Auth({ setUser }) {
               onChange={(e) => setRegisterPassword(e.target.value)}
               className="border border-stone-200 rounded-xl p-3 bg-stone-50/50 w-full"
             />
-            <button type="submit" id="auth-btn-register" className="btn btn-primary w-full justify-center">Tạo tài khoản</button>
+            <button type="submit" id="auth-btn-register" disabled={isLoadingRegister} className="btn btn-primary w-full justify-center">{isLoadingRegister ? "Đang tạo tài khoản..." : "Tạo tài khoản"}</button>
           </form>
         </Reveal>
       </div>
@@ -3124,8 +3132,8 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
                   <span className="jt-dot-green" /> Tour Guide & Xe WanderHUB
                 </div>
                 <p className="jt-vehicle-sub">Tài xế kiêm hướng dẫn viên — đặt ngay trong vài giây</p>
-                <button className="jt-book-btn" onClick={handleCheckVehicles}>
-                  <Car size={14} /> Đặt xe ngay
+                <button className="jt-book-btn" onClick={handleCheckVehicles} disabled={vehicleStatus === "loading"}>
+                  <Car size={14} /> {vehicleStatus === "loading" ? "Đang kiểm tra..." : "Đặt xe ngay"}
                 </button>
               </div>
             )}
@@ -3150,7 +3158,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
                     <button
                       className="jt-book-btn"
                       onClick={() => handleBookWanderHub("motorbike")}
-                      disabled={moto.available_count === 0}
+                      disabled={moto.available_count === 0 || vehicleStatus === "booking"}
                     >
                       <Car size={14} /> Xe máy — Còn {moto.available_count} chiếc
                     </button>
@@ -3160,7 +3168,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
                       className="jt-book-btn"
                       style={{ marginTop: "8px" }}
                       onClick={() => handleBookWanderHub("car7")}
-                      disabled={car7.available_count === 0}
+                      disabled={car7.available_count === 0 || vehicleStatus === "booking"}
                     >
                       <Car size={14} /> Xe 7 chỗ — Còn {car7.available_count} chiếc
                     </button>
@@ -3199,8 +3207,8 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
                   <span className="jt-dot-amber" /> Xe WanderHUB hiện đã hết
                 </div>
                 <p className="jt-vehicle-sub">Vui lòng thử lại sau hoặc liên hệ hỗ trợ WanderHUB.</p>
-                <button className="jt-book-btn" style={{ background: "#78716c", marginTop: "8px" }} onClick={handleCheckVehicles}>
-                  <Car size={14} /> Thử lại
+                <button className="jt-book-btn" style={{ background: "#78716c", marginTop: "8px" }} onClick={handleCheckVehicles} disabled={vehicleStatus === "loading"}>
+                  <Car size={14} /> {vehicleStatus === "loading" ? "Đang kiểm tra..." : "Thử lại"}
                 </button>
               </div>
             )}
