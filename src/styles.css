@@ -149,16 +149,23 @@ select option {
 }
 
 .btn-primary {
-  color: white;
-  background: linear-gradient(135deg, #c96420, #e07830 52%, #a04e14);
-  box-shadow: 0 8px 28px rgba(201, 100, 32, 0.38), 0 0 36px rgba(201, 100, 32, 0.18);
+  color: #ffffff;
+  background: linear-gradient(135deg, #d97706, #ea8a2e 52%, #c2560a);
+  box-shadow: 0 8px 28px rgba(217, 119, 6, 0.42), 0 0 36px rgba(217, 119, 6, 0.18);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.02em;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #e88b1a, #f59e3b 52%, #d97706);
+  box-shadow: 0 10px 36px rgba(217, 119, 6, 0.52), 0 0 44px rgba(217, 119, 6, 0.22);
 }
 
 .btn-glass,
 .btn-ghost {
-  color: white;
-  background: rgba(45, 90, 61, 0.18);
-  border-color: rgba(45, 90, 61, 0.28);
+  color: #1e4230;
+  background: rgba(45, 90, 61, 0.08);
+  border-color: rgba(45, 90, 61, 0.2);
   backdrop-filter: blur(18px);
 }
 
@@ -166,6 +173,7 @@ select option {
 .btn-ghost:hover,
 .icon-btn:hover {
   border-color: rgba(45, 90, 61, 0.55);
+  background: rgba(45, 90, 61, 0.14);
   box-shadow: 0 0 26px rgba(45, 90, 61, 0.2);
 }
 
@@ -3241,5 +3249,18 @@ select option {
     border-left: none;
     border-top: 1px solid rgba(45, 90, 61, 0.1);
     max-height: none;
+  }
+}
+
+.car-marker {
+  offset-path: path("M 20,40 Q 100,10 200,40 T 380,40");
+  animation: moveCar 6s linear infinite;
+}
+@keyframes moveCar {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
   }
 }

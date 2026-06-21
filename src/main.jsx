@@ -16,8 +16,10 @@ import {
   Check,
   ChevronRight,
   Clock3,
+  Clipboard,
   Compass,
   Coffee,
+  Copy,
   CreditCard,
   Facebook,
   Gem,
@@ -29,7 +31,9 @@ import {
   MapPin,
   Menu,
   MessageCircle,
+  MessageSquare,
   Navigation,
+  Notebook,
   Phone,
   Plane,
   RefreshCcw,
@@ -38,6 +42,8 @@ import {
   Sparkles,
   Star,
   Settings,
+  ThumbsUp,
+  Users,
   Utensils,
   Wallet,
   X,
@@ -51,17 +57,20 @@ const navItems = [
   ["Về WanderHUB", "/about"],
   ["Gói dịch vụ", "/pricing"],
   ["Khám phá", "/explore"],
+  ["Đánh giá", "/reviews"],
   ["Liên hệ", "/contact"],
 ];
 
 const packages = [
   {
-    name: "Basic",
+    name: "Free",
     price: "Miễn phí",
     priceAmount: 0,
-    note: "Dành cho người mới trải nghiệm WanderHUB — 1 lịch trình AI mỗi 20 ngày.",
+    note: "Dành cho người mới trải nghiệm WanderHUB — 1 lịch trình AI mỗi tháng.",
+    icon: Compass,
+    color: "#5a7a60",
     features: [
-      "Tạo lịch trình AI (1 lần / 20 ngày)",
+      "Tạo lịch trình AI (1 lần / tháng)",
       "Khám phá địa điểm cơ bản",
       "Gợi ý theo mood & khu vực",
       "Bản đồ hành trình",
@@ -79,6 +88,8 @@ const packages = [
     priceAmount: 89000,
     note: "Gói tốt nhất cho người đi chơi thường xuyên tại TP.HCM.",
     highlight: true,
+    icon: Star,
+    color: "#c96420",
     features: [
       "Không giới hạn lịch trình AI",
       "Ưu tiên tài xế giờ cao điểm",
@@ -93,8 +104,20 @@ const packages = [
     name: "International Tourist",
     price: "199.000 VNĐ/hành trình",
     priceAmount: 199000,
-    note: "Trợ lý đô thị cho du khách quốc tế khám phá TP.HCM.",
+    note: "Your AI urban companion for exploring Ho Chi Minh City.",
+    noteVi: "Trợ lý đô thị cho du khách quốc tế khám phá TP.HCM.",
+    icon: Globe2,
+    color: "#2563eb",
+    isInternational: true,
     features: [
+      "Multilingual AI assistant (EN/JP/KR)",
+      "24/7 emergency support",
+      "Local assistant option",
+      "Unlimited itinerary generation",
+      "International booking & payment",
+      "Offline maps included",
+    ],
+    featuresVi: [
       "Trợ lý ảo đa ngôn ngữ (EN/JP/KR)",
       "Hỗ trợ sự cố 24/7",
       "Local assistant option",
@@ -103,6 +126,70 @@ const packages = [
       "Bản đồ offline có sẵn",
     ],
     notIncluded: [],
+  },
+];
+
+// ── USER REVIEWS DATA ──
+const userReviews = [
+  {
+    id: 1,
+    name: "Khánh Linh",
+    avatar: "/images/team/3.jpg",
+    role: "Creative Director, Quận 3",
+    rating: 5,
+    date: "12/06/2026",
+    place: "Secret Garden Rooftop",
+    content: "Tôi đã sống ở Sài Gòn 5 năm nhưng chưa bao giờ biết tới quán cafe nhỏ này. AI của WanderHUB gợi ý dựa trên mood thèm sự riêng tư. Thật đáng kinh ngạc!",
+  },
+  {
+    id: 2,
+    name: "Anh Tuấn",
+    avatar: "/images/team/1.jpg",
+    role: "Kiến trúc sư, Quận 1",
+    rating: 5,
+    date: "10/06/2026",
+    place: "Bến Bạch Đằng Waterbus",
+    content: "WanderHUB mang đến trải nghiệm lịch lãm, tinh tế chuẩn boutique hotel. Cách tích hợp xe điện Xanh SM chạy thẳng trong flow lịch trình rất mượt.",
+  },
+  {
+    id: 3,
+    name: "Mai Phương",
+    avatar: "/images/team/2.jpg",
+    role: "Food Blogger",
+    rating: 4,
+    date: "08/06/2026",
+    place: "Ốc Đào Q1",
+    content: "AI đề xuất tuyến ăn tối quá chuẩn luôn! Từ cafe → ốc đào → phố đi bộ, mọi thứ nối liền rất mượt. Tài xế WanderHUB cũng rất thân thiện.",
+  },
+  {
+    id: 4,
+    name: "David Chen",
+    avatar: "/images/team/6.jpg",
+    role: "Tourist from Singapore",
+    rating: 5,
+    date: "05/06/2026",
+    place: "Chợ Bến Thành",
+    content: "As a tourist, the International package was amazing. The multilingual assistant helped me navigate HCMC like a local. Best travel app experience in Vietnam!",
+  },
+  {
+    id: 5,
+    name: "Hoàng Nam",
+    avatar: "/images/team/5.jpg",
+    role: "Urban Photographer",
+    rating: 5,
+    date: "03/06/2026",
+    place: "Phố Nguyễn Huệ",
+    content: "Hidden gems đúng nghĩa! WanderHUB gợi ý cho mình những góc chụp mà mình chưa từng biết dù đã ở Sài Gòn 10 năm.",
+  },
+  {
+    id: 6,
+    name: "Yuki Tanaka",
+    avatar: "/images/team/4.jpg",
+    role: "Japanese Exchange Student",
+    rating: 5,
+    date: "01/06/2026",
+    place: "Landmark 81",
+    content: "日本語サポートが素晴らしい！ The Japanese language support was perfect. Route suggestions were very accurate and saved me so much time exploring the city.",
   },
 ];
 
@@ -1887,93 +1974,329 @@ function Home({ user }) {
 const PLAN_KEYS = { "Basic": "basic", "Premium": "premium", "International Tourist": "international" };
 
 function PaymentModal({ plan, onConfirm, onCancel }) {
-  const [step, setStep] = useState("qr"); // "qr" | "verifying" | "done"
+  const [step, setStep] = useState("method"); // "method" | "qr" | "verifying" | "done" | "thankyou"
+  const [paymentMethod, setPaymentMethod] = useState("bank"); // "bank" | "card" | "ewallet"
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherApplied, setVoucherApplied] = useState(null);
+  const [copiedField, setCopiedField] = useState(null);
+  const autoDetectTimerRef = useRef(null);
   const refCode = useRef(`WH${Date.now().toString(36).toUpperCase().slice(-6)}`);
-  const qrValue = `WANDERHUB|PLAN:${PLAN_KEYS[plan.name]}|AMT:${plan.priceAmount}VND|REF:${refCode.current}`;
+
+  const discountAmount = voucherApplied ? Math.round(plan.priceAmount * 0.1) : 0;
+  const finalPrice = plan.priceAmount - discountAmount;
+  const finalPriceDisplay = finalPrice === 0 ? "Miễn phí" : `${finalPrice.toLocaleString("vi-VN")} VNĐ`;
+
+  const qrValue = `WANDERHUB|PLAN:${PLAN_KEYS[plan.name]}|AMT:${finalPrice}VND|REF:${refCode.current}`;
 
   const bankInfo = [
-    { label: "Ngân hàng", value: "VietcomBank" },
-    { label: "Số tài khoản", value: "1020 4918 7263" },
-    { label: "Chủ tài khoản", value: "CONG TY WANDERHUB" },
-    { label: "Số tiền", value: plan.price },
-    { label: "Nội dung CK", value: `WANDERHUB ${(PLAN_KEYS[plan.name] || "").toUpperCase()} ${refCode.current}` },
+    { label: "Ngân hàng", value: "VietcomBank", copyable: false },
+    { label: "Số tài khoản", value: "1020 4918 7263", copyable: true },
+    { label: "Chủ tài khoản", value: "CONG TY WANDERHUB", copyable: false },
+    { label: "Số tiền", value: finalPriceDisplay, copyable: false },
+    { label: "Nội dung CK", value: `WANDERHUB ${(PLAN_KEYS[plan.name] || "").toUpperCase()} ${refCode.current}`, copyable: true },
   ];
 
+  const handleCopy = async (value, label) => {
+    try {
+      await navigator.clipboard.writeText(value.replace(/\s/g, ""));
+      setCopiedField(label);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch { /* fallback */ }
+  };
+
+  const handleApplyVoucher = () => {
+    const code = voucherCode.trim().toUpperCase();
+    if (code === "WANDERHUB10" || code === "NEWUSER" || code === "WELCOME2026") {
+      setVoucherApplied(code);
+    } else {
+      setVoucherApplied(false);
+    }
+  };
+
+  const startAutoDetect = () => {
+    // Simulate auto-detect: after 8 seconds, auto-confirm payment
+    autoDetectTimerRef.current = setTimeout(() => {
+      handleConfirm();
+    }, 8000);
+  };
+
+  const handleProceedToPayment = () => {
+    setStep("qr");
+    startAutoDetect();
+  };
+
   const handleConfirm = async () => {
+    if (autoDetectTimerRef.current) clearTimeout(autoDetectTimerRef.current);
     setStep("verifying");
-    await new Promise((r) => setTimeout(r, 1600));
-    setStep("done");
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((r) => setTimeout(r, 1800));
+    setStep("thankyou");
+  };
+
+  const handleFinish = () => {
     onConfirm();
   };
 
+  useEffect(() => {
+    return () => {
+      if (autoDetectTimerRef.current) clearTimeout(autoDetectTimerRef.current);
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && onCancel()}>
+    <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && step !== "thankyou" && onCancel()}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden"
+        className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="bg-[#1e4230] px-6 py-5 flex items-center justify-between">
           <div>
             <p className="text-white/60 text-xs uppercase tracking-widest mb-0.5">Thanh toán</p>
             <h2 className="text-white text-lg font-bold">Gói {plan.name}</h2>
-            <p className="text-emerald-300 text-sm font-semibold mt-0.5">{plan.price}</p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-emerald-300 text-sm font-semibold">{plan.price}</p>
+              {voucherApplied && (
+                <span className="text-xs bg-emerald-400/20 text-emerald-200 px-2 py-0.5 rounded-full font-bold">-10% → {finalPriceDisplay}</span>
+              )}
+            </div>
           </div>
           <button onClick={onCancel} className="text-white/50 hover:text-white transition p-1">
             <X size={20} />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-stone-100">
-          {/* Left: features */}
-          <div className="p-6">
-            <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">Bạn sẽ nhận được</p>
-            <div className="grid gap-2.5">
-              {plan.features.map((f) => (
-                <div key={f} className="flex gap-2.5 text-sm text-[#3d2b1a]/75">
-                  <Check size={15} className="shrink-0 text-emerald-600 mt-0.5" /> {f}
-                </div>
-              ))}
+        {/* ─── THANK YOU SCREEN ─── */}
+        {step === "thankyou" && (
+          <div className="p-8 flex flex-col items-center text-center gap-5">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              className="w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"
+            >
+              <Check size={40} className="text-white" />
+            </motion.div>
+            <div>
+              <h3 className="text-2xl font-black text-[#1e4230]">Cảm ơn bạn!</h3>
+              <p className="text-stone-600 mt-2">Thanh toán thành công cho gói <strong>{plan.name}</strong></p>
             </div>
-          </div>
 
-          {/* Right: QR + bank info */}
-          <div className="p-6 flex flex-col items-center gap-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">Quét mã QR để thanh toán</p>
+            <div className="w-full max-w-sm rounded-2xl bg-stone-50 border border-stone-100 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">Thông tin đơn hàng</p>
+              <div className="grid gap-2 text-sm">
+                <div className="flex justify-between"><span className="text-stone-500">Gói dịch vụ</span><strong className="text-[#1e4230]">{plan.name}</strong></div>
+                <div className="flex justify-between"><span className="text-stone-500">Giá gốc</span><span className="text-stone-700">{plan.price}</span></div>
+                {voucherApplied && <div className="flex justify-between"><span className="text-stone-500">Giảm giá ({voucherApplied})</span><span className="text-emerald-600 font-bold">-{discountAmount.toLocaleString("vi-VN")} VNĐ</span></div>}
+                <div className="flex justify-between border-t border-stone-200 pt-2 mt-1"><span className="text-stone-500 font-bold">Tổng thanh toán</span><strong className="text-[#1e4230] text-lg">{finalPriceDisplay}</strong></div>
+                <div className="flex justify-between"><span className="text-stone-500">Mã giao dịch</span><span className="text-stone-700 font-mono text-xs">{refCode.current}</span></div>
+              </div>
+            </div>
+
             <div className="p-3 rounded-xl border-2 border-[#2d5a3d]/15 bg-white shadow-sm">
-              <QRCodeSVG value={qrValue} size={156} bgColor="#ffffff" fgColor="#1e4230" level="M" includeMargin={false} />
+              <QRCodeSVG value={`RECEIPT|${refCode.current}|${plan.name}|${finalPrice}`} size={120} bgColor="#ffffff" fgColor="#1e4230" level="M" />
+              <p className="text-[10px] text-stone-400 mt-2 text-center">QR biên lai điện tử</p>
             </div>
-            <div className="w-full rounded-xl bg-stone-50 border border-stone-100 p-3.5 text-xs grid gap-1.5">
-              {bankInfo.map(({ label, value }) => (
-                <div key={label} className="flex items-start justify-between gap-3">
-                  <span className="text-stone-400 shrink-0">{label}</span>
-                  <span className="font-semibold text-stone-700 text-right">{value}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-[11px] text-center text-stone-400">Sau khi chuyển khoản thành công, nhấn xác nhận bên dưới</p>
-          </div>
-        </div>
 
-        {/* Footer */}
-        <div className="border-t border-stone-100 px-6 py-4 flex gap-3">
-          <button onClick={onCancel} disabled={step !== "qr"} className="btn btn-ghost flex-1 justify-center">
-            Hủy
-          </button>
-          <button
-            onClick={handleConfirm}
-            disabled={step !== "qr"}
-            className="btn btn-primary flex-1 justify-center"
-          >
-            {step === "verifying" && "Đang xác minh..."}
-            {step === "done" && "✓ Thành công!"}
-            {step === "qr" && "Xác nhận đã thanh toán"}
-          </button>
-        </div>
+            <button onClick={handleFinish} className="btn btn-primary w-full max-w-sm justify-center mt-2">
+              Bắt đầu trải nghiệm <ArrowRight size={18} />
+            </button>
+          </div>
+        )}
+
+        {/* ─── VERIFYING SCREEN ─── */}
+        {step === "verifying" && (
+          <div className="p-12 flex flex-col items-center text-center gap-4">
+            <div className="w-12 h-12 border-4 border-[#2d5a3d] border-t-transparent rounded-full animate-spin"></div>
+            <h4 className="font-bold text-[#1e4230] text-lg">Đang xác minh thanh toán...</h4>
+            <p className="text-sm text-stone-500">Hệ thống đang kiểm tra giao dịch của bạn</p>
+          </div>
+        )}
+
+        {/* ─── PAYMENT METHOD SELECTION ─── */}
+        {step === "method" && (
+          <>
+            {/* Package Summary */}
+            <div className="p-6 bg-stone-50 border-b border-stone-100">
+              <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">Tóm tắt đơn hàng</p>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  {plan.icon && <plan.icon size={22} style={{ color: plan.color || "#2d5a3d" }} />}
+                  <div>
+                    <strong className="text-[#1e4230]">{plan.name}</strong>
+                    <p className="text-xs text-stone-500">{plan.note}</p>
+                  </div>
+                </div>
+                <strong className="text-lg text-[#1e4230]">{plan.price}</strong>
+              </div>
+              <div className="grid gap-1.5 mt-3">
+                {(plan.isInternational ? plan.features : plan.features).slice(0, 4).map((f) => (
+                  <div key={f} className="flex gap-2 text-xs text-stone-600">
+                    <Check size={13} className="shrink-0 text-emerald-600 mt-0.5" /> {f}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Voucher Code */}
+            <div className="px-6 pt-5 pb-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Mã giảm giá / Voucher</p>
+              <div className="flex gap-2">
+                <input
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
+                  placeholder="Nhập mã voucher..."
+                  className="flex-1 text-sm p-2.5 rounded-xl border border-stone-200 outline-none focus:border-[#2d5a3d]"
+                />
+                <button
+                  onClick={handleApplyVoucher}
+                  className="btn text-sm px-4 py-2 bg-[#2d5a3d] text-white rounded-xl font-bold hover:bg-[#1e4230] transition min-h-0"
+                >
+                  Áp dụng
+                </button>
+              </div>
+              {voucherApplied === false && <p className="text-xs text-red-500 mt-1.5">Mã voucher không hợp lệ.</p>}
+              {voucherApplied && <p className="text-xs text-emerald-600 font-bold mt-1.5">✓ Đã áp dụng mã {voucherApplied} — giảm 10%!</p>}
+            </div>
+
+            {/* Payment Methods */}
+            <div className="px-6 pb-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">Phương thức thanh toán</p>
+              <div className="grid gap-2.5">
+                <button
+                  onClick={() => setPaymentMethod("bank")}
+                  className={`flex items-center gap-3 p-4 rounded-xl border-2 transition text-left ${paymentMethod === "bank" ? "border-[#2d5a3d] bg-[#2d5a3d]/5" : "border-stone-150 hover:border-stone-300"}`}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-[#2d5a3d]/10 flex items-center justify-center">
+                    <CreditCard size={20} className="text-[#2d5a3d]" />
+                  </div>
+                  <div className="flex-1">
+                    <strong className="text-sm text-[#1e4230]">Chuyển khoản ngân hàng</strong>
+                    <p className="text-xs text-stone-500">VietcomBank, BIDV, Techcombank, VPBank...</p>
+                  </div>
+                  {paymentMethod === "bank" && <Check size={18} className="text-[#2d5a3d]" />}
+                </button>
+
+                <button
+                  onClick={() => setPaymentMethod("ewallet")}
+                  className={`flex items-center gap-3 p-4 rounded-xl border-2 transition text-left ${paymentMethod === "ewallet" ? "border-[#2d5a3d] bg-[#2d5a3d]/5" : "border-stone-150 hover:border-stone-300"}`}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                    <Wallet size={20} className="text-pink-600" />
+                  </div>
+                  <div className="flex-1">
+                    <strong className="text-sm text-[#1e4230]">Ví điện tử</strong>
+                    <p className="text-xs text-stone-500">MoMo, ZaloPay, VNPay, ShopeePay</p>
+                  </div>
+                  {paymentMethod === "ewallet" && <Check size={18} className="text-[#2d5a3d]" />}
+                </button>
+
+                <button
+                  onClick={() => setPaymentMethod("card")}
+                  className={`flex items-center gap-3 p-4 rounded-xl border-2 transition text-left ${paymentMethod === "card" ? "border-[#2d5a3d] bg-[#2d5a3d]/5" : "border-stone-150 hover:border-stone-300"}`}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <Globe2 size={20} className="text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <strong className="text-sm text-[#1e4230]">Thẻ quốc tế / International Card</strong>
+                    <p className="text-xs text-stone-500">Visa, Mastercard, JCB, UnionPay, Amex</p>
+                  </div>
+                  {paymentMethod === "card" && <Check size={18} className="text-[#2d5a3d]" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-stone-100 px-6 py-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs text-stone-400">Tổng thanh toán</p>
+                <strong className="text-lg text-[#1e4230]">{finalPriceDisplay}</strong>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={onCancel} className="btn btn-ghost justify-center px-6">Hủy</button>
+                <button onClick={handleProceedToPayment} className="btn btn-primary justify-center px-6">
+                  Tiếp tục <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ─── QR / BANK TRANSFER SCREEN ─── */}
+        {step === "qr" && (
+          <>
+            <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-stone-100">
+              {/* Left: package info */}
+              <div className="p-6">
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">Chi tiết đơn hàng</p>
+                <div className="grid gap-2 text-sm mb-4">
+                  <div className="flex justify-between"><span className="text-stone-500">Gói</span><strong>{plan.name}</strong></div>
+                  <div className="flex justify-between"><span className="text-stone-500">Giá</span><span>{plan.price}</span></div>
+                  {voucherApplied && <div className="flex justify-between"><span className="text-stone-500">Voucher</span><span className="text-emerald-600 font-bold">-{discountAmount.toLocaleString("vi-VN")} VNĐ</span></div>}
+                  <div className="flex justify-between border-t pt-2"><span className="text-stone-500 font-bold">Tổng</span><strong className="text-[#1e4230]">{finalPriceDisplay}</strong></div>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-2">Tính năng bao gồm</p>
+                <div className="grid gap-2">
+                  {(plan.isInternational ? plan.features : plan.features).map((f) => (
+                    <div key={f} className="flex gap-2 text-xs text-[#3d2b1a]/75">
+                      <Check size={13} className="shrink-0 text-emerald-600 mt-0.5" /> {f}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right: QR + bank info with copy buttons */}
+              <div className="p-6 flex flex-col items-center gap-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+                  {paymentMethod === "bank" ? "Quét QR hoặc chuyển khoản" : paymentMethod === "ewallet" ? "Quét mã QR bằng ví điện tử" : "Quét mã QR để thanh toán"}
+                </p>
+                <div className="p-3 rounded-xl border-2 border-[#2d5a3d]/15 bg-white shadow-sm">
+                  <QRCodeSVG value={qrValue} size={140} bgColor="#ffffff" fgColor="#1e4230" level="M" includeMargin={false} />
+                </div>
+                <div className="w-full rounded-xl bg-stone-50 border border-stone-100 p-3.5 text-xs grid gap-2">
+                  {bankInfo.map(({ label, value, copyable }) => (
+                    <div key={label} className="flex items-center justify-between gap-2">
+                      <span className="text-stone-400 shrink-0">{label}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-stone-700 text-right">{value}</span>
+                        {copyable && (
+                          <button
+                            onClick={() => handleCopy(value, label)}
+                            className="p-1 rounded hover:bg-stone-200 transition"
+                            title="Sao chép"
+                          >
+                            {copiedField === label ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} className="text-stone-400" />}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="w-full rounded-lg bg-amber-50 border border-amber-200 p-2.5 text-center">
+                  <p className="text-[11px] text-amber-700 font-semibold flex items-center justify-center gap-1.5">
+                    <Clock3 size={12} /> Hệ thống tự động nhận diện khi thanh toán thành công
+                  </p>
+                  <p className="text-[10px] text-amber-600 mt-0.5">Hoặc nhấn xác nhận bên dưới nếu đã chuyển khoản</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-stone-100 px-6 py-4 flex gap-3">
+              <button onClick={() => setStep("method")} className="btn btn-ghost flex-1 justify-center">
+                ← Quay lại
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="btn btn-primary flex-1 justify-center"
+              >
+                Xác nhận đã thanh toán
+              </button>
+            </div>
+          </>
+        )}
       </motion.div>
     </div>
   );
@@ -1983,6 +2306,7 @@ function PricingGrid({ preview = false, user = null, userPlan = null, setUserPla
   const navigate = useNavigate();
   const [selecting, setSelecting] = useState(null);
   const [paymentPlan, setPaymentPlan] = useState(null);
+  const [detailPlan, setDetailPlan] = useState(null);
 
   const savePlan = async (plan) => {
     const planKey = PLAN_KEYS[plan.name] || "basic";
@@ -2010,6 +2334,12 @@ function PricingGrid({ preview = false, user = null, userPlan = null, setUserPla
     }
   };
 
+  const displayFeatures = (plan) => {
+    // For International Tourist, show English features
+    if (plan.isInternational) return plan.features;
+    return plan.features;
+  };
+
   return (
     <>
       {paymentPlan && (
@@ -2021,9 +2351,127 @@ function PricingGrid({ preview = false, user = null, userPlan = null, setUserPla
           />
         </AnimatePresence>
       )}
+
+      {/* Detail Modal for package */}
+      <AnimatePresence>
+        {detailPlan && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setDetailPlan(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6 border-b border-stone-100" style={{ background: `${detailPlan.color}08` }}>
+                <div className="flex items-center gap-3 mb-3">
+                  {detailPlan.icon && <detailPlan.icon size={28} style={{ color: detailPlan.color }} />}
+                  <div>
+                    <h3 className="text-xl font-black text-[#1e4230]">{detailPlan.name}</h3>
+                    <p className="text-lg font-bold" style={{ color: detailPlan.color }}>{detailPlan.price}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-stone-600">{detailPlan.isInternational ? detailPlan.note : detailPlan.note}</p>
+              </div>
+              <div className="p-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">
+                  {detailPlan.isInternational ? "Features Included" : "Tính năng bao gồm"}
+                </p>
+                <div className="grid gap-3">
+                  {displayFeatures(detailPlan).map((f) => (
+                    <div key={f} className="flex gap-3 text-sm text-[#3d2b1a]/80">
+                      <Check size={16} className="shrink-0 text-emerald-600 mt-0.5" /> {f}
+                    </div>
+                  ))}
+                </div>
+                {detailPlan.notIncluded?.length > 0 && (
+                  <>
+                    <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2 mt-5">
+                      {detailPlan.isInternational ? "Not Included" : "Không bao gồm"}
+                    </p>
+                    {detailPlan.notIncluded.map((f) => (
+                      <div key={f} className="flex gap-3 text-sm text-stone-400 line-through mb-1">
+                        <X size={16} className="shrink-0 text-stone-300 mt-0.5" /> {f}
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {/* Animated Route simulation */}
+                <div className="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden relative h-36">
+                  <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1.5px,transparent_1.5px)] [background-size:16px_16px] opacity-60" />
+                  <div className="relative z-10 flex items-center justify-between text-[11px] font-bold text-[#1e4230]/70 mb-2">
+                    <span className="flex items-center gap-1"><Car size={12} className="text-emerald-600 animate-bounce" /> {detailPlan.isInternational ? "Live Route Simulation" : "Mô phỏng hành trình xe điện Xanh SM"}</span>
+                    <span className="text-emerald-600 animate-pulse bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">{detailPlan.isInternational ? "Moving" : "Đang di chuyển"}</span>
+                  </div>
+                  {/* The route road path */}
+                  <svg className="w-full h-20 overflow-visible relative" viewBox="0 0 400 80">
+                    <defs>
+                      <linearGradient id="roadGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#cbd5e1" />
+                        <stop offset="50%" stopColor="#94a3b8" />
+                        <stop offset="100%" stopColor="#cbd5e1" />
+                      </linearGradient>
+                    </defs>
+                    {/* Road Path */}
+                    <path 
+                      d="M 20,40 Q 100,10 200,40 T 380,40" 
+                      fill="none" 
+                      stroke="url(#roadGradient)" 
+                      strokeWidth="10" 
+                      strokeLinecap="round" 
+                    />
+                    <path 
+                      d="M 20,40 Q 100,10 200,40 T 380,40" 
+                      fill="none" 
+                      stroke="#ffffff" 
+                      strokeWidth="1" 
+                      strokeDasharray="6,6" 
+                      strokeLinecap="round" 
+                    />
+                    {/* Pins */}
+                    <circle cx="20" cy="40" r="6" fill="#c96420" stroke="#ffffff" strokeWidth="2" />
+                    <circle cx="380" cy="40" r="6" fill="#2d5a3d" stroke="#ffffff" strokeWidth="2" />
+                    {/* Text for pins */}
+                    <text x="20" y="62" fontSize="9" fontWeight="bold" textAnchor="middle" fill="#57534e">{detailPlan.isInternational ? "Start" : "Điểm xuất phát"}</text>
+                    <text x="380" y="62" fontSize="9" fontWeight="bold" textAnchor="middle" fill="#57534e">{detailPlan.isInternational ? "Arriving" : "Điểm đến"}</text>
+                    
+                    {/* Car moving along the path */}
+                    <g className="car-marker">
+                      <circle r="10" fill="#1e4230" stroke="#ffffff" strokeWidth="2" />
+                      <svg x="-6" y="-6" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3">
+                        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+                        <circle cx="7" cy="17" r="2" />
+                        <circle cx="17" cy="17" r="2" />
+                      </svg>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+              <div className="p-6 border-t border-stone-100 flex gap-3">
+                <button onClick={() => setDetailPlan(null)} className="btn btn-ghost flex-1 justify-center">Đóng</button>
+                <button
+                  onClick={() => { setDetailPlan(null); handleSelectPlan(detailPlan); }}
+                  className="btn btn-primary flex-1 justify-center"
+                >
+                  {detailPlan.priceAmount === 0 ? "Dùng miễn phí" : detailPlan.isInternational ? "Get Started" : "Chọn gói này"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
         {packages.map((plan) => {
           const isActive = !preview && userPlan?.plan_name === plan.name;
+          const PlanIcon = plan.icon;
           return (
             <Reveal key={plan.name} className={`price-card relative ${plan.highlight ? "featured" : ""} ${isActive ? "ring-2 ring-emerald-500 ring-offset-2" : ""}`}>
               {/* Active plan tick */}
@@ -2033,13 +2481,21 @@ function PricingGrid({ preview = false, user = null, userPlan = null, setUserPla
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <h3>{plan.name}</h3>
+                <div className="flex items-center gap-2.5">
+                  {PlanIcon && (
+                    <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${plan.color}15` }}>
+                      <PlanIcon size={20} style={{ color: plan.color }} />
+                    </div>
+                  )}
+                  <h3>{plan.name}</h3>
+                </div>
                 {plan.highlight && <span className="badge">Best vibe</span>}
+                {plan.isInternational && <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">EN</span>}
               </div>
               <div className="mt-4 text-2xl font-black text-[#1e4230]">{plan.price}</div>
               <p className="mt-3 text-sm leading-6 text-[#3d2b1a]/62">{plan.note}</p>
               <div className="mt-6 grid gap-2.5">
-                {(preview ? plan.features.slice(0, 3) : plan.features).map((feature) => (
+                {(preview ? displayFeatures(plan).slice(0, 3) : displayFeatures(plan)).map((feature) => (
                   <div key={feature} className="flex gap-3 text-sm text-[#3d2b1a]/75">
                     <Check size={16} className="shrink-0 text-emerald-600 mt-0.5" /> {feature}
                   </div>
@@ -2050,21 +2506,37 @@ function PricingGrid({ preview = false, user = null, userPlan = null, setUserPla
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => handleSelectPlan(plan)}
-                disabled={selecting === plan.name || (isActive && plan.priceAmount === 0)}
-                className="btn btn-glass mt-7 w-full justify-center"
-              >
-                {selecting === plan.name
-                  ? "Đang xử lý..."
-                  : isActive
-                  ? "Đang sử dụng"
-                  : plan.priceAmount === 0
-                  ? "Dùng miễn phí"
-                  : plan.highlight
-                  ? "Bắt đầu Premium"
-                  : "Chọn gói này"}
-              </button>
+              <div className="mt-6 grid gap-2">
+                <button
+                  onClick={() => handleSelectPlan(plan)}
+                  disabled={selecting === plan.name || (isActive && plan.priceAmount === 0)}
+                  className={`btn mt-1 w-full justify-center font-bold ${
+                    plan.highlight
+                      ? "bg-gradient-to-r from-[#c96420] to-[#e07830] text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40"
+                      : plan.isInternational
+                      ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40"
+                      : "bg-[#2d5a3d] text-white hover:bg-[#1e4230]"
+                  }`}
+                >
+                  {selecting === plan.name
+                    ? "Đang xử lý..."
+                    : isActive
+                    ? "Đang sử dụng"
+                    : plan.priceAmount === 0
+                    ? "Dùng miễn phí"
+                    : plan.highlight
+                    ? "Bắt đầu Premium"
+                    : plan.isInternational
+                    ? "Get Started"
+                    : "Chọn gói này"}
+                </button>
+                <button
+                  onClick={() => setDetailPlan(plan)}
+                  className="text-xs font-bold text-stone-500 hover:text-[#2d5a3d] transition py-1"
+                >
+                  {plan.isInternational ? "View Details →" : "Xem chi tiết →"}
+                </button>
+              </div>
             </Reveal>
           );
         })}
@@ -2837,6 +3309,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
   const [selectedProviderIds, setSelectedProviderIds] = useState(() => new Set());
   const [commercialSuggestions, setCommercialSuggestions] = useState([]);
   const [showRideBooking, setShowRideBooking] = useState(false);
+  const [userNote, setUserNote] = useState("");
   const trackedHoverRef = useRef(new Set());
   const didAutoGenerateRef = useRef(false);
   // Prefer server-side usage count when user is logged in (userPlan), fallback to localStorage
@@ -3135,12 +3608,6 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
       navigate("/pricing", { replace: true });
       return;
     }
-    if (didAutoGenerateRef.current) return;
-    didAutoGenerateRef.current = true;
-    const timer = window.setTimeout(() => {
-      handleGenerate(true);
-    }, 250);
-    return () => window.clearTimeout(timer);
   }, []);
 
   const reroute = async () => {
@@ -3263,6 +3730,20 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
             </div>
           </div>
 
+          <div className="planner-field">
+            <div className="planner-field-head">
+              <span>Ghi chú / Yêu cầu đặc biệt</span>
+              <small>Note cho tài xế hoặc yêu cầu riêng</small>
+            </div>
+            <textarea
+              value={userNote}
+              onChange={(e) => setUserNote(e.target.value)}
+              placeholder="Ví dụ: Chuẩn bị dù vì có thể mưa, cần ghế cho em bé, dị ứng hải sản..."
+              rows={3}
+              className="w-full border border-stone-200 rounded-xl p-3 bg-stone-50/50 text-sm resize-none focus:border-[#2d5a3d] focus:ring-1 focus:ring-[#2d5a3d]/20"
+            />
+          </div>
+
           <button id="planner-btn-submit" onClick={() => handleGenerate(false)} disabled={isGenerating || limitReached} className="btn btn-primary w-full justify-center mt-2">
             {isGenerating ? "Đang xử lý..." : "Lên lịch trình AI"} <Sparkles size={18} />
           </button>
@@ -3353,6 +3834,19 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                         {item.duration_min ? <span><Clock3 size={14} /> {item.duration_min} phút</span> : null}
                         <span><Sparkles size={14} /> {Math.round(item.score || 88)}/100</span>
                       </div>
+                      <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
+                        <Clock3 size={10} /> Thời gian đề xuất: {
+                          (item.category || "").toLowerCase().includes("ăn") || (item.category || "").toLowerCase().includes("food") || (item.category || "").toLowerCase().includes("nhà hàng")
+                            ? "20-60 phút"
+                            : (item.category || "").toLowerCase().includes("cafe") || (item.category || "").toLowerCase().includes("uống")
+                            ? "30-45 phút"
+                            : (item.category || "").toLowerCase().includes("nightlife") || (item.category || "").toLowerCase().includes("bar")
+                            ? "60-120 phút"
+                            : (item.category || "").toLowerCase().includes("check-in") || (item.category || "").toLowerCase().includes("tham quan")
+                            ? "20-40 phút"
+                            : "30-60 phút"
+                        }
+                      </div>
                       <small className="recommendation-reason">{item.reason || "Đề xuất vì khớp mood, cùng khu vực ưu tiên và giúp route ít lặp trải nghiệm."}</small>
                       <button
                         type="button"
@@ -3414,6 +3908,12 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                         ? "Tick vào card để tiến hành đặt xe."
                         : "Tick vào card để xem hành trình trên bản đồ."}
                     </small>
+                    {userNote && (
+                      <div className="mt-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                        <strong className="flex items-center gap-1 mb-1"><Notebook size={12} /> Ghi chú:</strong>
+                        {userNote}
+                      </div>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -3440,13 +3940,168 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
               </div>
             </motion.div>
           ) : (
-            <div className="flex flex-col items-center justify-center min-h-[350px] text-center text-stone-400">
-              <Compass size={48} className="stroke-1 mb-4" />
-              <p>Chọn vài hộp bên trái rồi bấm nút để bắt đầu thiết kế hành trình.</p>
+            <div className="flex flex-col gap-6">
+              <div className="rounded-2xl bg-amber-500/5 border border-amber-500/10 p-5">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[#c96420]">Gợi ý từ WanderHUB</span>
+                <h3 className="text-lg font-black text-[#1e4230] mt-1 mb-2">Lên lịch trình dễ dàng hơn với các Dịch vụ nổi bật</h3>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Lựa chọn một trong các dịch vụ hoặc gói trải nghiệm được thiết kế sẵn dưới đây để WanderHUB tự động cấu hình các tham số và tối ưu tuyến đường cho bạn.
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[
+                  {
+                    id: "xanh_sm",
+                    title: "Tour Xe Điện Xanh SM Luxury",
+                    tag: "Được tài trợ",
+                    tagColor: "bg-[#2d5a3d]/10 text-[#2d5a3d]",
+                    desc: "Di chuyển bằng dòng xe điện Xanh SM đẳng cấp. Đã bao gồm tour hướng dẫn và voucher giảm giá 20%.",
+                    price: "Từ 150.000 VNĐ",
+                    rating: "4.9 (1.2k đánh giá)",
+                    vibe: "chill",
+                    transport: "Thuê Tour Guide",
+                    interests: ["cafe_drink", "food", "checkin"],
+                  },
+                  {
+                    id: "waterbus",
+                    title: "Sunset Waterbus & Café Tour",
+                    tag: "Phổ biến nhất",
+                    tagColor: "bg-amber-500/10 text-amber-800",
+                    desc: "Ngắm hoàng hôn trên sông Bạch Đằng bằng tàu buýt sông, kết hợp cafe boutique và ẩm thực ven sông cực chill.",
+                    price: "Từ 220.000 VNĐ",
+                    rating: "4.8 (850 đánh giá)",
+                    vibe: "date",
+                    transport: "Tự đi xe máy",
+                    interests: ["cafe_drink", "checkin"],
+                  },
+                  {
+                    id: "local_foodie",
+                    title: "Quận 1 Street Food Discovery",
+                    tag: "Độc quyền Premium",
+                    tagColor: "bg-blue-500/10 text-blue-800",
+                    desc: "Khám phá các ngõ hẻm ẩm thực độc đáo cùng hướng dẫn viên bản địa am hiểu sâu sắc ẩm thực Sài Gòn.",
+                    price: "Từ 350.000 VNĐ",
+                    rating: "5.0 (520 đánh giá)",
+                    vibe: "foodie",
+                    transport: "Thuê Tour Guide",
+                    interests: ["food"],
+                  },
+                  {
+                    id: "cultural_museum",
+                    title: "Ký ức Sài Gòn & Di sản văn hóa",
+                    tag: "Dành cho gia đình",
+                    tagColor: "bg-[#2d5a3d]/10 text-[#2d5a3d]",
+                    desc: "Tuyến tham quan Dinh Độc Lập, Bưu điện Thành phố và các bảo tàng lịch sử lâu đời bằng xe điện thông minh.",
+                    price: "Miễn phí (chỉ trả vé vào cổng)",
+                    rating: "4.7 (340 đánh giá)",
+                    vibe: "culture",
+                    transport: "Thuê Tour Guide",
+                    interests: ["culture", "checkin"],
+                  }
+                ].map((promo) => (
+                  <div key={promo.id} className="p-5 rounded-2xl bg-white border border-[#2d5a3d]/10 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${promo.tagColor}`}>{promo.tag}</span>
+                        <span className="text-[10px] text-stone-400">⭐ {promo.rating}</span>
+                      </div>
+                      <h4 className="font-bold text-[#1e4230] text-sm mb-1">{promo.title}</h4>
+                      <p className="text-xs text-stone-500 leading-relaxed mb-3">{promo.desc}</p>
+                    </div>
+                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2 mt-auto">
+                      <span className="text-xs font-black text-[#c96420]">{promo.price}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVibe(promo.vibe);
+                          setTransport(promo.transport);
+                          setInterests(promo.interests);
+                          // Auto trigger generate after state is set
+                          setTimeout(() => {
+                            handleGenerate(true);
+                          }, 50);
+                        }}
+                        className="btn btn-primary !min-height-0 !py-1 px-3 text-xs"
+                      >
+                        Chọn dịch vụ
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col items-center justify-center p-8 bg-stone-50 rounded-2xl border border-stone-200/60 text-center text-stone-500 mt-2">
+                <Compass size={24} className="stroke-1.5 mb-2 text-stone-400" />
+                <p className="text-xs font-semibold">Hoặc tùy chỉnh các bộ lọc ở bảng điều khiển bên trái rồi bấm "Lên lịch trình AI" để tạo lộ trình cá nhân hóa.</p>
+              </div>
             </div>
           )}
         </Reveal>
       </div>
+    </PageShell>
+  );
+}
+
+function Reviews() {
+  return (
+    <PageShell eyebrow="User Reviews" title="Đánh giá từ cộng đồng WanderHUB.">
+      <p className="text-stone-600 max-w-2xl mb-10 -mt-2 leading-relaxed">
+        Những trải nghiệm thực tế từ du khách và người dùng đã sử dụng dịch vụ — giúp bạn tự tin hơn khi chọn điểm đến.
+      </p>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+        {[
+          { value: "4.9/5", label: "Điểm trung bình", icon: Star },
+          { value: "2.400+", label: "Lượt đánh giá", icon: MessageSquare },
+          { value: "98%", label: "Hài lòng", icon: ThumbsUp },
+          { value: "156", label: "Địa điểm", icon: MapPin },
+        ].map((stat) => (
+          <Reveal key={stat.label} className="text-center p-5 rounded-2xl bg-white border border-[#2d5a3d]/10 shadow-sm">
+            <stat.icon size={22} className="mx-auto mb-2 text-[#c96420]" />
+            <div className="text-2xl font-black text-[#1e4230]">{stat.value}</div>
+            <div className="text-xs text-stone-500 mt-1 font-semibold">{stat.label}</div>
+          </Reveal>
+        ))}
+      </div>
+
+      {/* Reviews Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {userReviews.map((review) => (
+          <Reveal key={review.id} className="bg-white rounded-2xl border border-[#2d5a3d]/10 p-6 shadow-sm hover:shadow-md transition flex flex-col">
+            <div className="flex items-center gap-3 mb-4">
+              <img src={review.avatar} alt={review.name} className="w-11 h-11 rounded-full object-cover ring-2 ring-[#2d5a3d]/10" />
+              <div className="flex-1">
+                <h4 className="font-bold text-[#1e4230] text-sm">{review.name}</h4>
+                <p className="text-xs text-stone-500">{review.role}</p>
+              </div>
+              <span className="text-xs text-stone-400">{review.date}</span>
+            </div>
+            <div className="flex items-center gap-1 mb-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} size={14} className={i < review.rating ? "text-[#c96420] fill-[#c96420]" : "text-stone-200"} />
+              ))}
+              <span className="text-xs text-stone-500 ml-1">{review.rating}/5</span>
+            </div>
+            <p className="text-sm text-stone-700 leading-relaxed flex-1 mb-4">"{review.content}"</p>
+            <div className="flex items-center gap-2 text-xs text-[#2d5a3d] font-bold mt-auto pt-3 border-t border-stone-100">
+              <MapPin size={12} /> {review.place}
+            </div>
+          </Reveal>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <Reveal className="mt-14 text-center">
+        <div className="rounded-2xl bg-[#2d5a3d]/5 border border-[#2d5a3d]/10 p-8">
+          <h3 className="text-xl font-bold text-[#1e4230] mb-2">Đã trải nghiệm WanderHUB?</h3>
+          <p className="text-sm text-stone-600 mb-5">Chia sẻ đánh giá của bạn để giúp cộng đồng và cải thiện chất lượng gợi ý AI.</p>
+          <NavLink to="/contact" className="btn btn-primary inline-flex items-center gap-2">
+            Gửi đánh giá <MessageSquare size={16} />
+          </NavLink>
+        </div>
+      </Reveal>
     </PageShell>
   );
 }
@@ -3499,6 +4154,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing user={user} userPlan={userPlan} setUserPlan={setUserPlan} />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/reviews" element={<Reviews />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/terms" element={<Terms />} />
