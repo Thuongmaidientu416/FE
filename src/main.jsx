@@ -3032,6 +3032,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
   const [activeIndex] = useState(0);
   // "idle" | "loading" | "selecting" | "booking" | "booked" | "unavailable"
   const [vehicleStatus, setVehicleStatus] = useState("idle");
+  const [pickupLocation, setPickupLocation] = useState("");
   const [bookedDriver, setBookedDriver] = useState(null);
   const [bookedVehicleType, setBookedVehicleType] = useState(null);
   const [bookedPrice, setBookedPrice] = useState(0);
@@ -3056,6 +3057,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
     try {
       const totalDistance = rideLegs.reduce((sum, leg) => sum + leg.distanceFromPrevious, 0);
       const price = calculateVehiclePrice(vehicleType, totalDistance);
+      console.log("[Vehicle Booking]", { vehicleType, rideLegsCount: rideLegs.length, totalDistance, price });
 
       const result = await apiBookVehicle(vehicleType, itineraryId ?? null);
       setBookedDriver(result.driver);
@@ -3171,7 +3173,14 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
                   <span className="jt-dot-green" /> Tour Guide & Xe WanderHUB
                 </div>
                 <p className="jt-vehicle-sub">Tài xế kiêm hướng dẫn viên — đặt ngay trong vài giây</p>
-                <button className="jt-book-btn" onClick={handleCheckVehicles} disabled={vehicleStatus === "loading"}>
+                <input
+                  type="text"
+                  placeholder="Địa điểm đón khách (vd: Quốc lộ 1A, Bình Thạnh)"
+                  value={pickupLocation}
+                  onChange={(e) => setPickupLocation(e.target.value)}
+                  className="border border-stone-200 rounded-lg p-2 mb-3 w-full text-sm bg-stone-50/50"
+                />
+                <button className="jt-book-btn" onClick={handleCheckVehicles} disabled={vehicleStatus === "loading" || !pickupLocation.trim()}>
                   <Car size={14} /> {vehicleStatus === "loading" ? "Đang kiểm tra..." : "Đặt xe ngay"}
                 </button>
               </div>
@@ -3190,12 +3199,17 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
               const totalDistance = rideLegs.reduce((sum, leg) => sum + leg.distanceFromPrevious, 0);
               const motoPrice = calculateVehiclePrice("motorbike", totalDistance);
               const car7Price = calculateVehiclePrice("car7", totalDistance);
+              console.log("[JourneyTracker] Selecting state:", { rideLegs: rideLegs.length, totalDistance, motoPrice, car7Price });
               return (
                 <div className="jt-vehicle-available">
                   <div className="jt-vehicle-header">
                     <span className="jt-dot-green" /> Chọn loại xe
                   </div>
-                  <p className="jt-vehicle-sub">Tài xế WanderHUB sẵn sàng đón bạn ngay ({totalDistance.toFixed(1)}km)</p>
+                  <p className="jt-vehicle-sub">
+                    <MapPin size={13} style={{ display: "inline", marginRight: "4px" }} />
+                    {pickupLocation}
+                  </p>
+                  <p className="jt-vehicle-sub" style={{ marginTop: "4px" }}>Tài xế WanderHUB sẵn sàng đón bạn ngay ({totalDistance.toFixed(1)}km)</p>
                   {moto && (
                     <button
                       className="jt-book-btn"
@@ -3230,6 +3244,10 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
               <div className="jt-vehicle-booked">
                 <div className="jt-vehicle-header">
                   <span className="jt-dot-green" /> Tài xế đã xác nhận!
+                </div>
+                <div className="jt-driver-row">
+                  <MapPin size={14} />
+                  <span style={{ fontSize: "13px" }}>{pickupLocation}</span>
                 </div>
                 <div className="jt-driver-row">
                   <Car size={14} />
