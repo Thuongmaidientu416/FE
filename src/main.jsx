@@ -3027,6 +3027,16 @@ const calculateVehiclePrice = (vehicleType, distanceKm) => {
   return Math.round(pricing.basePrice + pricing.pricePerKm * distanceKm);
 };
 
+// Truthful, generic blurb per category for spots without cuisine data
+const CATEGORY_BLURB = {
+  checkin: "Điểm check-in & tham quan — góc chụp ảnh đẹp và không gian đáng ghé.",
+  entertainment: "Khu vui chơi - giải trí năng động, hợp đi nhóm và xả stress.",
+  culture: "Không gian văn hóa - nghệ thuật: lịch sử, kiến trúc và triển lãm.",
+  nightlife: "Tụ điểm về đêm với đồ uống, âm nhạc và không khí sôi động.",
+  cafe_drink: "Quán cà phê / đồ uống lý tưởng để ngồi lại, trò chuyện và nghỉ chân.",
+  food: "Địa điểm ẩm thực đáng thử trong hành trình.",
+};
+
 
 
 function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, setShowQrCode, selectedStops, routeCost, routeDuration, selectedMood, district }) {
@@ -3317,7 +3327,41 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                             {stop.district && <span style={{ fontSize: "10px", background: "#f3f0ff", color: "#6b21a8", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>📍 {stop.district}</span>}
                             {stop.duration_min && <span style={{ fontSize: "10px", background: "#fff7ed", color: "#c96420", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>⏱ {stop.duration_min} phút</span>}
                           </div>
-                          {stop.reason && <div style={{ fontSize: "12px", color: "#888", lineHeight: 1.5, fontStyle: "italic", marginBottom: "4px" }}>"{stop.reason}"</div>}
+
+                          {/* Cuisine + dishes to try (real OSM data) */}
+                          {stop.cuisine && (
+                            <div style={{ fontSize: "12px", color: "#1e4230", fontWeight: "700", marginBottom: "5px" }}>
+                              🍽️ {stop.cuisine}
+                              {stop.must_try?.length > 0 && (
+                                <span style={{ fontWeight: "500", color: "#6b8576" }}> · Món nên thử: {stop.must_try.join(", ")}</span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Generic blurb for non-food spots */}
+                          {!stop.cuisine && CATEGORY_BLURB[stop.category_code] && (
+                            <div style={{ fontSize: "12px", color: "#6b8576", lineHeight: 1.5, marginBottom: "5px" }}>{CATEGORY_BLURB[stop.category_code]}</div>
+                          )}
+
+                          {/* Amenity highlights (real OSM tags) */}
+                          {stop.highlights?.length > 0 && (
+                            <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "6px" }}>
+                              {stop.highlights.map(h => (
+                                <span key={h} style={{ fontSize: "10px", background: "#eef5f0", color: "#2d5a3d", borderRadius: "5px", padding: "2px 7px", fontWeight: "600" }}>{h}</span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Practical info */}
+                          {(stop.opening_hours || stop.address || stop.phone) && (
+                            <div style={{ fontSize: "11px", color: "#999", lineHeight: 1.7, marginBottom: "6px" }}>
+                              {stop.opening_hours && <div>🕐 {stop.opening_hours}</div>}
+                              {stop.address && <div>📍 {stop.address}</div>}
+                              {stop.phone && <div>📞 {stop.phone}</div>}
+                            </div>
+                          )}
+
+                          {stop.reason && <div style={{ fontSize: "12px", color: "#888", lineHeight: 1.5, fontStyle: "italic", marginBottom: "4px" }}>💡 {stop.reason}</div>}
                           {price > 0 && <div style={{ fontSize: "13px", fontWeight: "700", color: "#1e4230" }}>💰 {price.toLocaleString("vi-VN")} VNĐ</div>}
                         </div>
                       </div>
@@ -3334,16 +3378,22 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
               </div>
             </div>
 
-            {/* ── QR code — bottom corner ── */}
-            {itineraryId && (
-              <div style={{ position: "fixed", bottom: "20px", right: "20px", background: "white", borderRadius: "16px", padding: "12px", boxShadow: "0 10px 34px rgba(30,66,48,0.22)", border: "1.5px solid #e0ede5", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", zIndex: 5 }}>
-                <div style={{ background: "white", padding: "4px", borderRadius: "8px" }}>
-                  <QRCodeSVG value={`${window.location.origin}?itinerary=${itineraryId}`} size={104} level="H" includeMargin={false} fgColor="#1e4230" />
-                </div>
-                <div style={{ fontSize: "10px", fontWeight: "700", color: "#2d5a3d", textAlign: "center", lineHeight: 1.3 }}>📱 Quét để lưu<br/>lịch trình</div>
-                <button onClick={() => setShowQrCode(true)} style={{ fontSize: "10px", color: "#c96420", fontWeight: "700", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Phóng to QR</button>
+            {/* ── QR code — bottom corner (always shown) ── */}
+            <div style={{ position: "fixed", bottom: "20px", right: "20px", background: "white", borderRadius: "16px", padding: "14px", boxShadow: "0 10px 34px rgba(30,66,48,0.22)", border: "1.5px solid #e0ede5", display: "flex", flexDirection: "column", alignItems: "center", gap: "7px", zIndex: 5 }}>
+              <div style={{ background: "white", padding: "4px", borderRadius: "8px" }}>
+                <QRCodeSVG
+                  value={itineraryId
+                    ? `${window.location.origin}?itinerary=${itineraryId}`
+                    : `WanderHUB · ${selectedMood?.label || "Lịch trình"} @ ${district?.name || "TP.HCM"} | ${selectedStops.map(s => s.title).join(" → ")}`}
+                  size={116} level="M" includeMargin={false} fgColor="#1e4230" />
               </div>
-            )}
+              <div style={{ fontSize: "10px", fontWeight: "700", color: "#2d5a3d", textAlign: "center", lineHeight: 1.3 }}>
+                📱 Quét để {itineraryId ? "mở & chia sẻ" : "xem"}<br/>lịch trình
+              </div>
+              {itineraryId && (
+                <button onClick={() => setShowQrCode(true)} style={{ fontSize: "10px", color: "#c96420", fontWeight: "700", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Phóng to QR ↗</button>
+              )}
+            </div>
           </div>
         </motion.div>
       )}
@@ -3720,6 +3770,13 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
     latitude: stop.latitude,
     longitude: stop.longitude,
     business_tag: stop.business_tag,
+    cuisine: stop.cuisine,
+    must_try: stop.must_try || [],
+    highlights: stop.highlights || [],
+    address: stop.address,
+    opening_hours: stop.opening_hours,
+    phone: stop.phone,
+    website: stop.website,
   }));
 
   const trackStopInteraction = async (item, eventType, metadata = {}) => {
