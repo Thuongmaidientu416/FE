@@ -60,16 +60,19 @@ def _fetch_user_affinity(conn: sqlite3.Connection, user_id: int | None) -> tuple
 def _fetch_exposure_penalties(conn: sqlite3.Connection) -> dict[int, float]:
     """Penalize providers that have appeared too often in recent recommendations."""
     try:
+        from datetime import datetime, timezone, timedelta
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
         rows = conn.execute(
             """
             SELECT provider_id, COUNT(*) AS exposure_count
             FROM recommendation_logs
             WHERE provider_id IS NOT NULL
-              AND created_at >= datetime('now', '-14 days')
+              AND created_at >= ?
             GROUP BY provider_id
-            """
+            """,
+            (cutoff,)
         ).fetchall()
-    except sqlite3.OperationalError:
+    except Exception:
         return {}
 
     return {
