@@ -4280,14 +4280,28 @@ function App() {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [userPlan, setUserPlan] = useState(null);
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
 
   // Restore session on mount
   useEffect(() => {
-    const token = localStorage.getItem("wanderhub_token");
-    if (!token) return;
-    apiGetMe()
-      .then((profile) => setUser(profile))
-      .catch(() => clearToken());
+    const restoreSession = async () => {
+      const token = localStorage.getItem("wanderhub_token");
+      if (!token) {
+        setIsRestoringSession(false);
+        return;
+      }
+      try {
+        const profile = await apiGetMe();
+        setUser(profile);
+        console.log("[Session] User restored:", profile.email);
+      } catch (err) {
+        console.log("[Session] Token invalid or expired, clearing...");
+        clearToken();
+      } finally {
+        setIsRestoringSession(false);
+      }
+    };
+    restoreSession();
   }, []);
 
   // Sync plan from server whenever user logs in / out
