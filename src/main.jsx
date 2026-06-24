@@ -1959,7 +1959,7 @@ function Home({ user }) {
               <NavLink to={!user ? "/auth" : hasPlan() ? "/planner" : "/pricing"} className="btn px-8 py-4 transition-all font-bold" style={{ backgroundColor: "white", color: "#1e4230", border: "none", boxShadow: "0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15)" }}>
                 Lên lịch trình ngay <ArrowRight size={18} />
               </NavLink>
-              <NavLink to="/explore" className="btn btn-glass text-white border-white/20 hover:bg-white/10 px-8 py-4 backdrop-blur-md">
+              <NavLink to="/explore" className="btn px-8 py-4 transition-all font-bold" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "white", border: "2px solid rgba(255,255,255,0.7)", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
                 Khám phá địa điểm <Compass size={18} />
               </NavLink>
             </div>
