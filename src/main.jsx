@@ -3055,14 +3055,14 @@ const calculateRentalPrice = (vehicleType, duration, unit) => {
 const VEHICLE_IMAGES_FALLBACK = {
   motorbike: {
     vehicle_type: "motorbike",
-    image_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop",
+    image_url: "https://images.unsplash.com/photo-1593618998160-e34014e67546?w=600&h=400&fit=crop",
     description: "Xe máy WanderHUB - Di động, nhanh gọn, phù hợp cho 1-2 người",
     features: "Bình xăng lớn, phanh ABS, đèn LED, bảo hiểm đầy đủ",
     capacity: "1-2 người"
   },
   car7: {
     vehicle_type: "car7",
-    image_url: "https://images.unsplash.com/photo-1605559424843-9e4c3ca4b7f1?w=600&h=400&fit=crop",
+    image_url: "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=600&h=400&fit=crop",
     description: "Xe 7 chỗ WanderHUB - Rộng rãi, thoải mái, tuyệt vời cho nhóm",
     features: "Điều hòa 2 vùng, ghế gập linh hoạt, cửa trượt tự động, WiFi 4G",
     capacity: "5-7 người"
