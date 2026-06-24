@@ -299,8 +299,8 @@ def generate_itinerary(
             if prev_lat is not None and c["latitude"] and c["longitude"]:
                 dist_km = haversine_km(prev_lat, prev_lon, c["latitude"], c["longitude"])
 
-            price_max = c["price_max_vnd"] or 0
-            base_score = c["ai_base_score"] or 50
+            price_max = float(c["price_max_vnd"] or 0)
+            base_score = float(c["ai_base_score"] or 50)
 
             # Apply category boost
             boost = category_boosts.get(c["category_code"], 0)
@@ -321,7 +321,7 @@ def generate_itinerary(
             knn_score = knn_similarity_score(c, intent_vector)
             c["knn_similarity"] = knn_score
             quality_score = adjusted_base
-            score = round((score * 0.40) + (knn_score * 0.45) + (quality_score * 0.15), 2)
+            score = round((score * 0.40) + (float(knn_score) * 0.45) + (float(quality_score) * 0.15), 2)
             scored.append((score, dist_km, c))
 
         # Select a balanced near-top candidate instead of always taking the same top-1.
@@ -336,11 +336,11 @@ def generate_itinerary(
         arrival_h = (arrival_min // 60) % 24
         arrival_m = arrival_min % 60
 
-        duration = best["avg_duration_min"] or 60
-        cost = best["price_max_vnd"] or 0
+        duration = int(best["avg_duration_min"] or 60)
+        cost = int(best["price_max_vnd"] or 0)
         # Use midpoint of price range as estimate
         if best["price_min_vnd"] and best["price_max_vnd"]:
-            cost = (best["price_min_vnd"] + best["price_max_vnd"]) // 2
+            cost = (int(best["price_min_vnd"]) + int(best["price_max_vnd"])) // 2
 
         # Generate reason
         reason = _generate_reason(best, context, rules, best_score)
