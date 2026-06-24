@@ -64,14 +64,15 @@ def generate(
         ).fetchone()
         if plan_row and plan_row["plan_key"] == "basic":
             from datetime import datetime, timezone, timedelta
+            cutoff = (datetime.now(timezone.utc) - timedelta(days=20)).isoformat()
             last_row = conn.execute(
                 """
                 SELECT created_at FROM itineraries
                 WHERE user_id = ?
-                  AND datetime(created_at) > datetime('now', '-20 days')
+                  AND created_at > ?
                 ORDER BY created_at DESC LIMIT 1
                 """,
-                (user_id,),
+                (user_id, cutoff),
             ).fetchone()
             if last_row:
                 last_dt = datetime.fromisoformat(last_row["created_at"])
