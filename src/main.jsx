@@ -3180,7 +3180,12 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
               </div>
             )}
             <button
-              onClick={() => setShowToast(false)}
+              onClick={() => {
+                setShowToast(false);
+                setTimeout(() => {
+                  journeyTrackerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 100);
+              }}
               style={{ width: "100%", padding: "13px", backgroundColor: "#1e4230", color: "white", border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
             >
               Đã hiểu, xem lịch trình
@@ -3478,6 +3483,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
   const [userNote, setUserNote] = useState("");
   const trackedHoverRef = useRef(new Set());
   const didAutoGenerateRef = useRef(false);
+  const journeyTrackerRef = useRef(null);
   // Prefer server-side usage count when user is logged in (userPlan), fallback to localStorage
   const [freeUsageCount, setFreeUsageCount] = useState(() => {
     if (userPlan?.usage_this_month !== undefined) return userPlan.usage_this_month;
@@ -4111,6 +4117,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                 </div>
                 {showRideBooking && rideLegs.length > 0 ? (
                   <>
+                    <div ref={journeyTrackerRef}>
                     <JourneyTracker
                       rideLegs={rideLegs}
                       transport={transport}
@@ -4118,6 +4125,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                       itineraryId={aiResponse?.itinerary_id ?? null}
                       setShowQrCode={setShowQrCode}
                     />
+                    </div>
 
                   </>
                 ) : null}
