@@ -11,6 +11,9 @@ PROJECT_ROOT = BASE_DIR
 SEED_DB_PATH = PROJECT_ROOT / "wanderhub.db"
 DB_PATH = Path("/tmp/wanderhub.db") if (os.getenv("VERCEL") or os.getenv("RENDER")) else SEED_DB_PATH
 
+# ── PostgreSQL (Supabase) ──────────────────────────────────────────
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+
 # ── Auth ───────────────────────────────────────────────────────────
 JWT_SECRET = os.getenv("WANDERHUB_JWT_SECRET", "wanderhub-dev-secret-change-in-prod")
 JWT_ALGORITHM = "HS256"

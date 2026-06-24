@@ -3,9 +3,9 @@ WanderHUB Backend — Itinerary Router (AI Custom Tour Generation)
 """
 
 from __future__ import annotations
+from typing import Any
 import json
 import random
-import sqlite3
 from fastapi import APIRouter, Depends, HTTPException
 
 from database import get_db_dependency
@@ -46,7 +46,7 @@ def _format_duration(minutes: int) -> str:
 def generate(
     body: ItineraryGenerateRequest,
     user_id: int | None = Depends(get_current_user_id),
-    conn: sqlite3.Connection = Depends(get_db_dependency),
+    conn: Any = Depends(get_db_dependency),
 ):
     """
     Core AI endpoint: Generate a custom tour itinerary.
@@ -298,7 +298,7 @@ def generate(
 @router.post("/reroute", response_model=ItineraryResponse)
 def reroute(
     body: RerouteRequest,
-    conn: sqlite3.Connection = Depends(get_db_dependency),
+    conn: Any = Depends(get_db_dependency),
 ):
     """Replace one stop in an itinerary with a similar alternative."""
     if not body.stops:
@@ -391,7 +391,7 @@ def reroute(
 @router.get("/{itinerary_id}")
 def get_itinerary(
     itinerary_id: int,
-    conn: sqlite3.Connection = Depends(get_db_dependency),
+    conn: Any = Depends(get_db_dependency),
 ):
     """Retrieve a saved itinerary."""
     row = conn.execute(
@@ -438,7 +438,7 @@ def submit_feedback(
     itinerary_id: int,
     body: FeedbackRequest,
     user_id: int = Depends(get_current_user_id),
-    conn: sqlite3.Connection = Depends(get_db_dependency),
+    conn: Any = Depends(get_db_dependency),
 ):
     """Submit user feedback for an itinerary."""
     conn.execute(

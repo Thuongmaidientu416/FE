@@ -5,8 +5,8 @@ POST /api/vehicles/book          — book one vehicle (decrement count)
 """
 
 from __future__ import annotations
+from typing import Any
 import random
-import sqlite3
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -39,7 +39,7 @@ MOCK_DRIVERS: dict[str, list[dict]] = {
 }
 
 
-def _get_fleet(conn: sqlite3.Connection) -> VehicleFleetResponse:
+def _get_fleet(conn: Any) -> VehicleFleetResponse:
     rows = conn.execute(
         "SELECT vehicle_type, label, total_count, available_count FROM vehicle_fleet ORDER BY id"
     ).fetchall()
@@ -51,12 +51,12 @@ def _get_fleet(conn: sqlite3.Connection) -> VehicleFleetResponse:
 
 
 @router.get("/availability", response_model=VehicleFleetResponse)
-def get_availability(conn: sqlite3.Connection = Depends(get_db_dependency)):
+def get_availability(conn: Any = Depends(get_db_dependency)):
     return _get_fleet(conn)
 
 
 @router.get("/images/{vehicle_type}")
-def get_vehicle_image(vehicle_type: str, conn: sqlite3.Connection = Depends(get_db_dependency)):
+def get_vehicle_image(vehicle_type: str, conn: Any = Depends(get_db_dependency)):
     """Get vehicle image by type"""
     row = conn.execute(
         "SELECT image_url, description, features, capacity FROM vehicle_images WHERE vehicle_type = ?",
@@ -79,7 +79,7 @@ def get_vehicle_image(vehicle_type: str, conn: sqlite3.Connection = Depends(get_
 def book_vehicle(
     body: VehicleBookRequest,
     user_id: int | None = Depends(get_current_user_id),
-    conn: sqlite3.Connection = Depends(get_db_dependency),
+    conn: Any = Depends(get_db_dependency),
 ):
     if body.vehicle_type not in MOCK_DRIVERS:
         raise HTTPException(status_code=400, detail="Loại xe không hợp lệ.")
