@@ -3148,7 +3148,6 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.55)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center" }}
-          onClick={() => setShowToast(false)}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
@@ -3183,7 +3182,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
               onClick={() => {
                 setShowToast(false);
                 setTimeout(() => {
-                  journeyTrackerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  itineraryPageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }, 100);
               }}
               style={{ width: "100%", padding: "13px", backgroundColor: "#1e4230", color: "white", border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
@@ -3479,11 +3478,13 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
   const [selectedProviderIds, setSelectedProviderIds] = useState(() => new Set());
   const [commercialSuggestions, setCommercialSuggestions] = useState([]);
   const [showRideBooking, setShowRideBooking] = useState(false);
+  const [showItineraryPage, setShowItineraryPage] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
   const [userNote, setUserNote] = useState("");
   const trackedHoverRef = useRef(new Set());
   const didAutoGenerateRef = useRef(false);
   const journeyTrackerRef = useRef(null);
+  const itineraryPageRef = useRef(null);
   // Prefer server-side usage count when user is logged in (userPlan), fallback to localStorage
   const [freeUsageCount, setFreeUsageCount] = useState(() => {
     if (userPlan?.usage_this_month !== undefined) return userPlan.usage_this_month;
@@ -4108,6 +4109,8 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     onClick={() => {
                       selectedStops.forEach((item, index) => trackStopInteraction(item, "save", { step: index + 1, next_stage: transport === "Thuê xe" ? "ride_booking" : "map_view" }));
                       setShowRideBooking(true);
+                      setShowItineraryPage(true);
+                      setTimeout(() => itineraryPageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
                     }}
                   >
                     {transport === "Thuê xe"
@@ -4115,20 +4118,55 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                       : <><MapPin size={16} /> Hoàn tất - Xem bản đồ</>}
                   </button>
                 </div>
-                {showRideBooking && rideLegs.length > 0 ? (
-                  <>
-                    <div ref={journeyTrackerRef}>
-                    <JourneyTracker
-                      rideLegs={rideLegs}
-                      transport={transport}
-                      totalRideMinutes={totalRideMinutes}
-                      itineraryId={aiResponse?.itinerary_id ?? null}
-                      setShowQrCode={setShowQrCode}
-                    />
+                {showItineraryPage && rideLegs.length > 0 && (
+                  <motion.div
+                    ref={itineraryPageRef}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    style={{ marginTop: "24px", borderRadius: "20px", overflow: "hidden", border: "1.5px solid #e2ede7", boxShadow: "0 8px 32px rgba(30,66,48,0.10)" }}
+                  >
+                    {/* ── Header ── */}
+                    <div style={{ background: "linear-gradient(135deg,#1e4230 0%,#2d5a3d 100%)", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div>
+                        <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", color: "rgba(255,255,255,0.6)", textTransform: "uppercase", marginBottom: "4px" }}>Lịch trình của bạn</div>
+                        <div style={{ fontSize: "18px", fontWeight: "800", color: "white" }}>{selectedStops.length} điểm · {transport}</div>
+                      </div>
+                      <button
+                        onClick={() => { setShowItineraryPage(false); setShowRideBooking(false); }}
+                        style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "white" }}
+                      >✕</button>
                     </div>
 
-                  </>
-                ) : null}
+                    {/* ── Stops timeline ── */}
+                    <div style={{ background: "#f9fbf9", padding: "20px 24px", borderBottom: "1px solid #e2ede7" }}>
+                      {selectedStops.map((stop, idx) => (
+                        <div key={stop.provider_id || idx} style={{ display: "flex", gap: "14px", marginBottom: idx < selectedStops.length - 1 ? "0" : "0" }}>
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                            <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#1e4230", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", fontSize: "13px", flexShrink: 0 }}>{idx + 1}</div>
+                            {idx < selectedStops.length - 1 && <div style={{ width: "2px", flex: 1, background: "#c8e0d0", margin: "4px 0", minHeight: "28px" }} />}
+                          </div>
+                          <div style={{ paddingBottom: idx < selectedStops.length - 1 ? "20px" : "0", flex: 1 }}>
+                            <div style={{ fontWeight: "700", fontSize: "14px", color: "#1e4230" }}>{stop.title}</div>
+                            <div style={{ fontSize: "12px", color: "#777", marginTop: "2px" }}>{stop.category || stop.category_code} · {stop.district} · {Number(stop.avg_price_vnd || stop.cost_estimated || 0).toLocaleString("vi-VN")} VNĐ</div>
+                            {stop.arrival_time && <div style={{ fontSize: "11px", color: "#aaa", marginTop: "1px" }}>🕐 {stop.arrival_time} · {stop.duration_min} phút</div>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* ── Journey Tracker (map + booking) ── */}
+                    <div ref={journeyTrackerRef}>
+                      <JourneyTracker
+                        rideLegs={rideLegs}
+                        transport={transport}
+                        totalRideMinutes={totalRideMinutes}
+                        itineraryId={aiResponse?.itinerary_id ?? null}
+                        setShowQrCode={setShowQrCode}
+                      />
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           ) : (
