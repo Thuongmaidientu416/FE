@@ -3029,7 +3029,7 @@ const calculateVehiclePrice = (vehicleType, distanceKm) => {
 
 
 
-function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) {
+function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, setShowQrCode }) {
   const mapContainerRef = useRef(null);
   const leafletInstanceRef = useRef(null);
   const [activeIndex] = useState(0);
@@ -3265,7 +3265,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
                   <span style={{ fontSize: "13px", color: "#666" }}>Giá dự kiến:</span>
                   <span style={{ fontSize: "14px", fontWeight: "bold", color: "#1e4230" }}>{bookedPrice.toLocaleString("vi-VN")} VNĐ</span>
                 </div>
-                {aiResponse?.itinerary_id && (
+                {itineraryId && (
                   <button
                     onClick={() => setShowQrCode(true)}
                     style={{ marginTop: "12px", width: "100%", padding: "10px", borderRadius: "8px", backgroundColor: "#1e4230", color: "white", border: "none", fontWeight: "bold", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
@@ -4034,6 +4034,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     transport={transport}
                     totalRideMinutes={totalRideMinutes}
                     itineraryId={aiResponse?.itinerary_id ?? null}
+                    setShowQrCode={setShowQrCode}
                   />
                 ) : null}
               </div>
