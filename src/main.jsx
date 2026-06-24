@@ -582,7 +582,7 @@ function LaptopMockup() {
         <Sparkles size={16} /> Mood: Deadline Escape
       </motion.div>
       <motion.div className="floating-card card-b" animate={{ y: [10, -12, 10] }} transition={{ duration: 6, repeat: Infinity }}>
-        <Car size={16} /> Tour Guide sẵn sàng
+        <Car size={16} /> Xe sẵn sàng
       </motion.div>
       <motion.div className="floating-card card-c" animate={{ x: [-6, 8, -6] }} transition={{ duration: 5.4, repeat: Infinity }}>
         <Gem size={16} /> Hidden gem unlocked
@@ -3041,7 +3041,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
   const [bookedPrice, setBookedPrice] = useState(0);
   const [vehicleFleet, setVehicleFleet] = useState([]);
 
-  const isRide = transport === "Thuê Tour Guide";
+  const isRide = transport === "Thuê xe";
   const isWalk = transport === "Đi bộ thong thả";
 
   const handleCheckVehicles = async () => {
@@ -3169,13 +3169,13 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId }) 
           })}
 
           <div className="journey-tracker-booking">
-            {/* ── Thuê Tour Guide: hai bước — nhấn đặt xe → chọn loại → xác nhận ── */}
+            {/* ── Thuê xe: hai bước — nhấn đặt xe → chọn loại → xác nhận ── */}
             {isRide && vehicleStatus === "idle" && (
               <div className="jt-vehicle-available">
                 <div className="jt-vehicle-header">
-                  <span className="jt-dot-green" /> Tour Guide & Xe WanderHUB
+                  <span className="jt-dot-green" /> Xe WanderHUB
                 </div>
-                <p className="jt-vehicle-sub">Tài xế kiêm hướng dẫn viên — đặt ngay trong vài giây</p>
+                <p className="jt-vehicle-sub">Đặt xe ngay trong vài giây</p>
                 <input
                   type="text"
                   placeholder="Địa điểm đón khách (vd: Quốc lộ 1A, Bình Thạnh)"
@@ -3376,7 +3376,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
   const [timeSlot, setTimeSlot] = useState(timeOptions[2]);
   const [district, setDistrict] = useState(districtOptions[0]);
   const [interests, setInterests] = useState(["cafe_drink", "food", "checkin"]);
-  const [transport, setTransport] = useState("Thuê Tour Guide");
+  const [transport, setTransport] = useState("Thuê xe");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState("");
   const [showResult, setShowResult] = useState(true);
@@ -3793,7 +3793,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
           <div className="planner-field">
             <div className="planner-field-head"><span>Phương tiện di chuyển</span></div>
             <div className="transport-row">
-              {["Thuê Tour Guide", "Đi bộ thong thả", "Tự lái xe máy"].map((item) => (
+              {["Thuê xe", "Đi bộ thong thả", "Tự lái xe máy"].map((item) => (
                 <button key={item} type="button" className={`transport-chip ${transport === item ? "is-active" : ""}`} onClick={() => setTransport(item)}>
                   <Car size={16} /> {item}
                 </button>
@@ -3881,10 +3881,11 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                 {aiResponse?.itinerary_id && (
                   <button
                     onClick={() => setShowQrCode(true)}
-                    className="icon-btn"
+                    className="btn btn-secondary text-sm flex items-center gap-2"
                     title="Xuất QR code lịch trình"
                   >
-                    <QRCodeSVG size={18} />
+                    <Clipboard size={16} />
+                    Xuất QR
                   </button>
                 )}
               </div>
@@ -3993,7 +3994,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     <small>
                       {selectedStops.length
                         ? selectedStops.map((item) => item.title).slice(0, 3).join(" · ")
-                        : transport === "Thuê Tour Guide"
+                        : transport === "Thuê xe"
                         ? "Tick vào card để tiến hành đặt xe."
                         : "Tick vào card để xem hành trình trên bản đồ."}
                     </small>
@@ -4009,11 +4010,11 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     disabled={!selectedStops.length}
                     className="booking-next-btn"
                     onClick={() => {
-                      selectedStops.forEach((item, index) => trackStopInteraction(item, "save", { step: index + 1, next_stage: transport === "Thuê Tour Guide" ? "ride_booking" : "map_view" }));
+                      selectedStops.forEach((item, index) => trackStopInteraction(item, "save", { step: index + 1, next_stage: transport === "Thuê xe" ? "ride_booking" : "map_view" }));
                       setShowRideBooking(true);
                     }}
                   >
-                    {transport === "Thuê Tour Guide"
+                    {transport === "Thuê xe"
                       ? <><Car size={16} /> Tiếp tục đặt xe</>
                       : <><MapPin size={16} /> Xem bản đồ hành trình</>}
                   </button>
@@ -4049,7 +4050,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     price: "Từ 150.000 VNĐ",
                     rating: "4.9 (1.2k đánh giá)",
                     vibe: "chill",
-                    transport: "Thuê Tour Guide",
+                    transport: "Thuê xe",
                     interests: ["cafe_drink", "food", "checkin"],
                   },
                   {
@@ -4073,7 +4074,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     price: "Từ 350.000 VNĐ",
                     rating: "5.0 (520 đánh giá)",
                     vibe: "foodie",
-                    transport: "Thuê Tour Guide",
+                    transport: "Thuê xe",
                     interests: ["food"],
                   },
                   {
@@ -4085,7 +4086,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     price: "Miễn phí (chỉ trả vé vào cổng)",
                     rating: "4.7 (340 đánh giá)",
                     vibe: "culture",
-                    transport: "Thuê Tour Guide",
+                    transport: "Thuê xe",
                     interests: ["culture", "checkin"],
                   }
                 ].map((promo) => (
