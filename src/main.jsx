@@ -3043,10 +3043,6 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
   const [bookingError, setBookingError] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
-  const [pickupCoords, setPickupCoords] = useState(null);
-  const modalMapRef = useRef(null);
-  const modalMapInstanceRef = useRef(null);
-  const modalDriverMarkerRef = useRef(null);
   const driverMarkerRef = useRef(null);
   const driverIntervalRef = useRef(null);
 
@@ -3077,7 +3073,6 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
         const geo = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`).then(r => r.json());
         if (geo?.[0]) pickupLatLng = [parseFloat(geo[0].lat), parseFloat(geo[0].lon)];
       } catch {}
-      setPickupCoords(pickupLatLng);
       const stopsDistance = rideLegs.reduce((sum, leg) => sum + leg.distanceFromPrevious, 0);
       const pickupDistance = (pickupLatLng && rideLegs[0]?.latitude && rideLegs[0]?.longitude)
         ? calculateDistance({ latitude: pickupLatLng[0], longitude: pickupLatLng[1] }, { latitude: rideLegs[0].latitude, longitude: rideLegs[0].longitude })
@@ -3195,45 +3190,6 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
     };
   }, [rideLegs]);
 
-  useEffect(() => {
-    if (!showItineraryModal || !modalMapRef.current) return;
-    if (modalMapInstanceRef.current) { modalMapInstanceRef.current.remove(); modalMapInstanceRef.current = null; }
-    if (modalDriverMarkerRef.current) { modalDriverMarkerRef.current = null; }
-    const getCoords = (leg, i) => leg.latitude && leg.longitude ? [leg.latitude, leg.longitude] : HCM_FALLBACK_COORDS[i % HCM_FALLBACK_COORDS.length];
-    const coords = rideLegs.map((leg, i) => getCoords(leg, i));
-    const center = coords[0] || [10.7769, 106.7009];
-    const map = L.map(modalMapRef.current, { zoomControl: true, scrollWheelZoom: false }).setView(center, 14);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
-    if (coords.length > 1) L.polyline(coords, { color: "#2d5a3d", weight: 3, dashArray: "6 4", opacity: 0.8 }).addTo(map);
-    coords.forEach((coord, i) => {
-      const icon = L.divIcon({ className: "", html: `<div style="width:28px;height:28px;border-radius:50%;background:${i===0?"#c96420":"#2d5a3d"};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,0.25);border:2px solid #fff">${i+1}</div>`, iconSize: [28,28], iconAnchor: [14,14] });
-      L.marker(coord, { icon }).addTo(map).bindPopup(`<b>${rideLegs[i]?.title || ""}</b>`);
-    });
-    if (coords.length > 1) map.fitBounds(L.latLngBounds(coords), { padding: [32, 32] });
-    // Add driver tracking on modal map when already booked
-    if (vehicleStatus === "booked" && pickupCoords) {
-      const dest = pickupCoords;
-      const pickupIcon = L.divIcon({ className: "", html: `<div style="background:#1e4230;color:white;border-radius:8px;padding:3px 8px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25)">📍 Điểm đón</div>`, iconSize: [90,28], iconAnchor: [45,28] });
-      L.marker(dest, { icon: pickupIcon }).addTo(map);
-      const driverIcon = L.divIcon({ className: "", html: `<div style="background:#c96420;color:white;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.35)">🛵</div>`, iconSize: [34,34], iconAnchor: [17,17] });
-      let mdPos = [dest[0] - 0.006 + Math.random() * 0.003, dest[1] - 0.006 + Math.random() * 0.003];
-      modalDriverMarkerRef.current = L.marker(mdPos, { icon: driverIcon }).addTo(map).bindPopup("Tài xế đang đến điểm đón...").openPopup();
-      map.panTo(dest);
-      const mdInterval = setInterval(() => {
-        mdPos = [mdPos[0] + (dest[0] - mdPos[0]) * 0.13, mdPos[1] + (dest[1] - mdPos[1]) * 0.13];
-        modalDriverMarkerRef.current?.setLatLng(mdPos);
-        if (Math.abs(mdPos[0] - dest[0]) < 0.0002 && Math.abs(mdPos[1] - dest[1]) < 0.0002) {
-          clearInterval(mdInterval);
-          modalDriverMarkerRef.current?.setLatLng(dest).setPopupContent("🎉 Tài xế đã đến điểm đón!").openPopup();
-        }
-      }, 2000);
-      modalMapInstanceRef.current = map;
-      return () => { clearInterval(mdInterval); map.remove(); modalMapInstanceRef.current = null; };
-    }
-    modalMapInstanceRef.current = map;
-    return () => { map.remove(); modalMapInstanceRef.current = null; };
-  }, [showItineraryModal, rideLegs, vehicleStatus, pickupCoords]);
-
   return (
     <>
       {showToast && (
@@ -3299,11 +3255,6 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                 <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", marginTop: "3px" }}>{selectedStops.length} điểm dừng · {routeDuration} · {transport}</div>
               </div>
               <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                {itineraryId && (
-                  <button onClick={() => setShowQrCode(true)} style={{ background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", borderRadius: "10px", padding: "6px 12px", display: "flex", alignItems: "center", gap: "5px", cursor: "pointer", color: "white", fontSize: "12px", fontWeight: "700" }}>
-                    <Clipboard size={13} /> QR
-                  </button>
-                )}
                 <button onClick={() => setShowItineraryModal(false)} style={{ background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: "50%", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "white", fontSize: "15px" }}>✕</button>
               </div>
             </div>
@@ -3317,41 +3268,27 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
             </div>
           </div>
 
-          {/* ── Two-column body ── */}
-          <div style={{ flex: 1, overflow: "hidden", display: "flex", gap: "0" }}>
+          {/* ── Info body (no map) ── */}
+          <div style={{ flex: 1, overflowY: "auto", position: "relative" }}>
+            <div style={{ maxWidth: "620px", margin: "0 auto", padding: "0 0 140px" }}>
 
-            {/* Left: Map */}
-            <div style={{ flex: "1 1 55%", position: "relative", minWidth: 0 }}>
-              <div ref={modalMapRef} style={{ width: "100%", height: "100%" }} />
-              <div style={{ position: "absolute", bottom: "14px", left: "50%", transform: "translateX(-50%)", background: "rgba(30,66,48,0.85)", color: "white", fontSize: "11px", fontWeight: "600", borderRadius: "20px", padding: "5px 14px", backdropFilter: "blur(4px)", pointerEvents: "none", whiteSpace: "nowrap" }}>
-                {rideLegs.length} điểm · {totalRideMinutes} phút di chuyển
-              </div>
-              {vehicleStatus === "booked" && bookedDriver && (
-                <div style={{ position: "absolute", top: "12px", left: "50%", transform: "translateX(-50%)", background: "rgba(201,100,32,0.9)", color: "white", fontSize: "11px", fontWeight: "700", borderRadius: "20px", padding: "5px 14px", backdropFilter: "blur(4px)", pointerEvents: "none", whiteSpace: "nowrap" }}>
-                  🛵 Theo dõi tài xế — ETA ~{bookedDriver.eta_minutes} phút
-                </div>
-              )}
-            </div>
-
-            {/* Right: Timeline */}
-            <div style={{ flex: "0 0 380px", borderLeft: "1px solid #e0ede5", overflowY: "auto", display: "flex", flexDirection: "column" }}>
               {/* Driver info banner when booked */}
               {vehicleStatus === "booked" && bookedDriver && (
-                <div style={{ background: "#1e4230", color: "white", padding: "12px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexShrink: 0 }}>
+                <div style={{ background: "#1e4230", color: "white", padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
                   <div>
                     <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", marginBottom: "2px" }}>Tài xế đã xác nhận</div>
-                    <div style={{ fontSize: "14px", fontWeight: "800" }}>{bookedDriver.name} · ⭐ {bookedDriver.rating}</div>
+                    <div style={{ fontSize: "15px", fontWeight: "800" }}>{bookedDriver.name} · ⭐ {bookedDriver.rating}</div>
                     <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "2px" }}>{bookedDriver.plate} · ETA ~{bookedDriver.eta_minutes} phút</div>
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
                     <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", marginBottom: "2px" }}>Giá xe</div>
-                    <div style={{ fontSize: "17px", fontWeight: "900", color: "#86efac" }}>{bookedPrice.toLocaleString("vi-VN")} VNĐ</div>
+                    <div style={{ fontSize: "18px", fontWeight: "900", color: "#86efac" }}>{bookedPrice.toLocaleString("vi-VN")} VNĐ</div>
                   </div>
                 </div>
               )}
 
               {/* Stop list */}
-              <div style={{ padding: "18px 18px 32px", flex: 1 }}>
+              <div style={{ padding: "22px 22px 0" }}>
                 <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", color: "#aaa", textTransform: "uppercase", marginBottom: "16px" }}>Chi tiết hành trình</div>
                 {selectedStops.map((stop, idx) => {
                   const travelNext = rideLegs[idx + 1]?.travelFromPrevious;
@@ -3365,13 +3302,13 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                         <div style={{ width: "4px", background: isFirst ? "#c96420" : isLast ? "#7c3aed" : "#2d5a3d", flexShrink: 0 }} />
                         {stop.image_url && (
                           <img src={stop.image_url} alt={stop.title} onError={e => { e.currentTarget.style.display = "none"; }}
-                            style={{ width: "88px", height: "88px", objectFit: "cover", flexShrink: 0 }} />
+                            style={{ width: "104px", height: "104px", objectFit: "cover", flexShrink: 0 }} />
                         )}
-                        <div style={{ flex: 1, padding: "12px 14px", minWidth: 0 }}>
+                        <div style={{ flex: 1, padding: "14px 16px", minWidth: 0 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "6px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                               <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: isFirst ? "#c96420" : isLast ? "#7c3aed" : "#2d5a3d", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", fontSize: "11px", flexShrink: 0 }}>{idx + 1}</div>
-                              <div style={{ fontWeight: "800", fontSize: "14px", color: "#1e4230", lineHeight: 1.2 }}>{stop.title}</div>
+                              <div style={{ fontWeight: "800", fontSize: "15px", color: "#1e4230", lineHeight: 1.2 }}>{stop.title}</div>
                             </div>
                             {stop.arrival_time && <div style={{ fontSize: "11px", fontWeight: "700", color: "#2d5a3d", background: "#e8f5e9", borderRadius: "6px", padding: "2px 8px", whiteSpace: "nowrap", flexShrink: 0 }}>🕐 {stop.arrival_time}</div>}
                           </div>
@@ -3380,8 +3317,8 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                             {stop.district && <span style={{ fontSize: "10px", background: "#f3f0ff", color: "#6b21a8", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>📍 {stop.district}</span>}
                             {stop.duration_min && <span style={{ fontSize: "10px", background: "#fff7ed", color: "#c96420", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>⏱ {stop.duration_min} phút</span>}
                           </div>
-                          {stop.reason && <div style={{ fontSize: "11px", color: "#888", lineHeight: 1.5, fontStyle: "italic", marginBottom: "4px" }}>"{stop.reason}"</div>}
-                          {price > 0 && <div style={{ fontSize: "12px", fontWeight: "700", color: "#1e4230" }}>💰 {price.toLocaleString("vi-VN")} VNĐ</div>}
+                          {stop.reason && <div style={{ fontSize: "12px", color: "#888", lineHeight: 1.5, fontStyle: "italic", marginBottom: "4px" }}>"{stop.reason}"</div>}
+                          {price > 0 && <div style={{ fontSize: "13px", fontWeight: "700", color: "#1e4230" }}>💰 {price.toLocaleString("vi-VN")} VNĐ</div>}
                         </div>
                       </div>
                       {/* Travel connector */}
@@ -3396,6 +3333,17 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                 })}
               </div>
             </div>
+
+            {/* ── QR code — bottom corner ── */}
+            {itineraryId && (
+              <div style={{ position: "fixed", bottom: "20px", right: "20px", background: "white", borderRadius: "16px", padding: "12px", boxShadow: "0 10px 34px rgba(30,66,48,0.22)", border: "1.5px solid #e0ede5", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", zIndex: 5 }}>
+                <div style={{ background: "white", padding: "4px", borderRadius: "8px" }}>
+                  <QRCodeSVG value={`${window.location.origin}?itinerary=${itineraryId}`} size={104} level="H" includeMargin={false} fgColor="#1e4230" />
+                </div>
+                <div style={{ fontSize: "10px", fontWeight: "700", color: "#2d5a3d", textAlign: "center", lineHeight: 1.3 }}>📱 Quét để lưu<br/>lịch trình</div>
+                <button onClick={() => setShowQrCode(true)} style={{ fontSize: "10px", color: "#c96420", fontWeight: "700", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Phóng to QR</button>
+              </div>
+            )}
           </div>
         </motion.div>
       )}
