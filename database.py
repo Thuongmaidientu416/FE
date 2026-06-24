@@ -144,6 +144,17 @@ CREATE TABLE IF NOT EXISTS vehicle_bookings (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Vehicle images for display when booking
+CREATE TABLE IF NOT EXISTS vehicle_images (
+    id INTEGER PRIMARY KEY,
+    vehicle_type TEXT NOT NULL UNIQUE,
+    image_url TEXT NOT NULL,
+    description TEXT,
+    features TEXT,
+    capacity TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Keep an audit trail of which recommendations were shown and why.
 CREATE TABLE IF NOT EXISTS recommendation_logs (
     id INTEGER PRIMARY KEY,
@@ -187,6 +198,27 @@ def init_db() -> None:
                 [
                     ("motorbike", "Xe máy WanderHUB", 50, 50),
                     ("car7",      "Xe 7 chỗ WanderHUB", 20, 20),
+                ],
+            )
+        # Seed vehicle images
+        if conn.execute("SELECT COUNT(*) AS cnt FROM vehicle_images").fetchone()["cnt"] == 0:
+            conn.executemany(
+                "INSERT INTO vehicle_images (vehicle_type, image_url, description, features, capacity) VALUES (?, ?, ?, ?, ?)",
+                [
+                    (
+                        "motorbike",
+                        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop",
+                        "Xe máy WanderHUB - Di động, nhanh gọn, phù hợp cho 1-2 người",
+                        "Bình xăng lớn, phanh ABS, đèn LED, bảo hiểm đầy đủ",
+                        "1-2 người"
+                    ),
+                    (
+                        "car7",
+                        "https://images.unsplash.com/photo-1605559424843-9e4c3ca4b7f1?w=600&h=400&fit=crop",
+                        "Xe 7 chỗ WanderHUB - Rộng rãi, thoải mái, tuyệt vời cho nhóm",
+                        "Điều hòa 2 vùng, ghế gập linh hoạt, cửa trượt tự động, WiFi 4G",
+                        "5-7 người"
+                    ),
                 ],
             )
         conn.commit()
