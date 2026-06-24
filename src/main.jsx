@@ -3077,24 +3077,43 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
       setVehicleFleet(result.remaining.fleet ?? []);
       setVehicleStatus("booked");
       setShowToast(true);
-      // Start driver tracking simulation on map
-      if (leafletInstanceRef.current && rideLegs[0]) {
-        const dest = rideLegs[0].latitude && rideLegs[0].longitude
-          ? [rideLegs[0].latitude, rideLegs[0].longitude]
-          : HCM_FALLBACK_COORDS[0];
-        let pos = [dest[0] - 0.008 + Math.random() * 0.004, dest[1] - 0.008 + Math.random() * 0.004];
-        const driverIcon = L.divIcon({ className: "", html: `<div style="background:#c96420;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🛵</div>`, iconSize: [32,32], iconAnchor: [16,16] });
-        if (driverMarkerRef.current) driverMarkerRef.current.remove();
-        driverMarkerRef.current = L.marker(pos, { icon: driverIcon }).addTo(leafletInstanceRef.current).bindPopup("Tài xế đang đến...");
-        if (driverIntervalRef.current) clearInterval(driverIntervalRef.current);
-        driverIntervalRef.current = setInterval(() => {
-          pos = [pos[0] + (dest[0] - pos[0]) * 0.12, pos[1] + (dest[1] - pos[1]) * 0.12];
-          driverMarkerRef.current?.setLatLng(pos);
-          if (Math.abs(pos[0] - dest[0]) < 0.0003 && Math.abs(pos[1] - dest[1]) < 0.0003) {
-            clearInterval(driverIntervalRef.current);
-            driverMarkerRef.current?.setPopupContent("Tài xế đã đến! 🎉").openPopup();
-          }
-        }, 2000);
+      // Start driver tracking: geocode pickup address → animate driver toward it
+      if (leafletInstanceRef.current) {
+        const startTracking = (dest) => {
+          let pos = [dest[0] - 0.007 + Math.random() * 0.004, dest[1] - 0.007 + Math.random() * 0.004];
+          const driverIcon = L.divIcon({ className: "", html: `<div style="background:#c96420;color:white;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.35)">🛵</div>`, iconSize: [34,34], iconAnchor: [17,17] });
+          // Pickup pin marker
+          const pickupIcon = L.divIcon({ className: "", html: `<div style="background:#1e4230;color:white;border-radius:8px;padding:3px 8px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25)">📍 Điểm đón</div>`, iconSize: [90,28], iconAnchor: [45,28] });
+          L.marker(dest, { icon: pickupIcon }).addTo(leafletInstanceRef.current);
+          if (driverMarkerRef.current) driverMarkerRef.current.remove();
+          driverMarkerRef.current = L.marker(pos, { icon: driverIcon }).addTo(leafletInstanceRef.current).bindPopup(`Tài xế đang đến điểm đón...`).openPopup();
+          leafletInstanceRef.current.panTo(dest);
+          if (driverIntervalRef.current) clearInterval(driverIntervalRef.current);
+          driverIntervalRef.current = setInterval(() => {
+            pos = [pos[0] + (dest[0] - pos[0]) * 0.13, pos[1] + (dest[1] - pos[1]) * 0.13];
+            driverMarkerRef.current?.setLatLng(pos);
+            if (Math.abs(pos[0] - dest[0]) < 0.0002 && Math.abs(pos[1] - dest[1]) < 0.0002) {
+              clearInterval(driverIntervalRef.current);
+              driverMarkerRef.current?.setLatLng(dest).setPopupContent("🎉 Tài xế đã đến điểm đón!").openPopup();
+            }
+          }, 2000);
+        };
+        // Geocode pickup address via Nominatim
+        const query = encodeURIComponent(pickupLocation + ", Ho Chi Minh City, Vietnam");
+        fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`)
+          .then(r => r.json())
+          .then(data => {
+            if (data?.[0]) {
+              startTracking([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+            } else {
+              // fallback: use near first stop
+              const fb = rideLegs[0]?.latitude && rideLegs[0]?.longitude
+                ? [rideLegs[0].latitude, rideLegs[0].longitude]
+                : HCM_FALLBACK_COORDS[0];
+              startTracking(fb);
+            }
+          })
+          .catch(() => startTracking(HCM_FALLBACK_COORDS[0]));
       }
     } catch (err) {
       setBookingError(err.message || "Đặt xe thất bại. Vui lòng thử lại.");
