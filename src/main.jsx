@@ -3305,203 +3305,158 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
         </motion.div>
       )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="journey-tracker-panel"
-      >
-      <div className="journey-tracker-inner">
-        <div className="journey-tracker-map-wrap">
-          <div ref={mapContainerRef} />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }}
+        style={{ borderRadius: "20px", overflow: "hidden", border: "1.5px solid #ddeee5", boxShadow: "0 8px 32px rgba(30,66,48,0.10)", background: "white", marginTop: "16px" }}>
+
+        {/* Map */}
+        <div style={{ height: "180px", position: "relative" }}>
+          <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
+          <div style={{ position: "absolute", top: "12px", left: "12px", background: "rgba(30,66,48,0.85)", color: "white", fontSize: "11px", fontWeight: "700", borderRadius: "20px", padding: "4px 12px", backdropFilter: "blur(4px)" }}>
+            🗺 {rideLegs.length} điểm · {totalRideMinutes} phút
+          </div>
         </div>
 
-        <div className="journey-tracker-timeline">
-          <div className="journey-tracker-timeline-head">
-            <strong>Theo dõi hành trình</strong>
-            <small>{rideLegs.length} điểm · {totalRideMinutes} phút di chuyển</small>
-          </div>
-
+        {/* Stops */}
+        <div style={{ padding: "16px 18px 0" }}>
+          <div style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "1.5px", color: "#aaa", textTransform: "uppercase", marginBottom: "12px" }}>Lộ trình</div>
           {rideLegs.map((leg, index) => {
-            const status = index === activeIndex ? "current" : index === activeIndex + 1 ? "next" : "waiting";
+            const isCurrent = index === activeIndex;
+            const isNext = index === activeIndex + 1;
             return (
-              <div key={`tracker-${leg.provider_id || leg.title}-${index}`} className="journey-tracker-leg">
-                <div className={`journey-tracker-pin ${status === "current" ? "is-current" : status === "next" ? "is-next" : "is-waiting"}`}>
-                  {index + 1}
+              <div key={`leg-${index}`} style={{ display: "flex", gap: "0", marginBottom: "0" }}>
+                <div style={{ width: "44px", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: isCurrent ? "#c96420" : isNext ? "#2d5a3d" : "#e8f0eb", color: isCurrent || isNext ? "white" : "#8aaa96", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", fontSize: "12px", flexShrink: 0, border: isCurrent ? "2px solid #f97316" : "none" }}>{index + 1}</div>
+                  {index < rideLegs.length - 1 && <div style={{ width: "2px", height: "28px", background: "#e0ede5", margin: "3px 0" }} />}
                 </div>
-                <div className="journey-tracker-leg-info">
-                  <b>{leg.title}</b>
-                  <small>{leg.time || leg.rideLabel}{index > 0 && leg.travelFromPrevious ? ` · ${leg.travelFromPrevious} phút từ điểm trước` : ""}</small>
+                <div style={{ flex: 1, paddingBottom: index < rideLegs.length - 1 ? "0" : "16px", paddingTop: "4px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontWeight: "700", fontSize: "13px", color: "#1e4230" }}>{leg.title}</div>
+                    <span style={{ fontSize: "10px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px", background: isCurrent ? "#fff3e0" : isNext ? "#e8f5e9" : "#f5f5f5", color: isCurrent ? "#c96420" : isNext ? "#2d5a3d" : "#aaa" }}>
+                      {isCurrent ? "Đang đến" : isNext ? "Tiếp theo" : "Chờ"}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#999", marginTop: "2px", marginBottom: "8px" }}>
+                    {leg.arrival_time || leg.time || leg.rideLabel}{index > 0 && leg.travelFromPrevious ? ` · ${leg.travelFromPrevious} phút từ điểm trước` : ""}
+                  </div>
                 </div>
-                <span className={`journey-tracker-status ${status}`}>
-                  {status === "current" ? "Đang đến" : status === "next" ? "Tiếp theo" : "Chờ"}
-                </span>
               </div>
             );
           })}
-
-          <div className="journey-tracker-booking">
-            {/* ── Thuê xe: hai bước — nhấn đặt xe → chọn loại → xác nhận ── */}
-            {isRide && vehicleStatus === "idle" && (
-              <div className="jt-vehicle-available">
-                <div className="jt-vehicle-header">
-                  <span className="jt-dot-green" /> Xe WanderHUB
-                </div>
-                <p className="jt-vehicle-sub">Đặt xe ngay trong vài giây</p>
-                <label style={{ fontSize: "11px", fontWeight: "600", color: "#666", display: "block", marginBottom: "4px" }}>
-                  Điểm đón <span style={{ color: "#e53e3e" }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Vd: 123 Nguyễn Huệ, Quận 1"
-                  value={pickupLocation}
-                  onChange={(e) => setPickupLocation(e.target.value)}
-                  style={{ borderColor: pickupLocation.trim() === "" ? "#e2e8f0" : "#2d5a3d" }}
-                  className="border rounded-lg p-2 mb-3 w-full text-sm bg-stone-50/50 transition-colors"
-                />
-                <button
-                  className="jt-book-btn"
-                  onClick={handleCheckVehicles}
-                  disabled={!pickupLocation.trim()}
-                  style={{ opacity: !pickupLocation.trim() ? 0.5 : 1, cursor: !pickupLocation.trim() ? "not-allowed" : "pointer" }}
-                >
-                  <Car size={14} /> Kiểm tra xe khả dụng
-                </button>
-              </div>
-            )}
-
-            {isRide && vehicleStatus === "loading" && (
-              <div className="jt-vehicle-check">
-                <div className="jt-spinner" />
-                <span>Đang kiểm tra xe WanderHUB...</span>
-              </div>
-            )}
-
-            {isRide && vehicleStatus === "selecting" && (() => {
-              const moto = vehicleFleet.find(v => v.vehicle_type === "motorbike");
-              const car7 = vehicleFleet.find(v => v.vehicle_type === "car7");
-              const totalDistance = rideLegs.reduce((sum, leg) => sum + leg.distanceFromPrevious, 0);
-              const motoPrice = calculateVehiclePrice("motorbike", totalDistance);
-              const car7Price = calculateVehiclePrice("car7", totalDistance);
-              return (
-                <div className="jt-vehicle-available">
-                  <div className="jt-vehicle-header">
-                    <span className="jt-dot-green" /> Chọn loại xe
-                  </div>
-                  <p className="jt-vehicle-sub" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <MapPin size={13} /> {pickupLocation}
-                  </p>
-                  <p className="jt-vehicle-sub" style={{ marginTop: "4px", color: "#2d5a3d", fontWeight: "600" }}>
-                    ✅ {totalDistance.toFixed(1)}km — Tài xế sẵn sàng
-                  </p>
-                  {bookingError && (
-                    <p style={{ color: "#e53e3e", fontSize: "12px", marginTop: "8px", backgroundColor: "#fff5f5", padding: "8px", borderRadius: "6px", border: "1px solid #fed7d7" }}>
-                      ⚠️ {bookingError}
-                    </p>
-                  )}
-                  {moto && (
-                    <button
-                      className="jt-book-btn"
-                      style={{ marginTop: "8px", opacity: moto.available_count === 0 ? 0.5 : 1 }}
-                      onClick={() => handleBookWanderHub("motorbike")}
-                      disabled={moto.available_count === 0}
-                    >
-                      <Car size={14} />
-                      {moto.available_count === 0 ? "Xe máy — Hết xe" : `Xe máy — ${motoPrice.toLocaleString("vi-VN")} VNĐ`}
-                    </button>
-                  )}
-                  {car7 && (
-                    <button
-                      className="jt-book-btn"
-                      style={{ marginTop: "8px", opacity: car7.available_count === 0 ? 0.5 : 1 }}
-                      onClick={() => handleBookWanderHub("car7")}
-                      disabled={car7.available_count === 0}
-                    >
-                      <Car size={14} />
-                      {car7.available_count === 0 ? "Xe 7 chỗ — Hết xe" : `Xe 7 chỗ — ${car7Price.toLocaleString("vi-VN")} VNĐ`}
-                    </button>
-                  )}
-                </div>
-              );
-            })()}
-
-            {isRide && vehicleStatus === "booking" && (
-              <div className="jt-vehicle-check">
-                <div className="jt-spinner" />
-                <span>Đang xác nhận tài xế...</span>
-              </div>
-            )}
-
-            {isRide && vehicleStatus === "booked" && bookedDriver && (
-              <div className="jt-vehicle-booked">
-                <div className="jt-vehicle-header">
-                  <span className="jt-dot-green" /> Tài xế đã xác nhận!
-                </div>
-                <div className="jt-driver-row">
-                  <MapPin size={14} />
-                  <span style={{ fontSize: "13px" }}>{pickupLocation}</span>
-                </div>
-                <div className="jt-driver-row">
-                  <Car size={14} />
-                  <span><b>{bookedDriver.name}</b> · ⭐ {bookedDriver.rating}</span>
-                </div>
-                <div className="jt-driver-row">
-                  <span className="jt-plate">{bookedDriver.plate}</span>
-                  <span>· đến trong <b>{bookedDriver.eta_minutes} phút</b></span>
-                </div>
-                <p className="jt-vehicle-sub" style={{ marginTop: "6px" }}>{bookedDriver.vehicle_label}</p>
-                <div className="jt-driver-row" style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #f5f5f5", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "13px", color: "#666" }}>Giá dự kiến:</span>
-                  <span style={{ fontSize: "14px", fontWeight: "bold", color: "#1e4230" }}>{bookedPrice.toLocaleString("vi-VN")} VNĐ</span>
-                </div>
-                {itineraryId && (
-                  <button
-                    onClick={() => setShowQrCode(true)}
-                    style={{ marginTop: "12px", width: "100%", padding: "10px", borderRadius: "8px", backgroundColor: "#1e4230", color: "white", border: "none", fontWeight: "bold", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
-                  >
-                    <Clipboard size={16} />
-                    Xuất QR lịch trình
-                  </button>
-                )}
-              </div>
-            )}
-
-            {isRide && vehicleStatus === "unavailable" && (
-              <div className="jt-vehicle-unavailable">
-                <div className="jt-vehicle-header">
-                  <span className="jt-dot-amber" /> Không có xe khả dụng
-                </div>
-                {bookingError
-                  ? <p className="jt-vehicle-sub" style={{ color: "#e53e3e" }}>⚠️ {bookingError}</p>
-                  : <p className="jt-vehicle-sub">Toàn bộ xe WanderHUB hiện đang bận. Vui lòng thử lại sau.</p>
-                }
-                <button
-                  className="jt-book-btn"
-                  style={{ background: "#78716c", marginTop: "8px" }}
-                  onClick={() => { setVehicleStatus("idle"); setBookingError(""); }}
-                >
-                  <Car size={14} /> Quay lại
-                </button>
-              </div>
-            )}
-
-            {/* ── Walk mode: chỉ bản đồ, không có booking ── */}
-            {isWalk && (
-              <div className="journey-tracker-walk-note">
-                Bắt đầu đi bộ và theo dõi tiến độ từng điểm trên bản đồ.
-              </div>
-            )}
-
-            {/* ── Tự lái: bản đồ + note ── */}
-            {!isRide && !isWalk && (
-              <div className="journey-tracker-walk-note">
-                Khởi động xe và theo dõi hành trình trên bản đồ.
-              </div>
-            )}
-          </div>
         </div>
-      </div>
-    </motion.div>
+
+        {/* Booking section */}
+        <div style={{ padding: "0 18px 18px", borderTop: "1px solid #f0f5f2", marginTop: "4px", paddingTop: "16px" }}>
+          {isRide && vehicleStatus === "idle" && (
+            <div>
+              <div style={{ fontSize: "13px", fontWeight: "700", color: "#1e4230", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e", display: "inline-block" }} /> Xe WanderHUB sẵn sàng
+              </div>
+              <div style={{ fontSize: "12px", color: "#888", marginBottom: "12px" }}>Nhập điểm đón để đặt xe ngay</div>
+              <label style={{ fontSize: "11px", fontWeight: "600", color: "#555", display: "block", marginBottom: "5px" }}>Điểm đón <span style={{ color: "#e53e3e" }}>*</span></label>
+              <input type="text" placeholder="Vd: 123 Nguyễn Huệ, Quận 1" value={pickupLocation} onChange={e => setPickupLocation(e.target.value)}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1.5px solid ${pickupLocation.trim() ? "#2d5a3d" : "#dde"}`, fontSize: "13px", outline: "none", marginBottom: "10px", boxSizing: "border-box", background: "#fafcfa" }} />
+              <button onClick={handleCheckVehicles} disabled={!pickupLocation.trim()}
+                style={{ width: "100%", padding: "12px", borderRadius: "12px", background: pickupLocation.trim() ? "#1e4230" : "#ccc", color: "white", border: "none", fontWeight: "700", fontSize: "13px", cursor: pickupLocation.trim() ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                <Car size={15} /> Kiểm tra xe khả dụng
+              </button>
+            </div>
+          )}
+
+          {isRide && (vehicleStatus === "loading" || vehicleStatus === "booking") && (
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px", background: "#f8faf8", borderRadius: "12px" }}>
+              <div className="jt-spinner" />
+              <span style={{ fontSize: "13px", color: "#555", fontWeight: "600" }}>{vehicleStatus === "loading" ? "Đang kiểm tra xe..." : "Đang xác nhận tài xế..."}</span>
+            </div>
+          )}
+
+          {isRide && vehicleStatus === "selecting" && (() => {
+            const moto = vehicleFleet.find(v => v.vehicle_type === "motorbike");
+            const car7 = vehicleFleet.find(v => v.vehicle_type === "car7");
+            const totalDistance = rideLegs.reduce((sum, leg) => sum + leg.distanceFromPrevious, 0);
+            return (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                  <div style={{ fontSize: "13px", fontWeight: "700", color: "#1e4230", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e", display: "inline-block" }} /> Chọn loại xe
+                  </div>
+                  <span style={{ fontSize: "11px", color: "#2d5a3d", fontWeight: "600", background: "#e8f5e9", padding: "2px 10px", borderRadius: "6px" }}>✅ {totalDistance.toFixed(1)} km</span>
+                </div>
+                <div style={{ fontSize: "12px", color: "#888", marginBottom: "12px", display: "flex", alignItems: "center", gap: "4px" }}><MapPin size={12} /> {pickupLocation}</div>
+                {bookingError && <div style={{ fontSize: "12px", color: "#e53e3e", background: "#fff5f5", border: "1px solid #fed7d7", borderRadius: "8px", padding: "8px 12px", marginBottom: "10px" }}>⚠️ {bookingError}</div>}
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {moto && <button onClick={() => handleBookWanderHub("motorbike")} disabled={moto.available_count === 0}
+                    style={{ padding: "12px 16px", borderRadius: "12px", background: moto.available_count === 0 ? "#f5f5f5" : "#1e4230", color: moto.available_count === 0 ? "#aaa" : "white", border: "none", fontWeight: "700", fontSize: "13px", cursor: moto.available_count === 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Car size={15} /> Xe máy</span>
+                    <span>{moto.available_count === 0 ? "Hết xe" : `${calculateVehiclePrice("motorbike", totalDistance).toLocaleString("vi-VN")} VNĐ`}</span>
+                  </button>}
+                  {car7 && <button onClick={() => handleBookWanderHub("car7")} disabled={car7.available_count === 0}
+                    style={{ padding: "12px 16px", borderRadius: "12px", background: car7.available_count === 0 ? "#f5f5f5" : "#2d5a3d", color: car7.available_count === 0 ? "#aaa" : "white", border: "none", fontWeight: "700", fontSize: "13px", cursor: car7.available_count === 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Car size={15} /> Xe 7 chỗ</span>
+                    <span>{car7.available_count === 0 ? "Hết xe" : `${calculateVehiclePrice("car7", totalDistance).toLocaleString("vi-VN")} VNĐ`}</span>
+                  </button>}
+                </div>
+              </div>
+            );
+          })()}
+
+          {isRide && vehicleStatus === "booked" && bookedDriver && (
+            <div style={{ background: "#f0f9f3", borderRadius: "14px", padding: "16px", border: "1.5px solid #c8e6d0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+                <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 0 3px #bbf7d0" }} />
+                <span style={{ fontWeight: "800", fontSize: "14px", color: "#1e4230" }}>Tài xế đã xác nhận!</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "12px", color: "#666", display: "flex", alignItems: "center", gap: "4px" }}><MapPin size={12} /> Điểm đón</span>
+                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#333" }}>{pickupLocation}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "12px", color: "#666" }}>Tài xế</span>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#1e4230" }}>{bookedDriver.name} · ⭐ {bookedDriver.rating}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "12px", color: "#666" }}>Biển số</span>
+                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#1e4230", background: "white", border: "2px solid #1e4230", borderRadius: "6px", padding: "2px 10px", letterSpacing: "1px" }}>{bookedDriver.plate}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "12px", color: "#666" }}>ETA</span>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#c96420" }}>~{bookedDriver.eta_minutes} phút</span>
+                </div>
+                {bookedDriver.vehicle_label && <div style={{ fontSize: "12px", color: "#888" }}>{bookedDriver.vehicle_label}</div>}
+                <div style={{ borderTop: "1px solid #c8e6d0", paddingTop: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "12px", color: "#666" }}>Giá dự kiến</span>
+                  <span style={{ fontSize: "16px", fontWeight: "900", color: "#1e4230" }}>{bookedPrice.toLocaleString("vi-VN")} VNĐ</span>
+                </div>
+              </div>
+              {itineraryId && (
+                <button onClick={() => setShowQrCode(true)}
+                  style={{ marginTop: "14px", width: "100%", padding: "11px", borderRadius: "10px", background: "#1e4230", color: "white", border: "none", fontWeight: "700", fontSize: "13px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                  <Clipboard size={15} /> Xuất QR lịch trình
+                </button>
+              )}
+            </div>
+          )}
+
+          {isRide && vehicleStatus === "unavailable" && (
+            <div style={{ background: "#fffbeb", borderRadius: "12px", padding: "14px", border: "1px solid #fde68a" }}>
+              <div style={{ fontWeight: "700", fontSize: "13px", color: "#92400e", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} /> Không có xe khả dụng
+              </div>
+              <p style={{ fontSize: "12px", color: "#78350f", marginBottom: "12px" }}>{bookingError || "Toàn bộ xe WanderHUB hiện đang bận. Vui lòng thử lại."}</p>
+              <button onClick={() => { setVehicleStatus("idle"); setBookingError(""); }}
+                style={{ padding: "10px 20px", borderRadius: "10px", background: "#1e4230", color: "white", border: "none", fontWeight: "700", fontSize: "13px", cursor: "pointer" }}>
+                Thử lại
+              </button>
+            </div>
+          )}
+
+          {(isWalk || (!isRide && !isWalk)) && (
+            <div style={{ padding: "12px 16px", background: "#f8faf8", borderRadius: "12px", fontSize: "13px", color: "#666" }}>
+              {isWalk ? "🚶 Bắt đầu đi bộ và theo dõi tiến độ từng điểm trên bản đồ." : "🚗 Khởi động xe và theo dõi hành trình trên bản đồ."}
+            </div>
+          )}
+        </div>
+      </motion.div>
     </>
   );
 }
