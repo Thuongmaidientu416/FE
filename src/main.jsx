@@ -4208,7 +4208,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                   </button>
                 </div>
                 {showRideBooking && rideLegs.length > 0 && (
-                  <div ref={journeyTrackerRef}>
+                  <div ref={journeyTrackerRef} style={{ gridColumn: "1 / -1" }}>
                     <JourneyTracker
                       rideLegs={rideLegs}
                       transport={transport}
