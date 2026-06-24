@@ -6,7 +6,9 @@ from __future__ import annotations
 from typing import Any
 import json
 import random
+import traceback
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 
 from database import get_db_dependency
 from models.schemas import (
@@ -42,7 +44,7 @@ def _format_duration(minutes: int) -> str:
     return f"{h}h {m:02d}m"
 
 
-@router.post("/generate", response_model=ItineraryResponse)
+@router.post("/generate")
 def generate(
     body: ItineraryGenerateRequest,
     user_id: int | None = Depends(get_current_user_id),
@@ -56,6 +58,17 @@ def generate(
       Layer 2 (Knowledge Engine) → apply business rules
       Layer 3 (Recommendation Engine) → score & build itinerary
     """
+    try:
+        return _generate_inner(body, user_id, conn)
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[GENERATE ERROR] {type(e).__name__}: {e}")
+        print(traceback.format_exc())
+        return JSONResponse(status_code=500, content={"detail": f"{type(e).__name__}: {str(e)}"})
+
+
+def _generate_inner(body: ItineraryGenerateRequest, user_id, conn):
     # Enforce Basic plan limit: 1 itinerary per 20 days (skip for auto-generated previews)
     if user_id and not body.is_auto_generate:
         plan_row = conn.execute(
