@@ -3029,7 +3029,7 @@ const calculateVehiclePrice = (vehicleType, distanceKm) => {
 
 
 
-function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, setShowQrCode }) {
+function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, setShowQrCode, selectedStops, routeCost, routeDuration, selectedMood, district }) {
   const mapContainerRef = useRef(null);
   const leafletInstanceRef = useRef(null);
   const [activeIndex] = useState(0);
@@ -3042,6 +3042,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
   const [vehicleFleet, setVehicleFleet] = useState([]);
   const [bookingError, setBookingError] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [showItineraryModal, setShowItineraryModal] = useState(false);
 
   const isRide = transport === "Thuê xe";
   const isWalk = transport === "Đi bộ thong thả";
@@ -3555,7 +3556,6 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
   const [selectedProviderIds, setSelectedProviderIds] = useState(() => new Set());
   const [commercialSuggestions, setCommercialSuggestions] = useState([]);
   const [showRideBooking, setShowRideBooking] = useState(false);
-  const [showItineraryModal, setShowItineraryModal] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
   const [userNote, setUserNote] = useState("");
   const trackedHoverRef = useRef(new Set());
@@ -4200,6 +4200,11 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                       totalRideMinutes={totalRideMinutes}
                       itineraryId={aiResponse?.itinerary_id ?? null}
                       setShowQrCode={setShowQrCode}
+                      selectedStops={selectedStops}
+                      routeCost={routeCost}
+                      routeDuration={routeDuration}
+                      selectedMood={selectedMood}
+                      district={district}
                     />
                   </div>
                 )}
