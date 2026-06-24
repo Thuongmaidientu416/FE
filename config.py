@@ -26,12 +26,13 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # ── CORS ──────────────────────────────────────────────────────────
 CORS_ORIGINS = [
-    "http://localhost:5173",   # Vite dev
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:4173",   # Vite preview
+    "http://localhost:4173",
     "http://127.0.0.1:4173",
+    "https://wanderhub416tmdt.vercel.app",
 ]
 
 # ── AI Recommendation defaults ────────────────────────────────────
