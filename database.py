@@ -18,10 +18,18 @@ if _USE_PG:
 
 # ── PostgreSQL row/cursor wrapper (mimics sqlite3 interface) ────────
 
+def _pg_cast(v):
+    """Convert PostgreSQL-specific types to plain Python types."""
+    from decimal import Decimal
+    if isinstance(v, Decimal):
+        return float(v)
+    return v
+
+
 class _PGRow(dict):
     """Dict that also supports row[0] index access like sqlite3.Row."""
     def __init__(self, d):
-        super().__init__(d)
+        super().__init__({k: _pg_cast(v) for k, v in d.items()})
         self._keys_list = list(d.keys())
 
     def __getitem__(self, key):

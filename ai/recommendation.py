@@ -455,10 +455,10 @@ def find_commercial_suggestions(
     for row in rows:
         row["commercial_priority"] = True
         knn_score = knn_similarity_score(row, intent_vector)
-        deal_score = (row.get("deal_viability") or 3) * 20
+        deal_score = float(row.get("deal_viability") or 3) * 20
         district_bonus = 8 if row.get("district_match") else 0
         category_bonus = 5 if row.get("category_match") else 0
-        score = round(knn_score * 0.55 + deal_score * 0.25 + (row.get("ai_base_score") or 50) * 0.15 + district_bonus + category_bonus, 2)
+        score = round(knn_score * 0.55 + deal_score * 0.25 + float(row.get("ai_base_score") or 50) * 0.15 + district_bonus + category_bonus, 2)
         row["knn_similarity"] = knn_score
         row["score"] = min(score, 99.0)
         scored.append((score, row))
