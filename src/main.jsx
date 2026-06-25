@@ -3046,6 +3046,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
   // "idle" | "loading" | "selecting" | "booking" | "booked" | "unavailable"
   const [vehicleStatus, setVehicleStatus] = useState("idle");
   const [pickupLocation, setPickupLocation] = useState("");
+  const [pickupCoords, setPickupCoords] = useState(null);
   const [bookedDriver, setBookedDriver] = useState(null);
   const [bookedVehicleType, setBookedVehicleType] = useState(null);
   const [bookedPrice, setBookedPrice] = useState(0);
@@ -3063,6 +3064,14 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
     setBookingError("");
     setVehicleStatus("loading");
     try {
+      // Geocode pickup (best-effort) so the price reflects distance from điểm đón
+      (async () => {
+        try {
+          const q = encodeURIComponent(pickupLocation + ", Ho Chi Minh City, Vietnam");
+          const geo = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`).then(r => r.json());
+          if (geo?.[0]) setPickupCoords([parseFloat(geo[0].lat), parseFloat(geo[0].lon)]);
+        } catch {}
+      })();
       const data = await apiGetVehicleAvailability();
       setVehicleFleet(data.fleet ?? []);
       setVehicleStatus(data.has_wanderhub ? "selecting" : "unavailable");
@@ -3076,13 +3085,15 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
     setVehicleStatus("booking");
     setBookingError("");
     try {
-      // Geocode pickup to get real distance from pickup → stops
-      let pickupLatLng = null;
-      try {
-        const q = encodeURIComponent(pickupLocation + ", Ho Chi Minh City, Vietnam");
-        const geo = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`).then(r => r.json());
-        if (geo?.[0]) pickupLatLng = [parseFloat(geo[0].lat), parseFloat(geo[0].lon)];
-      } catch {}
+      // Reuse pickup coords geocoded at check time; geocode now as fallback
+      let pickupLatLng = pickupCoords;
+      if (!pickupLatLng) {
+        try {
+          const q = encodeURIComponent(pickupLocation + ", Ho Chi Minh City, Vietnam");
+          const geo = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`).then(r => r.json());
+          if (geo?.[0]) { pickupLatLng = [parseFloat(geo[0].lat), parseFloat(geo[0].lon)]; setPickupCoords(pickupLatLng); }
+        } catch {}
+      }
       const stopsDistance = rideLegs.reduce((sum, leg) => sum + leg.distanceFromPrevious, 0);
       const pickupDistance = (pickupLatLng && rideLegs[0]?.latitude && rideLegs[0]?.longitude)
         ? calculateDistance({ latitude: pickupLatLng[0], longitude: pickupLatLng[1] }, { latitude: rideLegs[0].latitude, longitude: rideLegs[0].longitude })
@@ -3470,7 +3481,11 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
           {isRide && vehicleStatus === "selecting" && (() => {
             const moto = vehicleFleet.find(v => v.vehicle_type === "motorbike");
             const car7 = vehicleFleet.find(v => v.vehicle_type === "car7");
-            const totalDistance = rideLegs.reduce((sum, leg) => sum + leg.distanceFromPrevious, 0);
+            const stopsDistance = rideLegs.reduce((sum, leg) => sum + leg.distanceFromPrevious, 0);
+            const pickupDistance = (pickupCoords && rideLegs[0]?.latitude && rideLegs[0]?.longitude)
+              ? calculateDistance({ latitude: pickupCoords[0], longitude: pickupCoords[1] }, { latitude: rideLegs[0].latitude, longitude: rideLegs[0].longitude })
+              : 1.5;
+            const totalDistance = pickupDistance + stopsDistance;
             return (
               <div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
@@ -3479,6 +3494,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                   </div>
                   <span style={{ fontSize: "11px", color: "#2d5a3d", fontWeight: "600", background: "#e8f5e9", padding: "2px 10px", borderRadius: "6px" }}>✅ {totalDistance.toFixed(1)} km</span>
                 </div>
+                <div style={{ fontSize: "11px", color: "#aaa", marginBottom: "8px" }}>Gồm {pickupDistance.toFixed(1)} km từ điểm đón + {stopsDistance.toFixed(1)} km giữa các điểm</div>
                 <div style={{ fontSize: "12px", color: "#888", marginBottom: "12px", display: "flex", alignItems: "center", gap: "4px" }}><MapPin size={12} /> {pickupLocation}</div>
                 {bookingError && <div style={{ fontSize: "12px", color: "#e53e3e", background: "#fff5f5", border: "1px solid #fed7d7", borderRadius: "8px", padding: "8px 12px", marginBottom: "10px" }}>⚠️ {bookingError}</div>}
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -3822,8 +3838,17 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
     trackStopInteraction(item, nextSelected ? "choose" : "dislike", { step: index + 1 });
   };
 
-  const selectedStops = routeStops.filter((item) => isStopSelected(item));
-  const rideStops = selectedStops.slice(0, 3);
+  // Selected stops = chosen items from the main route AND from partner suggestions
+  const selectedStops = (() => {
+    const seen = new Set();
+    return [...routeStops, ...commercialSuggestions].filter((item) => {
+      const key = item.provider_id || item.title;
+      if (!isStopSelected(item) || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  })();
+  const rideStops = selectedStops;
   const rideLegs = useMemo(() => {
     const estimateMinutes = (from, to) => {
       const dist = calculateDistance(from, to);
