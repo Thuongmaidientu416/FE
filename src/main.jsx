@@ -3478,6 +3478,8 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
             </div>
           )}
 
+
+
           {isRide && vehicleStatus === "selecting" && (() => {
             const moto = vehicleFleet.find(v => v.vehicle_type === "motorbike");
             const car7 = vehicleFleet.find(v => v.vehicle_type === "car7");
@@ -3543,9 +3545,9 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                 </div>
               </div>
               {itineraryId && (
-                <button onClick={() => setShowQrCode(true)}
+                <button onClick={() => setShowItineraryModal(true)}
                   style={{ marginTop: "14px", width: "100%", padding: "11px", borderRadius: "10px", background: "#1e4230", color: "white", border: "none", fontWeight: "700", fontSize: "13px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                  <Clipboard size={15} /> Xuất QR lịch trình
+                  <Clipboard size={15} /> Xuất lịch trình
                 </button>
               )}
             </div>
