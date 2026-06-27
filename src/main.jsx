@@ -1357,7 +1357,7 @@ const csQuickReplies = [
 function FloatingChatBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { from: "ai", text: "Xin chào! Tôi là WanderBot của WanderHUB. \n\nTôi ở đây để diễn giải các đề xuất điểm đến, hỗ trợ điều chỉnh hành trình và giải đáp thông tin dịch vụ (CSKH) cho bạn. Tôi có thể giúp gì cho bạn hôm nay?" }
+    { from: "ai", text: "Xin chào! Tôi là WanderBot của WanderHUB. \n\nTôi ở đây để giải đáp các thắc mắc dịch vụ, hỗ trợ các vấn đề phát sinh (CSKH) và giới thiệu thông tin hữu ích về các địa điểm cho bạn. Tôi có thể giúp gì cho bạn hôm nay?" }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
