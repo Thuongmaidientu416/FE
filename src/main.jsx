@@ -499,8 +499,8 @@ function Footer({ user }) {
           <div className="mb-3 font-semibold text-[#1e4230]">Liên hệ</div>
           <p>Địa chỉ: Thủ Đức, TP.HCM</p>
           <p>Hotline: 1900-0905</p>
-          <p>Facebook: WanderHUB</p>
-          <p>Instagram: Bổ sung sau</p>
+          <p>Email: <a href="mailto:wanderhub.team.sg@gmail.com" className="hover:underline">wanderhub.team.sg@gmail.com</a></p>
+          <p>Facebook: <a href="https://www.facebook.com/wanderhub.team.sg" target="_blank" rel="noopener noreferrer" className="hover:underline">WanderHUB Team</a></p>
         </div>
         <div className="grid gap-2 text-sm">
           <NavLink to="/faq" className="text-[#3d2b1a]/62 hover:text-cyan">FAQ</NavLink>
@@ -2753,8 +2753,8 @@ function Contact() {
         <Reveal className="glass-panel">
           <div className="contact-row"><MapPin /> Thủ Đức, TP.HCM</div>
           <div className="contact-row"><Phone /> 1900-0905</div>
-          <div className="contact-row"><Facebook /> WanderHUB</div>
-          <div className="contact-row"><Instagram /> wanderhub.premium</div>
+          <div className="contact-row"><Mail /> <a href="mailto:wanderhub.team.sg@gmail.com" className="hover:underline">wanderhub.team.sg@gmail.com</a></div>
+          <div className="contact-row"><Facebook /> <a href="https://www.facebook.com/wanderhub.team.sg" target="_blank" rel="noopener noreferrer" className="hover:underline">WanderHUB Team</a></div>
         </Reveal>
         <Reveal className="glass-panel">
           {status && (
