@@ -20,6 +20,7 @@ from routers.auth import get_current_user_id
 from ai.data_engine import get_user_context
 from ai.knowledge_engine import apply_rules
 from ai.recommendation import generate_itinerary, find_commercial_suggestions, find_replacement
+from utils.place_details import fetch_place_details
 
 router = APIRouter(prefix="/api/itinerary", tags=["itinerary"])
 
@@ -228,6 +229,16 @@ def generate(
         limit=2,
     )
 
+    # Enrich every stop with truthful OSM detail (cuisine, dishes, amenities, hours, address)
+    detail_map = fetch_place_details(
+        conn,
+        [s["provider_id"] for s in stops_data] + [s["provider_id"] for s in commercial_data],
+    )
+    for s in stops_data:
+        s.update(detail_map.get(s["provider_id"], {}))
+    for s in commercial_data:
+        s.update(detail_map.get(s["provider_id"], {}))
+
     # Build response
     response_stops = [
         ItineraryStop(
@@ -252,6 +263,13 @@ def generate(
             score=s.get("score"),
             knn_similarity=s.get("knn_similarity"),
             business_tag=s.get("business_tag"),
+            cuisine=s.get("cuisine"),
+            must_try=s.get("must_try") or [],
+            highlights=s.get("highlights") or [],
+            address=s.get("address"),
+            opening_hours=s.get("opening_hours"),
+            phone=s.get("phone"),
+            website=s.get("website"),
         )
         for s in stops_data
     ]
@@ -278,6 +296,13 @@ def generate(
             score=s.get("score"),
             knn_similarity=s.get("knn_similarity"),
             business_tag=s.get("business_tag"),
+            cuisine=s.get("cuisine"),
+            must_try=s.get("must_try") or [],
+            highlights=s.get("highlights") or [],
+            address=s.get("address"),
+            opening_hours=s.get("opening_hours"),
+            phone=s.get("phone"),
+            website=s.get("website"),
         )
         for s in commercial_data
     ]
@@ -428,8 +453,20 @@ def get_itinerary(
         (itinerary_id,),
     ).fetchall()
 
+    # Enrich stops with OSM details
+    provider_ids = [s["provider_id"] for s in stops]
+    detail_map = fetch_place_details(conn, provider_ids)
+    
+    formatted_stops = []
+    for s in stops:
+        stop_dict = dict(s)
+        stop_dict.update(detail_map.get(s["provider_id"], {}))
+        formatted_stops.append(stop_dict)
+
     itinerary = dict(row)
-    itinerary["stops"] = [dict(s) for s in stops]
+    itinerary["stops"] = formatted_stops
+    itinerary["total_cost"] = _format_cost(row["total_cost_estimated"])
+    itinerary["total_duration"] = _format_duration(row["total_duration_min"])
     return itinerary
 
 

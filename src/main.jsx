@@ -51,7 +51,7 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import { processUserMessage } from "./ai-llm/index";
-import { apiLogin, apiRegister, apiGenerateItinerary, apiRerouteItinerary, apiSubmitContact, apiTrackInteraction, apiSelectPlan, apiGetMyPlan, apiGetMe, apiGetVehicleAvailability, apiGetVehicleImage, apiBookVehicle, clearToken, setToken } from "./api";
+import { apiLogin, apiRegister, apiGenerateItinerary, apiRerouteItinerary, apiSubmitContact, apiTrackInteraction, apiSelectPlan, apiGetMyPlan, apiGetMe, apiGetVehicleAvailability, apiGetVehicleImage, apiBookVehicle, apiGetItinerary, clearToken, setToken } from "./api";
 
 const navItems = [
   ["Trang chủ", "/"],
@@ -3395,7 +3395,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
               <div style={{ background: "white", padding: "4px", borderRadius: "8px" }}>
                 <QRCodeSVG
                   value={itineraryId
-                    ? `${window.location.origin}?itinerary=${itineraryId}`
+                    ? `${window.location.origin}/planner?itinerary=${itineraryId}`
                     : `WanderHUB · ${selectedMood?.label || "Lịch trình"} @ ${district?.name || "TP.HCM"} | ${selectedStops.map(s => s.title).join(" → ")}`}
                   size={116} level="M" includeMargin={false} fgColor="#1e4230" />
               </div>
@@ -3600,6 +3600,7 @@ function getFreeUsageData() {
 }
 
 function PlannerV2({ userPlan = null, setUserPlan = null }) {
+  const location = useLocation();
   const moodOptions = [
     { code: "chill", label: "Chill", hint: "Cafe, dạo phố, nhịp nhẹ", icon: Coffee },
     { code: "date", label: "Hẹn hò", hint: "Đẹp, riêng tư, ven sông", icon: Sparkles },
@@ -3867,6 +3868,87 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
   const totalRideMinutes = rideLegs.reduce((sum, stop) => sum + stop.travelFromPrevious, 0);
 
 
+  const loadSavedItinerary = async (id) => {
+    setIsGenerating(true);
+    setGenerationStep("Đang tải lịch trình đã chia sẻ...");
+    setShowResult(false);
+    try {
+      const result = await apiGetItinerary(id);
+      
+      const mappedResponse = {
+        itinerary_id: result.id,
+        session_id: null,
+        title: result.title,
+        mood: result.mood_code,
+        total_cost: result.total_cost || "0 VNĐ",
+        total_duration: result.total_duration || "0m",
+        transport: result.transport_mode || "Be / Xanh SM",
+        stops: (result.stops || []).map((s) => ({
+          step: s.step,
+          provider_id: s.provider_id,
+          title: s.title,
+          district: s.district,
+          category: s.category,
+          category_code: s.category_code,
+          role: s.role,
+          arrival_time: s.arrival_time,
+          duration_min: s.duration_min,
+          cost_estimated: s.cost_estimated,
+          avg_price_vnd: s.cost_estimated,
+          reason: s.reason,
+          image_url: s.image_url,
+          latitude: s.latitude,
+          longitude: s.longitude,
+          cuisine: s.cuisine,
+          must_try: s.must_try || [],
+          highlights: s.highlights || [],
+          address: s.address,
+          opening_hours: s.opening_hours,
+          phone: s.phone,
+          website: s.website,
+        })),
+        commercial_suggestions: []
+      };
+
+      setAiResponse(mappedResponse);
+      
+      const formattedStops = mapStops(mappedResponse.stops);
+      setRouteStops(formattedStops);
+      
+      const providerIds = new Set(formattedStops.map(s => s.provider_id || s.title));
+      setSelectedProviderIds(providerIds);
+
+      setRouteCost(mappedResponse.total_cost);
+      setRouteDuration(mappedResponse.total_duration);
+      
+      if (mappedResponse.mood) {
+        setVibe(mappedResponse.mood);
+      }
+      
+      if (result.district_preference) {
+        const matchingDistrict = districtOptions.find(d => d.name === result.district_preference || d.backend === districtOptions.find(opt => opt.backend === result.district_preference)?.backend);
+        const targetDistrict = matchingDistrict || districtOptions.find(d => d.name === result.district_preference || d.backend === result.district_preference);
+        if (targetDistrict) {
+          setDistrict(targetDistrict);
+        }
+      }
+
+      if (result.transport_mode) {
+        setTransport(result.transport_mode);
+      }
+
+      setCommercialSuggestions([]);
+      setShowRideBooking(true);
+      setIsGenerating(false);
+      setShowResult(true);
+    } catch (err) {
+      console.error("Failed to load itinerary", err);
+      setIsGenerating(false);
+      alert("Không thể tải lịch trình. Vui lòng kiểm tra lại đường dẫn chia sẻ.");
+    }
+  };
+
+
   const handleGenerate = async (isAutoGenerate = false) => {
     if (!isAutoGenerate && limitReached) return;
 
@@ -3971,11 +4053,17 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
 
   const navigate = useNavigate();
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const itineraryId = params.get("itinerary");
+    if (itineraryId) {
+      loadSavedItinerary(itineraryId);
+      return;
+    }
     if (!localStorage.getItem("wh_selected_plan")) {
       navigate("/pricing", { replace: true });
       return;
     }
-  }, []);
+  }, [location.search]);
 
   const reroute = async () => {
     if (aiResponse?.stops?.length) {
@@ -4466,7 +4554,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
               <div id={`qr-${aiResponse.itinerary_id}`} style={{ backgroundColor: "white", padding: "12px", borderRadius: "12px" }}>
                 <QRCodeSVG
-                  value={`${window.location.origin}?itinerary=${aiResponse.itinerary_id}`}
+                  value={`${window.location.origin}/planner?itinerary=${aiResponse.itinerary_id}`}
                   size={280}
                   level="H"
                   includeMargin={true}
@@ -4606,9 +4694,19 @@ function Reviews() {
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [userPlan, setUserPlan] = useState(null);
   const [isRestoringSession, setIsRestoringSession] = useState(true);
+
+  // Redirect to planner if itinerary query param is present (e.g. from scanned QR)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const itineraryId = params.get("itinerary");
+    if (itineraryId && location.pathname !== "/planner") {
+      navigate(`/planner?itinerary=${itineraryId}`, { replace: true });
+    }
+  }, [location.pathname, location.search, navigate]);
 
   // Restore session on mount
   useEffect(() => {
