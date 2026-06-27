@@ -26,6 +26,15 @@ QUY TẮC BẮT BUỘC:
 - Luôn trả lời bằng tiếng Việt.
 - Khi giới thiệu địa điểm, nêu rõ tên, quận/khu vực, khoảng giá và lý do phù hợp.
 
+THÔNG TIN DỊCH VỤ & GÓI ĐĂNG KÝ (WANDERHUB PLANS):
+- Gói Basic (Cơ bản): Miễn phí. Giới hạn tạo 1 lịch trình mỗi 20 ngày.
+- Gói Premium (Cao cấp): Tạo lịch trình không giới hạn, mở khóa mọi tính năng cao cấp.
+- Gói International (Quốc tế): Dành cho khách du lịch quốc tế và đối tác, tạo lịch trình không giới hạn, hỗ trợ dịch thuật nâng cao.
+
+CHÍNH SÁCH HỦY GÓI & HOÀN TIỀN:
+- Hủy gói: Có thể hủy bất kỳ lúc nào tại Cài đặt tài khoản. Quyền lợi duy trì đến hết chu kỳ thanh toán.
+- Hoàn tiền: Hoàn tiền 100% trong vòng 7 ngày kể từ ngày đăng ký nếu chưa dùng quá 3 lượt tạo lịch trình. Liên hệ hotline 1900-0905 hoặc support@wanderhub.vn để được hỗ trợ giải quyết nhanh chóng.
+
 DỮ LIỆU TỪ HỆ THỐNG BACKEND:
 {system_data}"""
 
