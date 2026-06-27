@@ -192,7 +192,7 @@ def init_db() -> None:
         conn.commit()
     finally:
         conn.close()
-    print(f"[DB] Schema + seed applied to {DB_PATH}")
+    print("[DB] Schema + seed applied successfully.")
 
 
 @contextmanager
