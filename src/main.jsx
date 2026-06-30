@@ -3919,7 +3919,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                   <div>
                     <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", marginBottom: "2px" }}>{t("modal.driver.confirmed")}</div>
                     <div style={{ fontSize: "15px", fontWeight: "800" }}>{bookedDriver.name} · ⭐ {bookedDriver.rating}</div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "2px" }}>{bookedDriver.plate} · ETA ~{bookedDriver.eta_minutes} phút</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "2px" }}>{bookedDriver.plate} · ETA ~{bookedDriver.eta_minutes} {isEn ? "min" : "phút"}</div>
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
                     <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", marginBottom: "2px" }}>{t("modal.driver.fare")}</div>
@@ -3969,7 +3969,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
 
                             <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
                               {stop.district && <span style={{ fontSize: "10px", background: "#f3f0ff", color: "#6b21a8", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>📍 {stop.district}</span>}
-                              {stop.duration_min && <span style={{ fontSize: "10px", background: "#fff7ed", color: "#c96420", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>⏱ {stop.duration_min} phút</span>}
+                              {stop.duration_min && <span style={{ fontSize: "10px", background: "#fff7ed", color: "#c96420", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>⏱ {stop.duration_min} {isEn ? "min" : "phút"}</span>}
                             </div>
 
                             {stop.cuisine && (
@@ -3978,8 +3978,8 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                                 {stop.must_try?.length > 0 && <span style={{ fontWeight: "500", color: "#6b8576" }}> · {stop.must_try.join(", ")}</span>}
                               </div>
                             )}
-                            {!stop.cuisine && CATEGORY_BLURB[stop.category_code] && (
-                              <div style={{ fontSize: "12px", color: "#6b8576", lineHeight: 1.5 }}>{CATEGORY_BLURB[stop.category_code]}</div>
+                            {!stop.cuisine && (CATEGORY_BLURB[stop.category_code] || LOCAL_TIPS_BLURB[stop.category_code]) && (
+                              <div style={{ fontSize: "12px", color: "#6b8576", lineHeight: 1.5 }}>{isEn ? LOCAL_TIPS_BLURB[stop.category_code] : CATEGORY_BLURB[stop.category_code]}</div>
                             )}
 
                             {stop.highlights?.length > 0 && (
@@ -4009,7 +4009,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                         {!isLast && travelNext && (
                           <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: "10px", padding: "0 4px" }}>
                             <div style={{ flex: 1, height: "1px", background: "#ddeee5" }} />
-                            <div style={{ fontSize: "11px", color: "#7aaa8e", fontWeight: "600", background: "#f0f7f2", borderRadius: "8px", padding: "4px 14px", border: "1px dashed #b8d8c4", whiteSpace: "nowrap" }}>🚗 ~{travelNext} phút di chuyển</div>
+                            <div style={{ fontSize: "11px", color: "#7aaa8e", fontWeight: "600", background: "#f0f7f2", borderRadius: "8px", padding: "4px 14px", border: "1px dashed #b8d8c4", whiteSpace: "nowrap" }}>🚗 ~{travelNext} {isEn ? "min travel" : "phút di chuyển"}</div>
                             <div style={{ flex: 1, height: "1px", background: "#ddeee5" }} />
                           </div>
                         )}
@@ -5004,24 +5004,24 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                         <small>{item.district || district.name}</small>
                       </div>
                       <div className="recommendation-metrics">
-                        <span><Wallet size={14} /> Giá TB {Number(item.avg_price_vnd || item.cost_estimated || 0).toLocaleString("vi-VN")} VNĐ</span>
-                        {item.duration_min ? <span><Clock3 size={14} /> {item.duration_min} phút</span> : null}
+                        <span><Wallet size={14} /> {isEn ? "Avg." : "Giá TB"} {Number(item.avg_price_vnd || item.cost_estimated || 0).toLocaleString("vi-VN")} VNĐ</span>
+                        {item.duration_min ? <span><Clock3 size={14} /> {item.duration_min} {isEn ? "min" : "phút"}</span> : null}
                         <span><Sparkles size={14} /> {Math.round(item.score || 88)}/100</span>
                       </div>
                       <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
-                        <Clock3 size={10} /> Thời gian đề xuất: {
+                        <Clock3 size={10} /> {isEn ? "Suggested time:" : "Thời gian đề xuất:"} {
                           (item.category || "").toLowerCase().includes("ăn") || (item.category || "").toLowerCase().includes("food") || (item.category || "").toLowerCase().includes("nhà hàng")
-                            ? "20-60 phút"
+                            ? isEn ? "20-60 min" : "20-60 phút"
                             : (item.category || "").toLowerCase().includes("cafe") || (item.category || "").toLowerCase().includes("uống")
-                            ? "30-45 phút"
+                            ? isEn ? "30-45 min" : "30-45 phút"
                             : (item.category || "").toLowerCase().includes("nightlife") || (item.category || "").toLowerCase().includes("bar")
-                            ? "60-120 phút"
+                            ? isEn ? "60-120 min" : "60-120 phút"
                             : (item.category || "").toLowerCase().includes("check-in") || (item.category || "").toLowerCase().includes("tham quan")
-                            ? "20-40 phút"
-                            : "30-60 phút"
+                            ? isEn ? "20-40 min" : "20-40 phút"
+                            : isEn ? "30-60 min" : "30-60 phút"
                         }
                       </div>
-                      <small className="recommendation-reason">{item.reason || "Đề xuất vì khớp mood, cùng khu vực ưu tiên và giúp route ít lặp trải nghiệm."}</small>
+                      <small className="recommendation-reason">{item.reason || (isEn ? "Recommended based on your mood, preferred area, and route variety." : "Đề xuất vì khớp mood, cùng khu vực ưu tiên và giúp route ít lặp trải nghiệm.")}</small>
                       <button
                         type="button"
                         className={`recommendation-check-row ${isStopSelected(item) ? "is-checked" : ""}`}
@@ -5032,7 +5032,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                         }}
                       >
                         <span className="recommendation-checkbox">{isStopSelected(item) ? <Check size={14} /> : null}</span>
-                        <span>{isStopSelected(item) ? "Đã thêm vào hành trình" : "Chọn điểm này"}</span>
+                        <span>{isStopSelected(item) ? (isEn ? "Added to itinerary" : "Đã thêm vào hành trình") : (isEn ? "Select this stop" : "Chọn điểm này")}</span>
                       </button>
                     </div>
                   </motion.div>
@@ -5041,10 +5041,10 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                   <div className="commercial-suggestion-panel">
                     <div className="commercial-suggestion-head">
                       <div>
-                        <strong>✨ Ngoài ra, có thể bạn quan tâm</strong>
-                        <small>Được đề xuất từ đối tác mới — không nằm trong tuyến AI chính.</small>
+                        <strong>✨ {isEn ? "You might also like" : "Ngoài ra, có thể bạn quan tâm"}</strong>
+                        <small>{isEn ? "Suggested by new partners — not part of the main AI route." : "Được đề xuất từ đối tác mới — không nằm trong tuyến AI chính."}</small>
                       </div>
-                      <span>Đối tác</span>
+                      <span>{isEn ? "Partner" : "Đối tác"}</span>
                     </div>
                     <div className="commercial-suggestion-grid">
                       {commercialSuggestions.map((item, index) => (
@@ -5066,7 +5066,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                             <b>{item.title}</b>
                             <small>{item.category || "Hidden gem"} · {Number(item.avg_price_vnd || item.cost_estimated || 0).toLocaleString("vi-VN")} VNĐ</small>
                           </span>
-                          <i>{isStopSelected(item) ? "Đã chọn" : "Thêm"}</i>
+                          <i>{isStopSelected(item) ? (isEn ? "Added" : "Đã chọn") : (isEn ? "Add" : "Thêm")}</i>
                         </button>
                       ))}
                     </div>
