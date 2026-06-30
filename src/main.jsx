@@ -4183,20 +4183,21 @@ function getFreeUsageData() {
 }
 
 function PlannerV2({ userPlan = null, setUserPlan = null }) {
+  const { t, isEn } = useT();
   const location = useLocation();
   const moodOptions = [
-    { code: "chill", label: "Chill", hint: "Cafe, dạo phố, nhịp nhẹ", icon: Coffee },
-    { code: "date", label: "Hẹn hò", hint: "Đẹp, riêng tư, ven sông", icon: Sparkles },
-    { code: "group", label: "Đi nhóm", hint: "Rộng rãi, vui, dễ tụ tập", icon: Headphones },
-    { code: "foodie", label: "Foodie", hint: "Ăn ngon, local, must-try", icon: Utensils },
-    { code: "nightlife", label: "Nightlife", hint: "Bar, phố đêm, city lights", icon: Star },
-    { code: "culture", label: "Văn hóa", hint: "Bảo tàng, phố cũ, nghệ thuật", icon: BadgeCheck },
-    { code: "checkin", label: "Check-in", hint: "Ảnh đẹp, landmark, view", icon: Camera },
-    { code: "hidden_gem", label: "Hidden gem", hint: "Ngóc ngách ít người biết", icon: Gem },
-    { code: "healing", label: "Healing", hint: "Yên tĩnh, xanh, hồi phục", icon: Compass },
-    { code: "premium", label: "Premium", hint: "Rooftop, fine dining, sang", icon: ShieldCheck },
-    { code: "budget", label: "Tiết kiệm", hint: "Vừa túi tiền, nhiều giá trị", icon: Wallet },
-    { code: "solo", label: "Solo", hint: "Tự do, dễ đi một mình", icon: Navigation },
+    { code: "chill",      label: "Chill",                hint: t("mood.chill.hint"),      icon: Coffee },
+    { code: "date",       label: t("mood.date.label"),   hint: t("mood.date.hint"),       icon: Sparkles },
+    { code: "group",      label: t("mood.group.label"),  hint: t("mood.group.hint"),      icon: Headphones },
+    { code: "foodie",     label: "Foodie",               hint: t("mood.foodie.hint"),     icon: Utensils },
+    { code: "nightlife",  label: "Nightlife",            hint: t("mood.nightlife.hint"),  icon: Star },
+    { code: "culture",    label: t("mood.culture.label"), hint: t("mood.culture.hint"),   icon: BadgeCheck },
+    { code: "checkin",    label: t("mood.checkin.label"), hint: t("mood.checkin.hint"),   icon: Camera },
+    { code: "hidden_gem", label: "Hidden Gem",           hint: t("mood.hidden_gem.hint"), icon: Gem },
+    { code: "healing",    label: "Healing",              hint: t("mood.healing.hint"),    icon: Compass },
+    { code: "premium",    label: "Premium",              hint: t("mood.premium.hint"),    icon: ShieldCheck },
+    { code: "budget",     label: t("mood.budget.label"), hint: t("mood.budget.hint"),     icon: Wallet },
+    { code: "solo",       label: "Solo",                 hint: t("mood.solo.hint"),       icon: Navigation },
   ];
 
   const districtOptions = [
@@ -4211,27 +4212,27 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
   ];
 
   const budgetOptions = [
-    { label: "Tiết kiệm", value: 200000, display: "150K - 200K" },
-    { label: "Vừa đẹp", value: 500000, display: "300K - 500K" },
-    { label: "Thoải mái", value: 800000, display: "500K - 800K" },
-    { label: "Không giới hạn", value: 1200000, display: "Premium" },
+    { label: t("budget.save"),      value: 200000,  display: "150K - 200K" },
+    { label: t("budget.mid"),       value: 500000,  display: "300K - 500K" },
+    { label: t("budget.comfort"),   value: 800000,  display: "500K - 800K" },
+    { label: t("budget.unlimited"), value: 1200000, display: "Premium" },
   ];
 
   const timeOptions = [
-    { label: "Sáng nhẹ", start: "08:30", end: "11:30", hint: "Cafe + check-in" },
-    { label: "Trưa chiều", start: "13:30", end: "17:30", hint: "Indoor + văn hóa" },
-    { label: "Sau giờ làm", start: "18:30", end: "22:00", hint: "Ăn tối + dạo phố" },
-    { label: "Đêm Sài Gòn", start: "20:00", end: "23:30", hint: "Nightlife + ăn khuya" },
-    { label: "Nửa ngày", start: "15:00", end: "22:00", hint: "4-5 điểm dừng" },
+    { label: t("time.morning"),   start: "08:30", end: "11:30", hint: t("time.morning.hint") },
+    { label: t("time.afternoon"), start: "13:30", end: "17:30", hint: t("time.afternoon.hint") },
+    { label: t("time.afterwork"), start: "18:30", end: "22:00", hint: t("time.afterwork.hint") },
+    { label: t("time.night"),     start: "20:00", end: "23:30", hint: t("time.night.hint") },
+    { label: t("time.halfday"),   start: "15:00", end: "22:00", hint: t("time.halfday.hint") },
   ];
 
   const interestOptions = [
-    { code: "checkin", label: "Chụp hình", icon: Camera },
-    { code: "cafe_drink", label: "Uống cafe", icon: Coffee },
-    { code: "food", label: "Trải nghiệm ẩm thực", icon: Utensils },
-    { code: "culture", label: "Văn hóa", icon: BadgeCheck },
-    { code: "nightlife", label: "Phố đêm", icon: Star },
-    { code: "entertainment", label: "Hoạt động vui chơi", icon: Sparkles },
+    { code: "checkin",       label: t("interest.checkin"),       icon: Camera },
+    { code: "cafe_drink",    label: t("interest.cafe"),          icon: Coffee },
+    { code: "food",          label: t("interest.food"),          icon: Utensils },
+    { code: "culture",       label: t("interest.culture"),       icon: BadgeCheck },
+    { code: "nightlife",     label: t("interest.nightlife"),     icon: Star },
+    { code: "entertainment", label: t("interest.entertainment"), icon: Sparkles },
   ];
 
   const [vibe, setVibe] = useState("chill");
@@ -4695,7 +4696,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
         <Reveal className="planner-panel planner-control-panel">
           <div className="planner-field">
             <div className="planner-field-head">
-              <span>Mood / Vibe</span>
+              <span>{t("planner.mood.label")}</span>
               <small>Theo bảng moods trong database</small>
             </div>
             <div className="choice-grid mood-choice-grid">
@@ -4711,7 +4712,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
 
           <div className="planner-field">
             <div className="planner-field-head">
-              <span>Khu vực Sài Gòn</span>
+              <span>{t("planner.district.label")}</span>
               <small>Chạm để chọn quận, không cần gõ</small>
             </div>
             <div className="district-grid">
@@ -4726,7 +4727,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
 
           <div className="planner-two-col">
             <div className="planner-field">
-              <div className="planner-field-head"><span>Ngân sách</span></div>
+              <div className="planner-field-head"><span>{t("planner.budget.label")}</span></div>
               <div className="segmented-stack">
                 {budgetOptions.map((item) => (
                   <button key={item.label} type="button" className={`segment-btn ${budget.label === item.label ? "is-active" : ""}`} onClick={() => setBudget(item)}>
@@ -4738,7 +4739,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
             </div>
 
             <div className="planner-field">
-              <div className="planner-field-head"><span>Thời gian tối ưu</span></div>
+              <div className="planner-field-head"><span>{t("planner.time.label")}</span></div>
               <div className="segmented-stack">
                 {timeOptions.map((item) => (
                   <button key={item.label} type="button" className={`segment-btn ${timeSlot.label === item.label ? "is-active" : ""}`} onClick={() => setTimeSlot(item)}>
@@ -4752,7 +4753,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
 
           <div className="planner-field">
             <div className="planner-field-head">
-              <span>Mình muốn ưu tiên</span>
+              <span>{t("planner.interests.label")}</span>
               <small>Checkbox chọn nhiều mục để cá nhân hóa route</small>
             </div>
             <div className="interest-grid">
@@ -4770,7 +4771,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
           </div>
 
           <div className="planner-field">
-            <div className="planner-field-head"><span>Phương tiện di chuyển</span></div>
+            <div className="planner-field-head"><span>{t("planner.transport.label")}</span></div>
             <div className="transport-row">
               {["Thuê xe", "Đi bộ thong thả", "Tự lái xe máy"].map((item) => (
                 <button key={item} type="button" className={`transport-chip ${transport === item ? "is-active" : ""}`} onClick={() => setTransport(item)}>
@@ -4783,13 +4784,13 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
 
           <div className="planner-field">
             <div className="planner-field-head">
-              <span>Ghi chú / Yêu cầu đặc biệt</span>
-              <small>Note cho tài xế hoặc yêu cầu riêng</small>
+              <span>{t("planner.note.label")}</span>
+              <small>{t("planner.note.small")}</small>
             </div>
             <textarea
               value={userNote}
               onChange={(e) => setUserNote(e.target.value)}
-              placeholder="Ví dụ: Chuẩn bị dù vì có thể mưa, cần ghế cho em bé, dị ứng hải sản..."
+              placeholder={t("planner.note.placeholder")}
               rows={3}
               className="w-full border border-stone-200 rounded-xl p-3 bg-stone-50/50 text-sm resize-none focus:border-[#2d5a3d] focus:ring-1 focus:ring-[#2d5a3d]/20"
             />
@@ -4801,33 +4802,33 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
             disabled={isGenerating || limitReached}
             className="btn btn-primary w-full justify-center mt-2"
           >
-            {isGenerating ? "Đang xử lý..." : "Lên lịch trình AI"}
+            {isGenerating ? t("planner.generating") : t("planner.btn.generate")}
             <Sparkles size={18} />
           </button>
           {isBasicPlan && !limitReached && (
             <p className="text-xs text-center text-stone-400 mt-2">
-              Gói <strong>Basic</strong>: còn <strong>{monthlyLimit - freeUsageCount}</strong>/{monthlyLimit} lượt — chu kỳ {FREE_PERIOD_DAYS} ngày
+              {t("planner.basic.remaining")
+                .replace("{remaining}", monthlyLimit - freeUsageCount)
+                .replace("{limit}", monthlyLimit)
+                .replace("{days}", FREE_PERIOD_DAYS)}
             </p>
           )}
           {!isBasicPlan && (
             <p className="text-xs text-center text-stone-400 mt-2">
-              Gói <strong>{userPlan?.plan_name}</strong>: tạo lịch trình không giới hạn
+              {t("planner.unlimited").replace("{plan}", userPlan?.plan_name)}
             </p>
           )}
           {limitReached && (
             <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-center text-sm">
-              <p className="font-semibold text-amber-700">Đã dùng lượt miễn phí trong chu kỳ này.</p>
+              <p className="font-semibold text-amber-700">{t("planner.limit.title")}</p>
               {userPlan?.period_reset_at && (
                 <p className="text-amber-600 mt-1">
-                  Reset sau{" "}
-                  <strong>
-                    {Math.max(1, Math.ceil((new Date(userPlan.period_reset_at) - Date.now()) / 86400000))} ngày
-                  </strong>
+                  {t("planner.limit.reset").replace("{days}", Math.max(1, Math.ceil((new Date(userPlan.period_reset_at) - Date.now()) / 86400000)))}
                 </p>
               )}
-              <p className="text-amber-500 text-xs mt-1">Hoặc nâng cấp Premium để tạo không giới hạn.</p>
+              <p className="text-amber-500 text-xs mt-1">{t("planner.limit.upgrade")}</p>
               <NavLink to="/pricing" className="btn btn-primary mt-3 w-full justify-center text-sm">
-                Xem gói Premium <ChevronRight size={14} />
+                {t("planner.limit.cta")} <ChevronRight size={14} />
               </NavLink>
             </div>
           )}
@@ -4838,7 +4839,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
             <div className="flex flex-col items-center justify-center min-h-[350px] gap-6 text-center">
               <div className="w-12 h-12 border-4 border-[#2d5a3d] border-t-transparent rounded-full animate-spin"></div>
               <div>
-                <h4 className="font-bold text-[#1e4230] text-lg">Đang tính toán...</h4>
+                <h4 className="font-bold text-[#1e4230] text-lg">{t("planner.loading.title")}</h4>
                 <p className="text-sm text-stone-500 mt-2">{generationStep}</p>
               </div>
             </div>
@@ -4846,7 +4847,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="serif-h text-2xl text-[#1e4230]">Tuyến đường AI khuyên dùng</h2>
+                  <h2 className="serif-h text-2xl text-[#1e4230]">{t("planner.result.title")}</h2>
                   <p className="planner-result-context">{selectedMood.label} · {district.name} · {selectedInterests}</p>
                 </div>
                 <button id="planner-btn-reroute" onClick={reroute} className="icon-btn" aria-label="Re-route"><RefreshCcw size={18} /></button>
@@ -4864,7 +4865,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
                     title="Xuất QR code lịch trình"
                   >
                     <Clipboard size={16} />
-                    Xuất QR
+                    {t("planner.export.qr")}
                   </button>
                 )}
               </div>
