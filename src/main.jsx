@@ -5627,6 +5627,30 @@ function AdminDashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [updatingUserId, setUpdatingUserId] = useState(null);
+  const [locationSubTab, setLocationSubTab] = useState("places"); // "places" | "partners"
+  const [locationModal, setLocationModal] = useState(null); // null | { mode: "add" | "edit-tips", data: {} }
+  const [contentModal, setContentModal] = useState(null); // null | { mode: "add" | "edit", data: {} }
+
+  const [places, setPlaces] = useState([
+    { id: 1, name: "Secret Garden Rooftop", category: "cafe_drink", district: "Quận 3", status: "active", tips_blurb: "A Vietnamese café on a rooftop apartment.", tips_customs: "Sit as long as you like.", tips_phrase: "Cho tôi một ly cà phê sữa đá" },
+    { id: 2, name: "Ốc Đào Q1", category: "food", district: "Quận 1", status: "active", tips_blurb: "Legendary street seafood spot.", tips_customs: "Point at what others are eating.", tips_phrase: "Cho tôi xem thực đơn" },
+    { id: 3, name: "Bến Bạch Đằng", category: "checkin", district: "Quận 1", status: "active", tips_blurb: "Riverside promenade with Landmark 81 views.", tips_customs: "Great at dusk — arrive by 5:30 PM.", tips_phrase: "Đẹp quá!" },
+    { id: 4, name: "Araham Coffee", category: "cafe_drink", district: "Quận 1", status: "hidden", tips_blurb: "Multi-floor specialty coffee house.", tips_customs: "Upper floors have the best views.", tips_phrase: "Cho tôi một ly bạc xỉu" },
+  ]);
+
+  const [partners, setPartners] = useState([
+    { id: 1, name: "SOBO Coffee", category: "cafe_drink", weight: 8, status: "active" },
+    { id: 2, name: "Hana Sinh Tố", category: "food", weight: 6, status: "active" },
+    { id: 3, name: "Landmark 81 Skybar", category: "nightlife", weight: 9, status: "active" },
+    { id: 4, name: "Xanh SM Electric", category: "transport", weight: 10, status: "active" },
+  ]);
+
+  const [articles, setArticles] = useState([
+    { id: 1, title: "POV: Sài Gòn lúc 6 giờ sáng", vibe: "chill", status: "published", image_url: "", content: "Buổi sáng sớm...", publish_at: "2026-06-15T06:00" },
+    { id: 2, title: "Tuyến Ăn Đêm Q4 Chuẩn Vị", vibe: "foodie", status: "published", image_url: "", content: "Bắt đầu từ...", publish_at: "2026-06-20T19:00" },
+    { id: 3, title: "Date Chill Ven Sông – Golden Hour Guide", vibe: "romantic", status: "draft", image_url: "", content: "Draft...", publish_at: "" },
+  ]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -5707,7 +5731,9 @@ function AdminDashboard({ user }) {
               { id: "users", label: "Người dùng", icon: CommunityIcon },
               { id: "itineraries", label: "Lịch trình", icon: SmartAIIcon },
               { id: "feedback", label: "Ý kiến & Đánh giá", icon: ReviewsIcon },
-              { id: "contact", label: "Liên hệ / Hỗ trợ", icon: SupportIcon }
+              { id: "contact", label: "Liên hệ / Hỗ trợ", icon: SupportIcon },
+              { id: "locations", label: "Địa điểm & Đối tác", icon: MapPin },
+              { id: "content", label: "Nội dung Khám phá", icon: Gem }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -6043,6 +6069,422 @@ function AdminDashboard({ user }) {
                         <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed">{c.message}</p>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "locations" && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-bold text-[#1e4230]">Địa điểm & Đối tác</h3>
+                  <button
+                    onClick={() => setLocationModal({ mode: locationSubTab === "places" ? "add-place" : "add-partner", data: {} })}
+                    className="btn btn-primary text-sm px-4 py-2"
+                  >
+                    + {locationSubTab === "places" ? "Thêm địa điểm" : "Thêm đối tác"}
+                  </button>
+                </div>
+
+                {/* Sub-tabs */}
+                <div className="flex gap-2">
+                  {[{ id: "places", label: "📍 Địa điểm" }, { id: "partners", label: "🤝 Đối tác thương mại" }].map(st => (
+                    <button
+                      key={st.id}
+                      onClick={() => setLocationSubTab(st.id)}
+                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${locationSubTab === st.id ? "bg-[#2d5a3d] text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"}`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Places table */}
+                {locationSubTab === "places" && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-sm">
+                      <thead>
+                        <tr className="border-b border-stone-200 text-[#5a7a60] font-semibold">
+                          <th className="py-3 px-4">Tên địa điểm</th>
+                          <th className="py-3 px-4">Danh mục</th>
+                          <th className="py-3 px-4">Khu vực</th>
+                          <th className="py-3 px-4">Trạng thái</th>
+                          <th className="py-3 px-4 text-right">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-100">
+                        {places.map(p => (
+                          <tr key={p.id} className="hover:bg-stone-50/40">
+                            <td className="py-3 px-4 font-medium text-stone-800">{p.name}</td>
+                            <td className="py-3 px-4">
+                              <span className="px-2 py-0.5 rounded bg-stone-100 text-stone-600 text-xs font-semibold uppercase">{p.category}</span>
+                            </td>
+                            <td className="py-3 px-4 text-stone-600">{p.district}</td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-0.5 rounded text-xs font-semibold ${p.status === "active" ? "bg-green-100 text-green-700" : "bg-stone-100 text-stone-500"}`}>
+                                {p.status === "active" ? "Hiện" : "Ẩn"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right flex gap-2 justify-end">
+                              <button
+                                onClick={() => setLocationModal({ mode: "edit-tips", data: { ...p } })}
+                                className="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition font-semibold"
+                              >
+                                Local Tips
+                              </button>
+                              <button
+                                onClick={() => setPlaces(prev => prev.map(x => x.id === p.id ? { ...x, status: x.status === "active" ? "hidden" : "active" } : x))}
+                                className="text-xs bg-stone-100 text-stone-700 hover:bg-stone-200 px-3 py-1.5 rounded-lg transition font-semibold"
+                              >
+                                {p.status === "active" ? "Ẩn" : "Hiện"}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Partners table */}
+                {locationSubTab === "partners" && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-sm">
+                      <thead>
+                        <tr className="border-b border-stone-200 text-[#5a7a60] font-semibold">
+                          <th className="py-3 px-4">Tên đối tác</th>
+                          <th className="py-3 px-4">Danh mục</th>
+                          <th className="py-3 px-4">Trọng số ưu tiên</th>
+                          <th className="py-3 px-4">Trạng thái</th>
+                          <th className="py-3 px-4 text-right">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-100">
+                        {partners.map(pt => (
+                          <tr key={pt.id} className="hover:bg-stone-50/40">
+                            <td className="py-3 px-4 font-medium text-stone-800">{pt.name}</td>
+                            <td className="py-3 px-4">
+                              <span className="px-2 py-0.5 rounded bg-stone-100 text-stone-600 text-xs font-semibold uppercase">{pt.category}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="range" min="1" max="10" value={pt.weight}
+                                  onChange={e => setPartners(prev => prev.map(x => x.id === pt.id ? { ...x, weight: Number(e.target.value) } : x))}
+                                  className="w-24 accent-[#2d5a3d]"
+                                />
+                                <span className="text-xs font-bold text-[#2d5a3d] w-4">{pt.weight}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-0.5 rounded text-xs font-semibold ${pt.status === "active" ? "bg-green-100 text-green-700" : "bg-stone-100 text-stone-500"}`}>
+                                {pt.status === "active" ? "Đang hiển thị" : "Tạm ẩn"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <button
+                                onClick={() => setPartners(prev => prev.map(x => x.id === pt.id ? { ...x, status: x.status === "active" ? "hidden" : "active" } : x))}
+                                className="text-xs bg-stone-100 text-stone-700 hover:bg-stone-200 px-3 py-1.5 rounded-lg transition font-semibold"
+                              >
+                                {pt.status === "active" ? "Tạm ẩn" : "Hiện lại"}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Location modal */}
+                {locationModal && (
+                  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setLocationModal(null)}>
+                    <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl" onClick={e => e.stopPropagation()}>
+                      {locationModal.mode === "edit-tips" ? (
+                        <>
+                          <h3 className="text-xl font-bold text-[#1e4230] mb-6">✏️ Local Tips — {locationModal.data.name}</h3>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">What it is (Blurb)</label>
+                              <textarea
+                                rows={2}
+                                value={locationModal.data.tips_blurb || ""}
+                                onChange={e => setLocationModal(prev => ({ ...prev, data: { ...prev.data, tips_blurb: e.target.value } }))}
+                                className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Local Customs</label>
+                              <textarea
+                                rows={2}
+                                value={locationModal.data.tips_customs || ""}
+                                onChange={e => setLocationModal(prev => ({ ...prev, data: { ...prev.data, tips_customs: e.target.value } }))}
+                                className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Useful Phrase (Vietnamese)</label>
+                              <input
+                                type="text"
+                                value={locationModal.data.tips_phrase || ""}
+                                onChange={e => setLocationModal(prev => ({ ...prev, data: { ...prev.data, tips_phrase: e.target.value } }))}
+                                className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-3 mt-6">
+                            <button
+                              onClick={() => {
+                                setPlaces(prev => prev.map(x => x.id === locationModal.data.id ? { ...x, ...locationModal.data } : x));
+                                setLocationModal(null);
+                              }}
+                              className="btn btn-primary flex-1"
+                            >Lưu thay đổi</button>
+                            <button onClick={() => setLocationModal(null)} className="btn btn-ghost flex-1">Hủy</button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-xl font-bold text-[#1e4230] mb-6">
+                            {locationModal.mode === "add-place" ? "➕ Thêm địa điểm mới" : "➕ Thêm đối tác mới"}
+                          </h3>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Tên</label>
+                              <input
+                                type="text"
+                                value={locationModal.data.name || ""}
+                                onChange={e => setLocationModal(prev => ({ ...prev, data: { ...prev.data, name: e.target.value } }))}
+                                placeholder={locationModal.mode === "add-place" ? "Tên địa điểm" : "Tên đối tác"}
+                                className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Danh mục</label>
+                              <select
+                                value={locationModal.data.category || ""}
+                                onChange={e => setLocationModal(prev => ({ ...prev, data: { ...prev.data, category: e.target.value } }))}
+                                className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d] bg-white"
+                              >
+                                <option value="">Chọn danh mục</option>
+                                <option value="cafe_drink">Cafe & Đồ uống</option>
+                                <option value="food">Ẩm thực</option>
+                                <option value="checkin">Check-in & Tham quan</option>
+                                <option value="entertainment">Giải trí</option>
+                                <option value="nightlife">Nightlife</option>
+                                <option value="culture">Văn hóa</option>
+                                {locationModal.mode === "add-partner" && <option value="transport">Vận tải</option>}
+                              </select>
+                            </div>
+                            {locationModal.mode === "add-place" && (
+                              <div>
+                                <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Khu vực</label>
+                                <input
+                                  type="text"
+                                  value={locationModal.data.district || ""}
+                                  onChange={e => setLocationModal(prev => ({ ...prev, data: { ...prev.data, district: e.target.value } }))}
+                                  placeholder="VD: Quận 1"
+                                  className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                                />
+                              </div>
+                            )}
+                            {locationModal.mode === "add-partner" && (
+                              <div>
+                                <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Trọng số ưu tiên (1–10)</label>
+                                <input
+                                  type="number" min="1" max="10"
+                                  value={locationModal.data.weight || 5}
+                                  onChange={e => setLocationModal(prev => ({ ...prev, data: { ...prev.data, weight: Number(e.target.value) } }))}
+                                  className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-3 mt-6">
+                            <button
+                              onClick={() => {
+                                if (!locationModal.data.name) return;
+                                if (locationModal.mode === "add-place") {
+                                  setPlaces(prev => [...prev, { id: Date.now(), status: "active", ...locationModal.data }]);
+                                } else {
+                                  setPartners(prev => [...prev, { id: Date.now(), status: "active", weight: 5, ...locationModal.data }]);
+                                }
+                                setLocationModal(null);
+                              }}
+                              className="btn btn-primary flex-1"
+                            >Thêm</button>
+                            <button onClick={() => setLocationModal(null)} className="btn btn-ghost flex-1">Hủy</button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "content" && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-bold text-[#1e4230]">Nội dung Khám phá</h3>
+                  <button
+                    onClick={() => setContentModal({ mode: "add", data: { title: "", vibe: "chill", status: "draft", image_url: "", content: "", publish_at: "" } })}
+                    className="btn btn-primary text-sm px-4 py-2"
+                  >
+                    + Tạo bài viết
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-stone-200 text-[#5a7a60] font-semibold">
+                        <th className="py-3 px-4">Tiêu đề bài viết</th>
+                        <th className="py-3 px-4">Vibe</th>
+                        <th className="py-3 px-4">Trạng thái</th>
+                        <th className="py-3 px-4">Ngày xuất bản</th>
+                        <th className="py-3 px-4 text-right">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-100">
+                      {articles.map(a => (
+                        <tr key={a.id} className="hover:bg-stone-50/40">
+                          <td className="py-3 px-4 font-medium text-stone-800">{a.title}</td>
+                          <td className="py-3 px-4">
+                            <span className="px-2 py-0.5 rounded bg-cyan/10 text-cyan text-xs font-bold uppercase">{a.vibe}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${a.status === "published" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                              {a.status === "published" ? "Đã xuất bản" : "Bản nháp"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-stone-500">
+                            {a.publish_at ? new Date(a.publish_at).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" }) : "—"}
+                          </td>
+                          <td className="py-3 px-4 text-right flex gap-2 justify-end">
+                            <button
+                              onClick={() => setContentModal({ mode: "edit", data: { ...a } })}
+                              className="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition font-semibold"
+                            >
+                              Chỉnh sửa
+                            </button>
+                            <button
+                              onClick={() => setArticles(prev => prev.map(x => x.id === a.id ? { ...x, status: x.status === "published" ? "draft" : "published" } : x))}
+                              className="text-xs bg-stone-100 text-stone-700 hover:bg-stone-200 px-3 py-1.5 rounded-lg transition font-semibold"
+                            >
+                              {a.status === "published" ? "Gỡ xuống" : "Xuất bản"}
+                            </button>
+                            <button
+                              onClick={() => { if (window.confirm("Xóa bài viết này?")) setArticles(prev => prev.filter(x => x.id !== a.id)); }}
+                              className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg transition font-semibold"
+                            >
+                              Xóa
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Content editor modal */}
+                {contentModal && (
+                  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setContentModal(null)}>
+                    <div className="bg-white rounded-3xl p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                      <h3 className="text-xl font-bold text-[#1e4230] mb-6">
+                        {contentModal.mode === "add" ? "✍️ Tạo bài viết mới" : "✏️ Chỉnh sửa bài viết"}
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Tiêu đề</label>
+                          <input
+                            type="text"
+                            value={contentModal.data.title}
+                            onChange={e => setContentModal(prev => ({ ...prev, data: { ...prev.data, title: e.target.value } }))}
+                            placeholder="POV: Sài Gòn lúc hoàng hôn..."
+                            className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Vibe tag</label>
+                            <select
+                              value={contentModal.data.vibe}
+                              onChange={e => setContentModal(prev => ({ ...prev, data: { ...prev.data, vibe: e.target.value } }))}
+                              className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d] bg-white"
+                            >
+                              <option value="chill">Chill</option>
+                              <option value="romantic">Romantic</option>
+                              <option value="foodie">Foodie</option>
+                              <option value="night-owl">Night Owl</option>
+                              <option value="culture">Culture</option>
+                              <option value="adventure">Adventure</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Trạng thái</label>
+                            <select
+                              value={contentModal.data.status}
+                              onChange={e => setContentModal(prev => ({ ...prev, data: { ...prev.data, status: e.target.value } }))}
+                              className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d] bg-white"
+                            >
+                              <option value="draft">Bản nháp</option>
+                              <option value="published">Xuất bản ngay</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Ảnh bìa (URL)</label>
+                          <input
+                            type="text"
+                            value={contentModal.data.image_url}
+                            onChange={e => setContentModal(prev => ({ ...prev, data: { ...prev.data, image_url: e.target.value } }))}
+                            placeholder="https://..."
+                            className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                          />
+                          {contentModal.data.image_url && (
+                            <img src={contentModal.data.image_url} alt="preview" className="mt-2 w-full h-32 object-cover rounded-xl" onError={e => e.currentTarget.style.display = "none"} />
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Nội dung</label>
+                          <textarea
+                            rows={8}
+                            value={contentModal.data.content}
+                            onChange={e => setContentModal(prev => ({ ...prev, data: { ...prev.data, content: e.target.value } }))}
+                            placeholder="Viết nội dung bài viết tại đây... (hỗ trợ **in đậm**, *nghiêng*)"
+                            className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d] font-mono resize-y"
+                          />
+                          <p className="text-[10px] text-stone-400 mt-1">Hỗ trợ Markdown cơ bản: **in đậm**, *nghiêng*, # Tiêu đề</p>
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">Lên lịch xuất bản</label>
+                          <input
+                            type="datetime-local"
+                            value={contentModal.data.publish_at}
+                            onChange={e => setContentModal(prev => ({ ...prev, data: { ...prev.data, publish_at: e.target.value } }))}
+                            className="w-full border border-stone-200 rounded-xl p-3 text-sm outline-none focus:border-[#2d5a3d]"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => {
+                            if (!contentModal.data.title) return;
+                            if (contentModal.mode === "add") {
+                              setArticles(prev => [...prev, { id: Date.now(), ...contentModal.data }]);
+                            } else {
+                              setArticles(prev => prev.map(x => x.id === contentModal.data.id ? contentModal.data : x));
+                            }
+                            setContentModal(null);
+                          }}
+                          className="btn btn-primary flex-1"
+                        >
+                          {contentModal.mode === "add" ? "Tạo bài viết" : "Lưu thay đổi"}
+                        </button>
+                        <button onClick={() => setContentModal(null)} className="btn btn-ghost flex-1">Hủy</button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
