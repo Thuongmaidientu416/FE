@@ -3641,6 +3641,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
   const [bookingError, setBookingError] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("itinerary");
   const driverMarkerRef = useRef(null);
   const driverIntervalRef = useRef(null);
 
@@ -3874,6 +3875,31 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                 <span style={{ background: "rgba(201,100,32,0.7)", border: "1px solid rgba(201,100,32,0.5)", borderRadius: "20px", padding: "3px 11px", fontSize: "11px", color: "white", fontWeight: "700" }}>🛵 Tài xế đang đến</span>
               )}
             </div>
+            {isEn && (
+              <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.1)", marginTop: "8px" }}>
+                {["itinerary", "tips"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    style={{
+                      flex: 1,
+                      padding: "10px 0",
+                      fontSize: "13px",
+                      fontWeight: "700",
+                      color: activeTab === tab ? "white" : "rgba(255,255,255,0.45)",
+                      background: "none",
+                      border: "none",
+                      borderBottom: activeTab === tab ? "2px solid #c96420" : "2px solid transparent",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      letterSpacing: "0.3px",
+                    }}
+                  >
+                    {tab === "itinerary" ? t("modal.tab.itinerary") : t("modal.tab.tips")}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ── Info body (no map) ── */}
@@ -3896,6 +3922,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
               )}
 
               {/* Stop list — card grid */}
+              {(!isEn || activeTab === "itinerary") && (
               <div style={{ padding: "22px" }}>
                 <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", color: "#aaa", textTransform: "uppercase", marginBottom: "16px" }}>{t("modal.trip.detail")}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px" }}>
@@ -3984,6 +4011,59 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                   })}
                 </div>
               </div>
+              )}
+
+              {isEn && activeTab === "tips" && (
+                <div style={{ padding: "22px", display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {selectedStops.map((stop, idx) => {
+                    const catCode = stop.category_code || "food";
+                    const phrase = LOCAL_PHRASES[catCode];
+                    return (
+                      <div key={stop.provider_id || idx} style={{ background: "white", borderRadius: "20px", overflow: "hidden", border: "1px solid #e8f0eb", boxShadow: "0 2px 10px rgba(30,66,48,0.06)" }}>
+                        <div style={{ background: "linear-gradient(135deg, #1e4230, #2d5a3d)", padding: "14px 18px", display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "rgba(255,255,255,0.15)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", fontSize: "12px", flexShrink: 0 }}>{idx + 1}</div>
+                          <div style={{ fontWeight: "800", fontSize: "15px", color: "white" }}>{stop.title}</div>
+                          {stop.category && (
+                            <div style={{ marginLeft: "auto", background: "rgba(255,255,255,0.15)", borderRadius: "12px", padding: "2px 10px", fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,0.85)", textTransform: "uppercase" }}>{stop.category}</div>
+                          )}
+                        </div>
+                        <div style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                          {LOCAL_TIPS_BLURB[catCode] && (
+                            <div>
+                              <div style={{ fontSize: "10px", fontWeight: "700", color: "#c96420", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>What it is</div>
+                              <div style={{ fontSize: "13px", color: "#4a6552", lineHeight: 1.6 }}>{LOCAL_TIPS_BLURB[catCode]}</div>
+                            </div>
+                          )}
+                          {LOCAL_CUSTOMS[catCode] && (
+                            <div>
+                              <div style={{ fontSize: "10px", fontWeight: "700", color: "#2d5a3d", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Local Customs</div>
+                              <div style={{ fontSize: "13px", color: "#4a6552", lineHeight: 1.6 }}>💡 {LOCAL_CUSTOMS[catCode]}</div>
+                            </div>
+                          )}
+                          {(stop.must_try?.length > 0 || stop.cuisine) && (
+                            <div>
+                              <div style={{ fontSize: "10px", fontWeight: "700", color: "#7c3aed", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Must Try</div>
+                              <div style={{ fontSize: "13px", color: "#4a6552", lineHeight: 1.6 }}>
+                                {stop.cuisine && <span>🍽️ {stop.cuisine}</span>}
+                                {stop.must_try?.length > 0 && <span> · {stop.must_try.join(", ")}</span>}
+                              </div>
+                            </div>
+                          )}
+                          {phrase && (
+                            <div style={{ background: "#f0f7f2", borderRadius: "12px", padding: "12px 14px" }}>
+                              <div style={{ fontSize: "10px", fontWeight: "700", color: "#2d5a3d", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Useful Phrase</div>
+                              <div style={{ fontSize: "14px", fontWeight: "700", color: "#1e4230", marginBottom: "2px" }}>"{phrase.vi}"</div>
+                              <div style={{ fontSize: "12px", color: "#7aaa8e", fontStyle: "italic", marginBottom: "4px" }}>/{phrase.roman}/</div>
+                              <div style={{ fontSize: "12px", color: "#555", fontWeight: "600" }}>{phrase.en}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
             </div>
 
             {/* ── QR code — bottom corner (always shown) ── */}
