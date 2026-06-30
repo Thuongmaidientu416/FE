@@ -326,13 +326,13 @@ const SupportIcon = ({ className, active }) => (
   </svg>
 );
 
-const navItems = [
-  ["Trang chủ", "/"],
-  ["Về WanderHUB", "/about"],
-  ["Khám phá", "/explore"],
-  ["Gói dịch vụ", "/pricing"],
-  ["Đánh giá", "/reviews"],
-  ["Liên hệ", "/contact"],
+const NAV_ITEMS = [
+  { key: "nav.home",    href: "/" },
+  { key: "nav.about",   href: "/about" },
+  { key: "nav.explore", href: "/explore" },
+  { key: "nav.pricing", href: "/pricing" },
+  { key: "nav.reviews", href: "/reviews" },
+  { key: "nav.contact", href: "/contact" },
 ];
 
 const TRANSLATIONS = {
@@ -921,15 +921,19 @@ const PLAN_BADGE_STYLES = {
 };
 
 function Navbar({ user, userPlan, onLogout }) {
+  const { t } = useT();
   const [open, setOpen] = useState(false);
-  const displayedNavItems = user ? [...navItems, ["Lịch sử", "/history"]] : navItems;
+
+  const displayedNavItems = user
+    ? [...NAV_ITEMS, { key: "nav.history", href: "/history" }]
+    : NAV_ITEMS.filter(({ href }) => href !== "/pricing");
 
   return (
     <header className="site-nav fixed left-4 right-4 top-4 z-50">
       <div className="nav-glass mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo />
         <nav className="hidden items-center gap-7 lg:flex">
-          {displayedNavItems.map(([label, href]) => (
+          {displayedNavItems.map(({ key, href }) => (
             <NavLink
               id={`nav-link-${href.replace("/", "") || "home"}`}
               key={href}
@@ -938,7 +942,7 @@ function Navbar({ user, userPlan, onLogout }) {
                 `text-sm font-medium transition ${isActive ? "text-cyan" : "text-[#5a7a60] hover:text-[#1e4230]"}`
               }
             >
-              {label}
+              {t(key)}
             </NavLink>
           ))}
         </nav>
@@ -954,24 +958,20 @@ function Navbar({ user, userPlan, onLogout }) {
                   🛡️ Admin Panel
                 </NavLink>
               )}
-              <span className="text-sm font-semibold text-[#1e4230]">Chào, {user.name}!</span>
+              <span className="text-sm font-semibold text-[#1e4230]">{t("nav.hello")}, {user.name}!</span>
               {userPlan && (
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${PLAN_BADGE_STYLES[userPlan.plan_key] || PLAN_BADGE_STYLES.basic}`}>
                   {userPlan.plan_name}
                 </span>
               )}
               <button onClick={onLogout} className="btn btn-ghost">
-                Đăng xuất
+                {t("nav.logout")}
               </button>
             </>
           ) : (
             <>
-              <NavLink id="nav-btn-login" to="/auth" className="btn btn-ghost">
-                Đăng nhập
-              </NavLink>
-              <NavLink id="nav-btn-planner" to={!user ? "/auth" : hasPlan() ? "/planner" : "/pricing"} className="btn btn-primary">
-                Bắt đầu lên lịch trình
-              </NavLink>
+              <NavLink to="/auth" className="btn btn-ghost">{t("nav.login")}</NavLink>
+              <NavLink to="/auth" className="btn btn-primary">{t("nav.start")}</NavLink>
             </>
           )}
         </div>
@@ -982,7 +982,7 @@ function Navbar({ user, userPlan, onLogout }) {
       {open && (
         <div className="nav-mobile mx-auto mt-3 max-w-7xl px-4 py-4 lg:hidden">
           <div className="flex flex-col gap-3">
-            {[...displayedNavItems, ["FAQ", "/faq"], ["Điều khoản", "/terms"]].map(([label, href]) => (
+            {[...displayedNavItems, { key: "FAQ", href: "/faq" }, { key: "footer.terms", href: "/terms" }].map(({ key, href }) => (
               <NavLink
                 id={`nav-mobile-link-${href.replace("/", "")}`}
                 key={href}
@@ -990,7 +990,7 @@ function Navbar({ user, userPlan, onLogout }) {
                 onClick={() => setOpen(false)}
                 className="rounded-xl px-3 py-2 text-[#3d2b1a]/80"
               >
-                {label}
+                {key === "FAQ" ? "FAQ" : t(key)}
               </NavLink>
             ))}
             {user ? (
@@ -1000,18 +1000,18 @@ function Navbar({ user, userPlan, onLogout }) {
                     🛡️ Admin Control
                   </NavLink>
                 )}
-                <span className="px-3 py-2 text-sm font-semibold text-[#1e4230]">Chào, {user.name}!</span>
+                <span className="px-3 py-2 text-sm font-semibold text-[#1e4230]">{t("nav.hello")}, {user.name}!</span>
                 <button onClick={() => { onLogout(); setOpen(false); }} className="btn btn-ghost w-full justify-center">
-                  Đăng xuất
+                  {t("nav.logout")}
                 </button>
               </>
             ) : (
               <div className="flex flex-col gap-2">
                 <NavLink id="nav-mobile-btn-login" to="/auth" onClick={() => setOpen(false)} className="btn btn-ghost w-full justify-center">
-                  Đăng nhập
+                  {t("nav.login")}
                 </NavLink>
                 <NavLink id="nav-mobile-btn-planner" to={!user ? "/auth" : hasPlan() ? "/planner" : "/pricing"} onClick={() => setOpen(false)} className="btn btn-primary w-full justify-center">
-                  Bắt đầu lên lịch trình
+                  {t("nav.start")}
                 </NavLink>
               </div>
             )}
@@ -1023,18 +1023,19 @@ function Navbar({ user, userPlan, onLogout }) {
 }
 
 function Footer({ user }) {
+  const { t } = useT();
   return (
     <footer className="border-t border-[#2d5a3d]/10 bg-[#f5f0e8]">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div>
           <Logo />
           <p className="mt-4 max-w-md text-sm leading-6 text-[#3d2b1a]/65">
-            WanderHUB là người bạn thổ địa thông minh giúp bạn tìm hidden gems, xếp lịch trình và điều phối di chuyển trong thành phố.
+            {t("footer.tagline")}
           </p>
         </div>
         <div className="text-sm text-[#3d2b1a]/65">
-          <div className="mb-3 font-semibold text-[#1e4230]">Liên hệ</div>
-          <p>Địa chỉ: Thủ Đức, TP.HCM</p>
+          <div className="mb-3 font-semibold text-[#1e4230]">{t("footer.contact")}</div>
+          <p>{t("footer.address")}</p>
           <p>Hotline: 1900-0905</p>
           <p>Email: <a href="mailto:wanderhub.team.sg@gmail.com" className="hover:underline">wanderhub.team.sg@gmail.com</a></p>
           <p>Facebook: <a href="https://www.facebook.com/wanderhub.team.sg" target="_blank" rel="noopener noreferrer" className="hover:underline">WanderHUB Team</a></p>
@@ -1042,7 +1043,7 @@ function Footer({ user }) {
         <div className="grid gap-2 text-sm">
           <NavLink to="/faq" className="text-[#3d2b1a]/62 hover:text-cyan">FAQ</NavLink>
           <NavLink to="/terms" className="text-[#3d2b1a]/62 hover:text-cyan">Terms & Policies</NavLink>
-          <NavLink to="/auth" className="text-[#3d2b1a]/62 hover:text-cyan">Login / Register</NavLink>
+          <NavLink to="/auth" className="text-[#3d2b1a]/62 hover:text-cyan">{t("footer.login")}</NavLink>
           <NavLink to={!user ? "/auth" : hasPlan() ? "/planner" : "/pricing"} className="text-[#3d2b1a]/62 hover:text-cyan">AI Trip Planner</NavLink>
         </div>
       </div>
