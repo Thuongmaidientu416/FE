@@ -335,6 +335,254 @@ const navItems = [
   ["Liên hệ", "/contact"],
 ];
 
+const TRANSLATIONS = {
+  vi: {
+    "nav.home": "Trang chủ",
+    "nav.about": "Về WanderHUB",
+    "nav.explore": "Khám phá",
+    "nav.pricing": "Gói dịch vụ",
+    "nav.reviews": "Đánh giá",
+    "nav.contact": "Liên hệ",
+    "nav.history": "Lịch sử",
+    "nav.login": "Đăng nhập",
+    "nav.logout": "Đăng xuất",
+    "nav.start": "Bắt đầu lên lịch trình",
+    "nav.hello": "Chào",
+    "footer.tagline": "WanderHUB là người bạn thổ địa thông minh giúp bạn tìm hidden gems, xếp lịch trình và điều phối di chuyển trong thành phố.",
+    "footer.contact": "Liên hệ",
+    "footer.address": "Địa chỉ: Thủ Đức, TP.HCM",
+    "footer.login": "Đăng nhập / Đăng ký",
+    "hero.desc": "Góc nhìn WanderHUB đồng hành cùng bạn trên hành trình khám phá thành phố: lướt qua tuyến ven sông Sài Gòn, ngắm Landmark 81 phản chiếu trên mặt nước dưới ánh nắng ấm áp, nối tiếp các điểm cafe, ăn tối và check-in đúng gu của bạn.",
+    "hero.cta.plan": "Lên lịch trình ngay",
+    "hero.cta.explore": "Xem Trải Nghiệm Đô Thị",
+    "home.popular.eyebrow": "Xu hướng khám phá Sài Gòn",
+    "home.popular.title": "Lịch trình được yêu thích nhất",
+    "home.popular.sub": "Được đông đảo người dùng lựa chọn và xếp hạng cao. Click để trải nghiệm ngay.",
+    "home.about.eyebrow": "Thương hiệu WanderHUB",
+    "home.about.title": "Một góc nhìn lịch lãm về khám phá đô thị.",
+    "home.how.eyebrow": "Cách hoạt động",
+    "home.how.title": "Ba bước — lên đường ngay.",
+    "home.how.cta": "Thử tạo lịch trình ngay",
+    "planner.mood.label": "Chọn vibe / Mood",
+    "planner.district.label": "Quận / Khu vực",
+    "planner.budget.label": "Ngân sách",
+    "planner.time.label": "Khung giờ",
+    "planner.interests.label": "Sở thích",
+    "planner.transport.label": "Phương tiện",
+    "planner.note.label": "Ghi chú / Yêu cầu đặc biệt",
+    "planner.note.small": "Note cho tài xế hoặc yêu cầu riêng",
+    "planner.note.placeholder": "Ví dụ: Chuẩn bị dù vì có thể mưa, cần ghế cho em bé, dị ứng hải sản...",
+    "planner.btn.generate": "Lên lịch trình AI",
+    "planner.generating": "Đang xử lý...",
+    "planner.loading.title": "Đang tính toán...",
+    "planner.result.title": "Tuyến đường AI khuyên dùng",
+    "planner.export.qr": "Xuất QR",
+    "planner.basic.remaining": "Gói Basic: còn {remaining}/{limit} lượt — chu kỳ {days} ngày",
+    "planner.unlimited": "Gói {plan}: tạo lịch trình không giới hạn",
+    "planner.limit.title": "Đã dùng lượt miễn phí trong chu kỳ này.",
+    "planner.limit.reset": "Reset sau {days} ngày",
+    "planner.limit.upgrade": "Hoặc nâng cấp Premium để tạo không giới hạn.",
+    "planner.limit.cta": "Xem gói Premium",
+    "mood.chill.hint": "Cafe, dạo phố, nhịp nhẹ",
+    "mood.date.label": "Hẹn hò",
+    "mood.date.hint": "Đẹp, riêng tư, ven sông",
+    "mood.group.label": "Đi nhóm",
+    "mood.group.hint": "Rộng rãi, vui, dễ tụ tập",
+    "mood.foodie.hint": "Ăn ngon, local, must-try",
+    "mood.nightlife.hint": "Bar, phố đêm, city lights",
+    "mood.culture.label": "Văn hóa",
+    "mood.culture.hint": "Bảo tàng, phố cũ, nghệ thuật",
+    "mood.checkin.label": "Check-in",
+    "mood.checkin.hint": "Ảnh đẹp, landmark, view",
+    "mood.hidden_gem.hint": "Ngóc ngách ít người biết",
+    "mood.healing.hint": "Yên tĩnh, xanh, hồi phục",
+    "mood.premium.hint": "Rooftop, fine dining, sang",
+    "mood.budget.label": "Tiết kiệm",
+    "mood.budget.hint": "Vừa túi tiền, nhiều giá trị",
+    "mood.solo.hint": "Tự do, dễ đi một mình",
+    "budget.save": "Tiết kiệm",
+    "budget.mid": "Vừa đẹp",
+    "budget.comfort": "Thoải mái",
+    "budget.unlimited": "Không giới hạn",
+    "time.morning": "Sáng nhẹ",
+    "time.afternoon": "Trưa chiều",
+    "time.afterwork": "Sau giờ làm",
+    "time.night": "Đêm Sài Gòn",
+    "time.halfday": "Nửa ngày",
+    "time.morning.hint": "Cafe + check-in",
+    "time.afternoon.hint": "Indoor + văn hóa",
+    "time.afterwork.hint": "Ăn tối + dạo phố",
+    "time.night.hint": "Nightlife + ăn khuya",
+    "time.halfday.hint": "4-5 điểm dừng",
+    "interest.checkin": "Chụp hình",
+    "interest.cafe": "Uống cafe",
+    "interest.food": "Trải nghiệm ẩm thực",
+    "interest.culture": "Văn hóa",
+    "interest.nightlife": "Phố đêm",
+    "interest.entertainment": "Hoạt động vui chơi",
+    "modal.header.label": "✦ WanderHUB · Lịch trình cá nhân",
+    "modal.stops": "điểm dừng",
+    "modal.trip.detail": "Chi tiết hành trình",
+    "modal.driver.confirmed": "Tài xế đã xác nhận",
+    "modal.driver.fare": "Giá xe",
+    "modal.tab.itinerary": "Lịch trình",
+    "modal.tab.tips": "Local Tips",
+    "modal.qr.scan": "Quét để",
+    "modal.qr.open": "mở & chia sẻ",
+    "modal.qr.view": "xem",
+    "modal.qr.label": "lịch trình",
+    "modal.qr.expand": "Phóng to QR ↗",
+    "history.eyebrow": "Lịch sử hành trình",
+    "history.title": "Chuyến đi đã chốt",
+    "history.loading": "Đang tải lịch sử hành trình...",
+    "history.error": "Không thể tải lịch sử chuyến đi.",
+    "history.empty.title": "Chưa có chuyến đi nào",
+    "history.empty.sub": "Bạn chưa lưu hay chốt lịch trình nào. Hãy bắt đầu chuyến đi đầu tiên nhé!",
+    "history.empty.cta": "Lên lịch ngay",
+    "history.detail.label": "Lịch trình chi tiết:",
+    "history.btn.view": "Xem Lại Lịch Trình & Đặt Xe",
+    "history.noauth.title": "Bạn chưa đăng nhập",
+    "history.noauth.sub": "Đăng nhập để lưu và xem lại các lịch trình đã đi của bạn.",
+    "history.noauth.cta": "Đăng nhập ngay",
+    "popular.select_count": "lượt chọn",
+    "popular.loading": "Đang tải lịch trình đề xuất...",
+    "popular.btn": "Xem lịch trình",
+    "reviews.eyebrow": "Cộng đồng WanderHUB",
+    "reviews.title": "Khách hàng nói gì?",
+    "common.loading": "Đang tải...",
+    "common.book_driver": "Đặt xe ngay",
+    "common.view_again": "Xem Lại",
+    "common.start_plan": "Lên lịch ngay",
+  },
+  en: {
+    "nav.home": "Home",
+    "nav.about": "About",
+    "nav.explore": "Explore",
+    "nav.pricing": "Pricing",
+    "nav.reviews": "Reviews",
+    "nav.contact": "Contact",
+    "nav.history": "My Trips",
+    "nav.login": "Sign In",
+    "nav.logout": "Sign Out",
+    "nav.start": "Start Planning",
+    "nav.hello": "Hello",
+    "footer.tagline": "WanderHUB is your smart local guide — uncovering hidden gems, building itineraries, and coordinating transport around the city.",
+    "footer.contact": "Contact",
+    "footer.address": "Address: Thu Duc, Ho Chi Minh City",
+    "footer.login": "Sign In / Register",
+    "hero.desc": "WanderHUB rides alongside you through the city: skimming the Saigon riverfront, catching Landmark 81 at golden hour, chaining cafés, dinners, and photo spots that actually match your vibe.",
+    "hero.cta.plan": "Plan My Trip Now",
+    "hero.cta.explore": "Explore the City",
+    "home.popular.eyebrow": "Trending in Saigon",
+    "home.popular.title": "Most Loved Itineraries",
+    "home.popular.sub": "Top-rated by our community. Click to experience them yourself.",
+    "home.about.eyebrow": "The WanderHUB Story",
+    "home.about.title": "A refined take on urban exploration.",
+    "home.how.eyebrow": "How It Works",
+    "home.how.title": "Three steps — then hit the road.",
+    "home.how.cta": "Try Building an Itinerary",
+    "planner.mood.label": "Pick Your Vibe / Mood",
+    "planner.district.label": "District / Area",
+    "planner.budget.label": "Budget",
+    "planner.time.label": "Time Slot",
+    "planner.interests.label": "Interests",
+    "planner.transport.label": "Transport",
+    "planner.note.label": "Notes / Special Requests",
+    "planner.note.small": "Notes for the driver or specific requirements",
+    "planner.note.placeholder": "e.g. Bring umbrella — rain expected, need baby seat, seafood allergy...",
+    "planner.btn.generate": "Generate AI Itinerary",
+    "planner.generating": "Processing...",
+    "planner.loading.title": "Calculating...",
+    "planner.result.title": "AI Recommended Route",
+    "planner.export.qr": "Export QR",
+    "planner.basic.remaining": "Basic plan: {remaining}/{limit} uses left — {days}-day cycle",
+    "planner.unlimited": "{plan} plan: unlimited itineraries",
+    "planner.limit.title": "You've used all free generations this cycle.",
+    "planner.limit.reset": "Resets in {days} days",
+    "planner.limit.upgrade": "Or upgrade to Premium for unlimited generations.",
+    "planner.limit.cta": "View Premium Plans",
+    "mood.chill.hint": "Cafés, strolling, slow pace",
+    "mood.date.label": "Date Night",
+    "mood.date.hint": "Scenic, intimate, riverside",
+    "mood.group.label": "Group Outing",
+    "mood.group.hint": "Spacious, fun, easy to gather",
+    "mood.foodie.hint": "Great food, local, must-try",
+    "mood.nightlife.hint": "Bars, night streets, city lights",
+    "mood.culture.label": "Culture",
+    "mood.culture.hint": "Museums, old streets, art",
+    "mood.checkin.label": "Photo Spots",
+    "mood.checkin.hint": "Great shots, landmarks, views",
+    "mood.hidden_gem.hint": "Off-the-beaten-path spots",
+    "mood.healing.hint": "Quiet, green, restorative",
+    "mood.premium.hint": "Rooftop, fine dining, luxury",
+    "mood.budget.label": "Budget-Friendly",
+    "mood.budget.hint": "Best value for money",
+    "mood.solo.hint": "Easy to navigate solo",
+    "budget.save": "Budget",
+    "budget.mid": "Moderate",
+    "budget.comfort": "Comfortable",
+    "budget.unlimited": "No Limit",
+    "time.morning": "Morning",
+    "time.afternoon": "Afternoon",
+    "time.afterwork": "After Work",
+    "time.night": "Saigon Nights",
+    "time.halfday": "Half Day",
+    "time.morning.hint": "Café + photo spots",
+    "time.afternoon.hint": "Indoor + culture",
+    "time.afterwork.hint": "Dinner + evening stroll",
+    "time.night.hint": "Nightlife + late bites",
+    "time.halfday.hint": "4–5 stops",
+    "interest.checkin": "Photography",
+    "interest.cafe": "Café Hopping",
+    "interest.food": "Food Experiences",
+    "interest.culture": "Culture",
+    "interest.nightlife": "Nightlife",
+    "interest.entertainment": "Entertainment",
+    "modal.header.label": "✦ WanderHUB · Personal Itinerary",
+    "modal.stops": "stops",
+    "modal.trip.detail": "Trip Details",
+    "modal.driver.confirmed": "Driver Confirmed",
+    "modal.driver.fare": "Fare",
+    "modal.tab.itinerary": "Itinerary",
+    "modal.tab.tips": "Local Tips",
+    "modal.qr.scan": "Scan to",
+    "modal.qr.open": "open & share",
+    "modal.qr.view": "view",
+    "modal.qr.label": "your itinerary",
+    "modal.qr.expand": "Expand QR ↗",
+    "history.eyebrow": "Your Journey History",
+    "history.title": "Past Trips",
+    "history.loading": "Loading your trip history...",
+    "history.error": "Could not load trip history.",
+    "history.empty.title": "No trips yet",
+    "history.empty.sub": "You haven't saved or confirmed any itinerary yet. Start your first trip!",
+    "history.empty.cta": "Plan a Trip",
+    "history.detail.label": "Itinerary Details:",
+    "history.btn.view": "View Itinerary & Book a Ride",
+    "history.noauth.title": "You're not signed in",
+    "history.noauth.sub": "Sign in to save and revisit your past itineraries.",
+    "history.noauth.cta": "Sign In",
+    "popular.select_count": "selected",
+    "popular.loading": "Loading recommended itineraries...",
+    "popular.btn": "View Itinerary",
+    "reviews.eyebrow": "WanderHUB Community",
+    "reviews.title": "What Our Users Say",
+    "common.loading": "Loading...",
+    "common.book_driver": "Book a Ride",
+    "common.view_again": "View Again",
+    "common.start_plan": "Plan Now",
+  },
+};
+
+const LangContext = React.createContext("vi");
+
+function useT() {
+  const lang = useContext(LangContext);
+  const isEn = lang === "en";
+  const t = (key) => TRANSLATIONS[lang]?.[key] ?? TRANSLATIONS["vi"]?.[key] ?? key;
+  return { t, isEn, lang };
+}
+
 const packages = [
   {
     name: "Free",
@@ -3329,6 +3577,33 @@ const CATEGORY_BLURB = {
   food: "Địa điểm ẩm thực đáng thử trong hành trình.",
 };
 
+const LOCAL_TIPS_BLURB = {
+  checkin: "A popular photo spot — iconic architecture, street scenes, or viewpoints that define the Saigon aesthetic.",
+  entertainment: "An entertainment venue — great for groups, high energy, and unwinding after a long day.",
+  culture: "A cultural or heritage space: expect history, art, and a glimpse into Vietnamese identity.",
+  nightlife: "A nightlife hotspot — drinks, music, and the electric atmosphere of Saigon after dark.",
+  cafe_drink: "A Vietnamese café — expect strong drip coffee, condensed milk, and a laid-back local vibe.",
+  food: "A local eatery serving authentic Vietnamese cuisine — one of the city's true pleasures.",
+};
+
+const LOCAL_CUSTOMS = {
+  checkin: "Ask before photographing locals or religious spaces. A smile and a nod go a long way.",
+  entertainment: "Motorbike parking on the pavement is normal. Join the flow and you'll fit right in.",
+  culture: "Dress modestly (covered shoulders and knees) when entering temples or government buildings.",
+  nightlife: "Cash is king at most local bars. ATMs are everywhere — withdraw before heading out.",
+  cafe_drink: "It's perfectly normal to sit for hours. Order one drink and stay as long as you like.",
+  food: "Point at the menu or neighbouring tables if you're unsure what to order — staff are used to it.",
+};
+
+const LOCAL_PHRASES = {
+  checkin:       { vi: "Cho tôi chụp ảnh ở đây được không?", roman: "Cho toy chup anh o day duoc khong?", en: "May I take a photo here?" },
+  entertainment: { vi: "Bao nhiêu tiền vào cửa?",            roman: "Bao nhieu tien vao cua?",           en: "How much is the entrance fee?" },
+  culture:       { vi: "Đây là gì vậy?",                     roman: "Day la gi vay?",                    en: "What is this?" },
+  nightlife:     { vi: "Cho tôi một ly bia.",                roman: "Cho toy mot ly bia.",               en: "One beer, please." },
+  cafe_drink:    { vi: "Cho tôi một ly cà phê sữa đá.",     roman: "Cho toy mot lee ca phe sua da.",    en: "One iced milk coffee, please." },
+  food:          { vi: "Cho tôi xem thực đơn.",              roman: "Cho toy xem thuc don.",             en: "Can I see the menu?" },
+};
+
 
 
 function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, setShowQrCode, selectedStops, routeCost, routeDuration, selectedMood, district }) {
@@ -5733,28 +6008,31 @@ function App() {
     clearToken();
   };
 
+  const lang = userPlan?.plan_key === "international" ? "en" : "vi";
   return (
-    <>
-      <Navbar user={user} userPlan={userPlan} onLogout={handleLogout} />
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Home user={user} />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/pricing" element={<Pricing user={user} userPlan={userPlan} setUserPlan={setUserPlan} />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/reviews" element={<Reviews />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/auth" element={<Auth setUser={setUser} />} />
-          <Route path="/planner" element={<PlannerV2 userPlan={userPlan} setUserPlan={setUserPlan} />} />
-          <Route path="/history" element={<HistoryPage user={user} />} />
-          <Route path="/admin" element={<AdminDashboard user={user} />} />
-        </Routes>
-      </AnimatePresence>
-      <Footer user={user} />
-      <FloatingChatBot />
-    </>
+    <LangContext.Provider value={lang}>
+      <>
+        <Navbar user={user} userPlan={userPlan} onLogout={handleLogout} />
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Home user={user} />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/pricing" element={<Pricing user={user} userPlan={userPlan} setUserPlan={setUserPlan} />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/auth" element={<Auth setUser={setUser} />} />
+            <Route path="/planner" element={<PlannerV2 userPlan={userPlan} setUserPlan={setUserPlan} />} />
+            <Route path="/history" element={<HistoryPage user={user} />} />
+            <Route path="/admin" element={<AdminDashboard user={user} />} />
+          </Routes>
+        </AnimatePresence>
+        <Footer user={user} />
+        <FloatingChatBot />
+      </>
+    </LangContext.Provider>
   );
 }
 
