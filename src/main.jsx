@@ -2100,7 +2100,7 @@ function FloatingChatBot() {
 
 
 function Home({ user }) {
-  const { t } = useT();
+  const { t, isEn } = useT();
 
   return (
     <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="overflow-hidden bg-[#fdf8f3]">
@@ -2156,29 +2156,29 @@ function Home({ user }) {
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="section-eyebrow">{t("home.how.eyebrow")}</span>
             <h2 className="section-title-large">{t("home.how.title")}</h2>
-            <p className="text-stone-600">Từ khi chọn mood đến khi bước xuống xe, WanderHUB lo hết.</p>
+            <p className="text-stone-600">{isEn ? "From mood selection to dropping off — WanderHUB handles everything." : "Từ khi chọn mood đến khi bước xuống xe, WanderHUB lo hết."}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 step: "01",
                 icon: Sparkles,
-                title: "Chọn mood & vibe",
-                desc: "Chỉ mất 30 giây – chọn cảm xúc, thời gian rảnh và ngân sách bạn muốn chi hôm nay.",
+                title: isEn ? "Choose your mood & vibe" : "Chọn mood & vibe",
+                desc: isEn ? "Takes just 30 seconds — pick your emotion, free time, and budget for today." : "Chỉ mất 30 giây – chọn cảm xúc, thời gian rảnh và ngân sách bạn muốn chi hôm nay.",
                 color: "#c96420",
               },
               {
                 step: "02",
                 icon: Bot,
-                title: "AI dựng lịch trình",
-                desc: "WanderHUB AI tối ưu hóa tuyến đường, chọn địa điểm đúng vị trí và kết nối xe điện đồng bộ.",
+                title: isEn ? "AI builds your itinerary" : "AI dựng lịch trình",
+                desc: isEn ? "WanderHUB AI optimises the route, selects perfectly located venues, and syncs your electric vehicle booking." : "WanderHUB AI tối ưu hóa tuyến đường, chọn địa điểm đúng vị trí và kết nối xe điện đồng bộ.",
                 color: "#2d5a3d",
               },
               {
                 step: "03",
                 icon: Car,
-                title: "Lên đường thôi!",
-                desc: "Có Xanh SM đợi sẵn, lịch trình hiển thị realtime. Bạn chỉ cần xuất hiện đông giờ.",
+                title: isEn ? "Hit the road!" : "Lên đường thôi!",
+                desc: isEn ? "Xanh SM is ready and waiting, your itinerary is displayed in real time. Just show up and enjoy." : "Có Xanh SM đợi sẵn, lịch trình hiển thị realtime. Bạn chỉ cần xuất hiện đông giờ.",
                 color: "#1e4230",
               }
             ].map(({ step, icon: Icon, title, desc, color }) => (
@@ -2210,15 +2210,13 @@ function Home({ user }) {
               <span className="section-eyebrow">{t("home.about.eyebrow")}</span>
               <h2 className="section-title-large">{t("home.about.title")}</h2>
               <p className="text-stone-600 leading-relaxed mb-6">
-                Chúng tôi tin rằng việc du ngoạn quanh thành phố Hồ Chí Minh không đơn giản là đi từ A đến B. Đó là sự khám phá
-                những ngóc ngách ẩn giấu, thưởng thức ly cà phê phin đúng điệu và cảm nhận nhịp đập năng động của Sài Gòn.
+                {isEn ? "We believe exploring Ho Chi Minh City is more than getting from A to B. It's about discovering hidden corners, enjoying a perfect drip coffee, and feeling the vibrant pulse of Saigon." : "Chúng tôi tin rằng việc du ngoạn quanh thành phố Hồ Chí Minh không đơn giản là đi từ A đến B. Đó là sự khám phá những ngóc ngách ẩn giấu, thưởng thức ly cà phê phin đúng điệu và cảm nhận nhịp đập năng động của Sài Gòn."}
               </p>
               <p className="text-stone-600 leading-relaxed mb-6">
-                Bằng sự kết hợp giữa trí tuệ nhân tạo thông minh và kiến thức bản địa sâu sắc, WanderHUB tối ưu hóa từng tuyến đường di chuyển,
-                giúp bạn tiết kiệm thời gian mà vẫn tận hưởng trọn vẹn những điểm đến tinh tế nhất.
+                {isEn ? "By combining intelligent AI and deep local knowledge, WanderHUB optimises every route so you save time while fully savoring the city's most refined destinations." : "Bằng sự kết hợp giữa trí tuệ nhân tạo thông minh và kiến thức bản địa sâu sắc, WanderHUB tối ưu hóa từng tuyến đường di chuyển, giúp bạn tiết kiệm thời gian mà vẫn tận hưởng trọn vẹn những điểm đến tinh tế nhất."}
               </p>
               <NavLink to={!user ? "/auth" : hasPlan() ? "/planner" : "/pricing"} className="btn btn-primary">
-                Trải Nghiệm Ngay <ChevronRight size={16} />
+                {isEn ? "Experience Now" : "Trải Nghiệm Ngay"} <ChevronRight size={16} />
               </NavLink>
             </Reveal>
             <Reveal>
@@ -2226,7 +2224,7 @@ function Home({ user }) {
                 <img src="/images/landmark-81.jpg" alt="Landmark 81 skyline" className="gallery-img" />
                 <div className="gallery-overlay-dark">
                   <h3 className="serif-h text-white text-2xl mb-1">Landmark 81</h3>
-                  <p className="text-white/80 text-sm">Biểu tượng tự hào của TP. Hồ Chí Minh hiện đại</p>
+                  <p className="text-white/80 text-sm">{isEn ? "The proud symbol of modern Ho Chi Minh City" : "Biểu tượng tự hào của TP. Hồ Chí Minh hiện đại"}</p>
                 </div>
               </div>
             </Reveal>
@@ -2239,40 +2237,40 @@ function Home({ user }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="section-eyebrow">AI-Powered Experience</span>
-            <h2 className="section-title-large">Trí tuệ nhân tạo hỗ trợ khám phá</h2>
-            <p className="text-stone-600">Những mảnh ghép công nghệ tạo nên một chuyến đi trọn vẹn và không lo toan.</p>
+            <h2 className="section-title-large">{isEn ? "AI-Powered Discovery" : "Trí tuệ nhân tạo hỗ trợ khám phá"}</h2>
+            <p className="text-stone-600">{isEn ? "The technology building blocks that make every journey seamless and worry-free." : "Những mảnh ghép công nghệ tạo nên một chuyến đi trọn vẹn và không lo toan."}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                title: "Tối ưu hóa tuyến đường AI",
-                desc: "AI sắp xếp thứ tự các điểm dừng hợp lý nhất để giảm thiểu kẹt xe và rút ngắn thời gian di chuyển đô thị.",
+                title: isEn ? "AI Route Optimisation" : "Tối ưu hóa tuyến đường AI",
+                desc: isEn ? "AI orders your stops to minimise city traffic and cut travel time between venues." : "AI sắp xếp thứ tự các điểm dừng hợp lý nhất để giảm thiểu kẹt xe và rút ngắn thời gian di chuyển đô thị.",
                 icon: RouteIcon
               },
               {
-                title: "Tích hợp chuyến đi thông minh",
-                desc: "Kết nối trực tiếp dịch vụ đặt xe điện Xanh SM và các đơn vị uy tín giúp bạn đi lại êm ái, bảo vệ môi trường.",
+                title: isEn ? "Smart Trip Integration" : "Tích hợp chuyến đi thông minh",
+                desc: isEn ? "Direct integration with Xanh SM electric vehicles and trusted partners for smooth, eco-friendly travel." : "Kết nối trực tiếp dịch vụ đặt xe điện Xanh SM và các đơn vị uy tín giúp bạn đi lại êm ái, bảo vệ môi trường.",
                 icon: Navigation
               },
               {
-                title: "Gợi ý Hidden Gems",
-                desc: "Kho dữ liệu bản địa chọn lọc giới thiệu những quán cà phê chung cư cũ, quán ăn vỉa hè chuẩn vị ít người biết.",
+                title: isEn ? "Hidden Gems Discovery" : "Gợi ý Hidden Gems",
+                desc: isEn ? "Curated local database surfaces old-apartment cafés and authentic street food spots that most visitors never find." : "Kho dữ liệu bản địa chọn lọc giới thiệu những quán cà phê chung cư cũ, quán ăn vỉa hè chuẩn vị ít người biết.",
                 icon: Gem
               },
               {
-                title: "Cập nhật đô thị Realtime",
-                desc: "Theo dõi tình hình thời tiết và lưu lượng giao thông trực tiếp để đề xuất re-route tức thời khi cần.",
+                title: isEn ? "Realtime City Updates" : "Cập nhật đô thị Realtime",
+                desc: isEn ? "Live weather and traffic monitoring to suggest instant re-routes whenever conditions change." : "Theo dõi tình hình thời tiết và lưu lượng giao thông trực tiếp để đề xuất re-route tức thời khi cần.",
                 icon: Clock3
               },
               {
-                title: "Cá nhân hóa trải nghiệm",
-                desc: "Lịch trình tự động điều chỉnh theo mức ngân sách của bạn (từ bình dân đến cao cấp) và vibe buổi hẹn.",
+                title: isEn ? "Personalised Experience" : "Cá nhân hóa trải nghiệm",
+                desc: isEn ? "Itinerary auto-adjusts to your budget (budget to premium) and the vibe of your outing." : "Lịch trình tự động điều chỉnh theo mức ngân sách của bạn (từ bình dân đến cao cấp) và vibe buổi hẹn.",
                 icon: Bot
               },
               {
-                title: "Trợ lý ảo thông minh",
-                desc: "Trò chuyện trực tiếp cùng trợ lý để nhận thêm thông tin điểm đến hoặc đổi điểm dừng trong nháy mắt.",
+                title: isEn ? "Intelligent Virtual Assistant" : "Trợ lý ảo thông minh",
+                desc: isEn ? "Chat directly with the assistant for more venue info or to swap stops in an instant." : "Trò chuyện trực tiếp cùng trợ lý để nhận thêm thông tin điểm đến hoặc đổi điểm dừng trong nháy mắt.",
                 icon: Sparkles
               }
             ].map((feat, idx) => {
@@ -2296,29 +2294,29 @@ function Home({ user }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="section-eyebrow">Curated Vibe Spots</span>
-            <h2 className="section-title-large">Trải nghiệm Sài Gòn tuyển chọn</h2>
-            <p className="text-stone-600">Được sắp xếp và cập nhật liên tục bởi WanderHUB SQUAD.</p>
+            <h2 className="section-title-large">{isEn ? "Curated Saigon Experiences" : "Trải nghiệm Sài Gòn tuyển chọn"}</h2>
+            <p className="text-stone-600">{isEn ? "Continuously curated and updated by the WanderHUB SQUAD." : "Được sắp xếp và cập nhật liên tục bởi WanderHUB SQUAD."}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 title: "Secret Garden Rooftop",
-                desc: "Không gian ẩm thực Việt mộc mạc, tĩnh lặng trên sân thượng chung cư cũ Pasteur.",
+                desc: isEn ? "Rustic Vietnamese dining in a rooftop setting atop an old Pasteur Street apartment building." : "Không gian ẩm thực Việt mộc mạc, tĩnh lặng trên sân thượng chung cư cũ Pasteur.",
                 badge: "Rooftop Café",
                 img: "/images/secret-garden.png",
                 rating: "4.9"
               },
               {
                 title: "Ốc Đào Q1",
-                desc: "Trải nghiệm ẩm thực hải sản đường phố Sài Gòn trứ danh với vị bơ tỏi thơm lừng.",
+                desc: isEn ? "The legendary Saigon street seafood experience — famous for its buttery garlic flavour." : "Trải nghiệm ẩm thực hải sản đường phố Sài Gòn trứ danh với vị bơ tỏi thơm lừng.",
                 badge: "Local Food",
                 img: "/images/oc-dao.png",
                 rating: "4.8"
               },
               {
                 title: "Bến Bạch Đằng & River View",
-                desc: "Đi bộ đón gió sông mát lành ngắm nhìn Landmark 81 lung linh ánh đèn hoàng hôn.",
+                desc: isEn ? "A riverside stroll with cool river breeze and a dazzling view of Landmark 81 at sunset." : "Đi bộ đón gió sông mát lành ngắm nhìn Landmark 81 lung linh ánh đèn hoàng hôn.",
                 badge: "Riverside",
                 img: "/images/landmark-81-3d.png",
                 rating: "4.9"
@@ -2341,7 +2339,7 @@ function Home({ user }) {
                       <p className="text-sm text-stone-600 leading-relaxed mb-6">{exp.desc}</p>
                     </div>
                     <NavLink to="/explore" className="text-sm font-bold text-[#2d5a3d] hover:text-[#c96420] inline-flex items-center gap-1 self-start transition">
-                      Tìm hiểu thêm <ChevronRight size={14} />
+                      {isEn ? "Learn more" : "Tìm hiểu thêm"} <ChevronRight size={14} />
                     </NavLink>
                   </div>
                 </div>
@@ -2356,30 +2354,30 @@ function Home({ user }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="section-eyebrow">POV: Saigon Golden Hour</span>
-            <h2 className="section-title-large">Thành phố qua ống kính WanderHUB</h2>
-            <p className="text-stone-600">Vẻ đẹp giao thoa giữa nét xưa cổ kính và nhịp sống trẻ trung, năng động.</p>
+            <h2 className="section-title-large">{isEn ? "The City Through WanderHUB's Lens" : "Thành phố qua ống kính WanderHUB"}</h2>
+            <p className="text-stone-600">{isEn ? "Where timeless heritage meets vibrant modern life." : "Vẻ đẹp giao thoa giữa nét xưa cổ kính và nhịp sống trẻ trung, năng động."}</p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
             {[
               {
                 title: "Bưu Điện Trung Tâm",
-                subtitle: "Ký ức thời gian",
+                subtitle: isEn ? "Memories of Time" : "Ký ức thời gian",
                 img: "/images/buu-dien.png"
               },
               {
                 title: "Phố Đi Bộ Nguyễn Huệ",
-                subtitle: "Trung tâm nhộn nhịp",
+                subtitle: isEn ? "Bustling City Centre" : "Trung tâm nhộn nhịp",
                 img: "/images/nguyen-hue.png"
               },
               {
                 title: "Công Viên Tao Đàn",
-                subtitle: "Lá phổi xanh mát",
+                subtitle: isEn ? "The Green Lung" : "Lá phổi xanh mát",
                 img: "/images/tao-dan.png"
               },
               {
                 title: "Nhà Thờ Đức Bà",
-                subtitle: "Vẻ đẹp vượt năm tháng",
+                subtitle: isEn ? "Timeless Beauty" : "Vẻ đẹp vượt năm tháng",
                 img: "/images/ben-thanh.png"
               }
             ].map((pic, idx) => (
@@ -2402,29 +2400,27 @@ function Home({ user }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="section-eyebrow">Guest Stories</span>
-            <h2 className="section-title-large">Đánh giá từ du khách đô thị</h2>
-            <p className="text-stone-600">Những người đã thay đổi cách đi chơi nhờ sự đồng hành của AI và bản địa.</p>
+            <h2 className="section-title-large">{isEn ? "Stories from Urban Explorers" : "Đánh giá từ du khách đô thị"}</h2>
+            <p className="text-stone-600">{isEn ? "People who changed how they explore the city with the help of AI and local expertise." : "Những người đã thay đổi cách đi chơi nhờ sự đồng hành của AI và bản địa."}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
             <Reveal>
               <div className="testimonial-card-editorial">
                 <p className="testimonial-quote">
-                  "Tôi đã sống ở Sài Gòn 5 năm nhưng chưa bao giờ biết tới một quán cafe nhỏ nằm trên lầu 3 của một căn chung cư cũ
-                  đường Pasteur. AI của WanderHUB đã gợi ý cho tôi dựa trên mood thèm sự riêng tư. Thật đáng kinh ngạc!"
+                  {isEn ? "\"I've lived in Saigon for 5 years and never knew about a tiny café on the 3rd floor of an old Pasteur Street apartment. WanderHUB's AI recommended it based on my mood for privacy. Simply amazing!\"" : "\"Tôi đã sống ở Sài Gòn 5 năm nhưng chưa bao giờ biết tới một quán cafe nhỏ nằm trên lầu 3 của một căn chung cư cũ đường Pasteur. AI của WanderHUB đã gợi ý cho tôi dựa trên mood thèm sự riêng tư. Thật đáng kinh ngạc!\""}
                 </p>
                 <div className="testimonial-author">Khánh Linh</div>
-                <div className="testimonial-role">Creative Director, Quận 3</div>
+                <div className="testimonial-role">{isEn ? "Creative Director, District 3" : "Creative Director, Quận 3"}</div>
               </div>
             </Reveal>
             <Reveal>
               <div className="testimonial-card-editorial">
                 <p className="testimonial-quote">
-                  "WanderHUB mang đến một trải nghiệm lịch lãm, tinh tế chuẩn boutique hotel. Cách tích hợp xe điện Xanh SM chạy thẳng
-                  trong flow lịch trình giúp tôi đi chơi thảnh thơi mà không cần loay hoay đổi app."
+                  {isEn ? "\"WanderHUB delivers a refined, boutique hotel-level experience. The seamless Xanh SM electric vehicle integration in the itinerary flow means I can enjoy my outing without juggling multiple apps.\"" : "\"WanderHUB mang đến một trải nghiệm lịch lãm, tinh tế chuẩn boutique hotel. Cách tích hợp xe điện Xanh SM chạy thẳng trong flow lịch trình giúp tôi đi chơi thảnh thơi mà không cần loay hoay đổi app.\""}
                 </p>
                 <div className="testimonial-author">Anh Tuấn</div>
-                <div className="testimonial-role">Kiến trúc sư, Quận 1</div>
+                <div className="testimonial-role">{isEn ? "Architect, District 1" : "Kiến trúc sư, Quận 1"}</div>
               </div>
             </Reveal>
           </div>
@@ -2437,19 +2433,18 @@ function Home({ user }) {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <Reveal>
               <span className="section-eyebrow">WanderHUB Pocket Guide</span>
-              <h2 className="section-title-large">Mang theo người bạn đồng hành AI</h2>
+              <h2 className="section-title-large">{isEn ? "Take Your AI Companion Everywhere" : "Mang theo người bạn đồng hành AI"}</h2>
               <p className="text-stone-600 leading-relaxed mb-6">
-                Bản nâng cấp ứng dụng di động WanderHUB sắp tới sẽ mang toàn bộ tính năng re-route tự động, tích hợp thanh toán
-                một chạm và định vị bản đồ thông minh vào lòng bàn tay của bạn.
+                {isEn ? "The upcoming WanderHUB mobile app will bring automatic re-routing, one-tap payment, and smart map navigation right to your palm." : "Bản nâng cấp ứng dụng di động WanderHUB sắp tới sẽ mang toàn bộ tính năng re-route tự động, tích hợp thanh toán một chạm và định vị bản đồ thông minh vào lòng bàn tay của bạn."}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl border border-stone-100 bg-[#fdf8f3]">
-                  <h4 className="font-bold text-[#1e4230]">Tải cho iOS</h4>
-                  <p className="text-xs text-stone-500 mt-1">App Store · Sắp ra mắt</p>
+                  <h4 className="font-bold text-[#1e4230]">{isEn ? "Download for iOS" : "Tải cho iOS"}</h4>
+                  <p className="text-xs text-stone-500 mt-1">{isEn ? "App Store · Coming soon" : "App Store · Sắp ra mắt"}</p>
                 </div>
                 <div className="p-4 rounded-xl border border-stone-100 bg-[#fdf8f3]">
-                  <h4 className="font-bold text-[#1e4230]">Tải cho Android</h4>
-                  <p className="text-xs text-stone-500 mt-1">Google Play · Sắp ra mắt</p>
+                  <h4 className="font-bold text-[#1e4230]">{isEn ? "Download for Android" : "Tải cho Android"}</h4>
+                  <p className="text-xs text-stone-500 mt-1">{isEn ? "Google Play · Coming soon" : "Google Play · Sắp ra mắt"}</p>
                 </div>
               </div>
             </Reveal>
@@ -2462,7 +2457,7 @@ function Home({ user }) {
                   </div>
                   <div className="phone-screen-content flex flex-col gap-3 mt-3">
                     <div className="phone-card">
-                      <span className="text-[10px] text-[#c96420] font-bold uppercase">Lịch trình tối nay</span>
+                      <span className="text-[10px] text-[#c96420] font-bold uppercase">{isEn ? "Tonight's itinerary" : "Lịch trình tối nay"}</span>
                       <h4 className="font-bold text-[#1e4230] text-sm mt-1">Date Chill Sông Sài Gòn</h4>
                     </div>
                     <div className="flex flex-col gap-2">
@@ -2492,9 +2487,9 @@ function Home({ user }) {
       <section className="editorial-section bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="section-eyebrow">Gói dịch vụ</span>
-            <h2 className="section-title-large">Chọn gói phù hợp với bạn</h2>
-            <p className="text-stone-600">Bắt đầu miễn phí, nâng cấp khi cần – không ràng buộc hợp đồng.</p>
+            <span className="section-eyebrow">{isEn ? "Service Plans" : "Gói dịch vụ"}</span>
+            <h2 className="section-title-large">{isEn ? "Choose the plan that fits you" : "Chọn gói phù hợp với bạn"}</h2>
+            <p className="text-stone-600">{isEn ? "Start free, upgrade when you need — no contracts." : "Bắt đầu miễn phí, nâng cấp khi cần – không ràng buộc hợp đồng."}</p>
           </div>
           <PricingGrid preview user={user} />
           <div className="text-center mt-10">
@@ -5393,7 +5388,7 @@ function Reviews() {
 }
 
 function PopularRecommendations() {
-  const { t } = useT();
+  const { t, isEn } = useT();
   const [popular, setPopular] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -5472,7 +5467,7 @@ function PopularRecommendations() {
                     </div>
 
                     <div className="space-y-2 border-t border-stone-100 pt-4">
-                      <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Hành trình:</p>
+                      <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">{isEn ? "Itinerary:" : "Hành trình:"}</p>
                       {itinerary.stops?.slice(0, 3).map((stop, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-sm text-stone-700">
                           <span className="w-5 h-5 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center text-xs font-bold">
@@ -5490,7 +5485,7 @@ function PopularRecommendations() {
                     onClick={() => navigate(`/planner?itinerary=${itinerary.id}`)}
                     className="btn btn-primary w-full text-center py-2.5 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 group-hover:bg-[#1e4230]"
                   >
-                    Xem Chi Tiết & Đi Ngay <ArrowRight size={15} />
+                    {isEn ? "View Details & Go" : "Xem Chi Tiết & Đi Ngay"} <ArrowRight size={15} />
                   </button>
                 </div>
               </motion.div>
