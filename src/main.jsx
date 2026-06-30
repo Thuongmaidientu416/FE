@@ -12,6 +12,7 @@ import {
   BadgeCheck,
   Bot,
   Camera,
+  Calendar,
   CalendarDays,
   Car,
   Check,
