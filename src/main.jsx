@@ -5496,6 +5496,7 @@ function PopularRecommendations() {
 }
 
 function HistoryPage({ user }) {
+  const { t } = useT();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -5513,39 +5514,39 @@ function HistoryPage({ user }) {
       })
       .catch((err) => {
         console.error(err);
-        setError("Không thể tải lịch sử chuyến đi.");
+        setError(t("history.error"));
         setLoading(false);
       });
   }, [user]);
 
   if (!user) {
     return (
-      <PageShell eyebrow="Lịch sử chuyến đi" title="Lịch sử của bạn">
+      <PageShell eyebrow={t("history.eyebrow")} title={t("history.title")}>
         <div className="text-center py-20 bg-white rounded-3xl border border-stone-100 shadow-sm px-6">
           <Calendar size={48} className="mx-auto text-stone-300 mb-4" />
-          <h3 className="text-xl font-semibold text-[#1e4230] mb-2">Bạn chưa đăng nhập</h3>
-          <p className="text-stone-500 mb-6">Đăng nhập để lưu và xem lại các lịch trình đã đi của bạn.</p>
-          <NavLink to="/auth" className="btn btn-primary">Đăng nhập ngay</NavLink>
+          <h3 className="text-xl font-semibold text-[#1e4230] mb-2">{t("history.noauth.title")}</h3>
+          <p className="text-stone-500 mb-6">{t("history.noauth.sub")}</p>
+          <NavLink to="/auth" className="btn btn-primary">{t("history.noauth.cta")}</NavLink>
         </div>
       </PageShell>
     );
   }
 
   return (
-    <PageShell eyebrow="Lịch sử hành trình" title="Chuyến đi đã chốt">
+    <PageShell eyebrow={t("history.eyebrow")} title={t("history.title")}>
       {loading ? (
         <div className="text-center py-20">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan mx-auto"></div>
-          <p className="text-stone-500 mt-4">Đang tải lịch sử hành trình...</p>
+          <p className="text-stone-500 mt-4">{t("history.loading")}</p>
         </div>
       ) : error ? (
         <div className="text-center py-20 text-red-500">{error}</div>
       ) : history.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-stone-100 shadow-sm px-6">
           <Calendar size={48} className="mx-auto text-stone-300 mb-4" />
-          <h3 className="text-xl font-semibold text-[#1e4230] mb-2">Chưa có chuyến đi nào</h3>
-          <p className="text-stone-500 mb-6">Bạn chưa lưu hay chốt lịch trình nào. Hãy bắt đầu chuyến đi đầu tiên nhé!</p>
-          <NavLink to="/planner" className="btn btn-primary">Lên lịch ngay</NavLink>
+          <h3 className="text-xl font-semibold text-[#1e4230] mb-2">{t("history.empty.title")}</h3>
+          <p className="text-stone-500 mb-6">{t("history.empty.sub")}</p>
+          <NavLink to="/planner" className="btn btn-primary">{t("history.empty.cta")}</NavLink>
         </div>
       ) : (
         <div className="grid gap-8 md:grid-cols-2">
@@ -5580,7 +5581,7 @@ function HistoryPage({ user }) {
                 </div>
 
                 <div className="border-t border-stone-100 pt-4">
-                  <h4 className="text-xs font-bold text-[#1e4230] uppercase tracking-wider mb-3">Lịch trình chi tiết:</h4>
+                  <h4 className="text-xs font-bold text-[#1e4230] uppercase tracking-wider mb-3">{t("history.detail.label")}</h4>
                   <div className="space-y-3 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-stone-100">
                     {(itinerary.stops || []).map((stop, idx) => (
                       <div key={idx} className="flex gap-4 relative">
@@ -5604,7 +5605,7 @@ function HistoryPage({ user }) {
                   onClick={() => navigate(`/planner?itinerary=${itinerary.id}`)}
                   className="btn btn-primary w-full text-center flex items-center justify-center gap-2"
                 >
-                  <MapPin size={16} /> Xem Lại Lịch Trình & Đặt Xe
+                  <MapPin size={16} /> {t("history.btn.view")}
                 </button>
               </div>
             </motion.div>
