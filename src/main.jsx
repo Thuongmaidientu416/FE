@@ -82,7 +82,6 @@ import {
 const navItems = [
   ["Trang chủ", "/"],
   ["Về WanderHUB", "/about"],
-  ["Gói dịch vụ", "/pricing"],
   ["Khám phá", "/explore"],
   ["Đánh giá", "/reviews"],
   ["Liên hệ", "/contact"],
