@@ -1915,9 +1915,12 @@ const csQuickReplies = [
 ];
 
 function FloatingChatBot() {
+  const { isEn } = useT();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { from: "ai", text: "Xin chào! Tôi là WanderBot của WanderHUB. \n\nTôi ở đây để giải đáp các thắc mắc dịch vụ, hỗ trợ các vấn đề phát sinh (CSKH) và giới thiệu thông tin hữu ích về các địa điểm cho bạn. Tôi có thể giúp gì cho bạn hôm nay?" }
+    { from: "ai", text: isEn
+      ? "Hello! I'm WanderBot by WanderHUB.\n\nI'm here to answer your questions, help with any issues, and share useful info about venues across Ho Chi Minh City. How can I help you today?"
+      : "Xin chào! Tôi là WanderBot của WanderHUB. \n\nTôi ở đây để giải đáp các thắc mắc dịch vụ, hỗ trợ các vấn đề phát sinh (CSKH) và giới thiệu thông tin hữu ích về các địa điểm cho bạn. Tôi có thể giúp gì cho bạn hôm nay?" }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -1959,12 +1962,13 @@ function FloatingChatBot() {
     setIsTyping(true);
 
     try {
-      const aiReply = await processUserMessage(msg, newMessages, groqKey || null);
+      const backendMsg = isEn ? `[RESPOND IN ENGLISH ONLY. Do not use Vietnamese.]\n\n${msg}` : msg;
+      const aiReply = await processUserMessage(backendMsg, newMessages, groqKey || null);
       setIsTyping(false);
       setMessages((p) => [...p, { from: "ai", text: aiReply }]);
     } catch (err) {
       setIsTyping(false);
-      setMessages((p) => [...p, { from: "ai", text: `Lỗi kết nối AI Engine: ${err.message}` }]);
+      setMessages((p) => [...p, { from: "ai", text: isEn ? `AI connection error: ${err.message}` : `Lỗi kết nối AI Engine: ${err.message}` }]);
     }
   };
 
@@ -1999,7 +2003,7 @@ function FloatingChatBot() {
                 <div>
                   <div className="wb-title">WanderBot AI</div>
                   <div className="wb-status">
-                    <span className="wb-dot" />Đang hoạt động
+                    <span className="wb-dot" />{isEn ? "Online" : "Đang hoạt động"}
                   </div>
                 </div>
               </div>
@@ -2052,7 +2056,10 @@ function FloatingChatBot() {
 
             {/* Quick replies */}
             <div className="wb-quick-replies">
-              {csQuickReplies.map((q) => (
+              {(isEn
+                ? ["What's a chill spot in District 1 tonight?", "Anything near Landmark 81?", "Romantic dinner on a budget", "Refund / Cancel plan"]
+                : csQuickReplies
+              ).map((q) => (
                 <button key={q} onClick={() => send(q)} className="wb-chip">{q}</button>
               ))}
             </div>
@@ -2063,7 +2070,7 @@ function FloatingChatBot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && send()}
-                placeholder="Nhắp câu hỏi..."
+                placeholder={isEn ? "Ask a question..." : "Nhắp câu hỏi..."}
                 className="wb-input"
               />
               <button onClick={() => send()} className="wb-send">
