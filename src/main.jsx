@@ -3600,84 +3600,94 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                 </div>
               )}
 
-              {/* Stop list */}
-              <div style={{ padding: "22px 22px 0" }}>
+              {/* Stop list — card grid */}
+              <div style={{ padding: "22px" }}>
                 <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", color: "#aaa", textTransform: "uppercase", marginBottom: "16px" }}>Chi tiết hành trình</div>
-                {selectedStops.map((stop, idx) => {
-                  const travelNext = rideLegs[idx + 1]?.travelFromPrevious;
-                  const price = Number(stop.avg_price_vnd || stop.cost_estimated || 0);
-                  const isFirst = idx === 0;
-                  const isLast = idx === selectedStops.length - 1;
-                  return (
-                    <div key={stop.provider_id || idx}>
-                      {/* Stop row */}
-                      <div style={{ display: "flex", gap: "0", background: "white", borderRadius: "16px", overflow: "hidden", boxShadow: "0 2px 10px rgba(30,66,48,0.07)", border: "1px solid #e8f0eb" }}>
-                        <div style={{ width: "4px", background: isFirst ? "#c96420" : isLast ? "#7c3aed" : "#2d5a3d", flexShrink: 0 }} />
-                        {stop.image_url && (
-                          <img src={stop.image_url} alt={stop.title} onError={e => { e.currentTarget.style.display = "none"; }}
-                            style={{ width: "104px", height: "104px", objectFit: "cover", flexShrink: 0 }} />
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px" }}>
+                  {selectedStops.map((stop, idx) => {
+                    const travelNext = rideLegs[idx + 1]?.travelFromPrevious;
+                    const price = Number(stop.avg_price_vnd || stop.cost_estimated || 0);
+                    const isFirst = idx === 0;
+                    const isLast = idx === selectedStops.length - 1;
+                    const accentColor = isFirst ? "#c96420" : isLast ? "#7c3aed" : "#2d5a3d";
+                    const fallbackImg = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop";
+                    return (
+                      <div key={stop.provider_id || idx} style={{ display: "contents" }}>
+                        <div style={{ background: "white", borderRadius: "20px", overflow: "hidden", boxShadow: "0 2px 12px rgba(30,66,48,0.09)", border: "1px solid #e8f0eb", display: "flex", flexDirection: "column" }}>
+                          {/* Image */}
+                          <div style={{ position: "relative", height: "160px", background: "#e8f0eb", overflow: "hidden", flexShrink: 0 }}>
+                            <img
+                              src={stop.image_url || fallbackImg}
+                              alt={stop.title}
+                              onError={e => { e.currentTarget.src = fallbackImg; }}
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                            {/* Step badge */}
+                            <div style={{ position: "absolute", top: "12px", left: "12px", width: "28px", height: "28px", borderRadius: "50%", background: accentColor, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", fontSize: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>{idx + 1}</div>
+                            {/* Category badge */}
+                            {stop.category && (
+                              <div style={{ position: "absolute", top: "12px", right: "12px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(4px)", borderRadius: "20px", padding: "3px 10px", fontSize: "10px", fontWeight: "700", color: "#1e4230", textTransform: "uppercase", letterSpacing: "0.5px" }}>{stop.category}</div>
+                            )}
+                            {/* Arrival time badge */}
+                            {stop.arrival_time && (
+                              <div style={{ position: "absolute", bottom: "10px", right: "10px", background: accentColor, color: "white", borderRadius: "8px", padding: "3px 9px", fontSize: "11px", fontWeight: "700" }}>🕐 {stop.arrival_time}</div>
+                            )}
+                          </div>
+
+                          {/* Content */}
+                          <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
+                            <div style={{ fontWeight: "800", fontSize: "15px", color: "#1e4230", lineHeight: 1.3 }}>{stop.title}</div>
+
+                            <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+                              {stop.district && <span style={{ fontSize: "10px", background: "#f3f0ff", color: "#6b21a8", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>📍 {stop.district}</span>}
+                              {stop.duration_min && <span style={{ fontSize: "10px", background: "#fff7ed", color: "#c96420", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>⏱ {stop.duration_min} phút</span>}
+                            </div>
+
+                            {stop.cuisine && (
+                              <div style={{ fontSize: "12px", color: "#1e4230", fontWeight: "700" }}>
+                                🍽️ {stop.cuisine}
+                                {stop.must_try?.length > 0 && <span style={{ fontWeight: "500", color: "#6b8576" }}> · {stop.must_try.join(", ")}</span>}
+                              </div>
+                            )}
+                            {!stop.cuisine && CATEGORY_BLURB[stop.category_code] && (
+                              <div style={{ fontSize: "12px", color: "#6b8576", lineHeight: 1.5 }}>{CATEGORY_BLURB[stop.category_code]}</div>
+                            )}
+
+                            {stop.highlights?.length > 0 && (
+                              <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                                {stop.highlights.map(h => (
+                                  <span key={h} style={{ fontSize: "10px", background: "#eef5f0", color: "#2d5a3d", borderRadius: "5px", padding: "2px 7px", fontWeight: "600" }}>{h}</span>
+                                ))}
+                              </div>
+                            )}
+
+                            {(stop.opening_hours || stop.address) && (
+                              <div style={{ fontSize: "11px", color: "#999", lineHeight: 1.7 }}>
+                                {stop.opening_hours && <div>🕐 {stop.opening_hours}</div>}
+                                {stop.address && <div>📍 {stop.address}</div>}
+                              </div>
+                            )}
+
+                            {stop.reason && <div style={{ fontSize: "11px", color: "#888", lineHeight: 1.5, fontStyle: "italic" }}>💡 {stop.reason}</div>}
+
+                            {price > 0 && (
+                              <div style={{ marginTop: "auto", paddingTop: "8px", borderTop: "1px solid #f0f0f0", fontSize: "13px", fontWeight: "800", color: accentColor }}>💰 {price.toLocaleString("vi-VN")} VNĐ</div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Travel connector — full width, between cards */}
+                        {!isLast && travelNext && (
+                          <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: "10px", padding: "0 4px" }}>
+                            <div style={{ flex: 1, height: "1px", background: "#ddeee5" }} />
+                            <div style={{ fontSize: "11px", color: "#7aaa8e", fontWeight: "600", background: "#f0f7f2", borderRadius: "8px", padding: "4px 14px", border: "1px dashed #b8d8c4", whiteSpace: "nowrap" }}>🚗 ~{travelNext} phút di chuyển</div>
+                            <div style={{ flex: 1, height: "1px", background: "#ddeee5" }} />
+                          </div>
                         )}
-                        <div style={{ flex: 1, padding: "14px 16px", minWidth: 0 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "6px" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                              <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: isFirst ? "#c96420" : isLast ? "#7c3aed" : "#2d5a3d", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", fontSize: "11px", flexShrink: 0 }}>{idx + 1}</div>
-                              <div style={{ fontWeight: "800", fontSize: "15px", color: "#1e4230", lineHeight: 1.2 }}>{stop.title}</div>
-                            </div>
-                            {stop.arrival_time && <div style={{ fontSize: "11px", fontWeight: "700", color: "#2d5a3d", background: "#e8f5e9", borderRadius: "6px", padding: "2px 8px", whiteSpace: "nowrap", flexShrink: 0 }}>🕐 {stop.arrival_time}</div>}
-                          </div>
-                          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "6px" }}>
-                            {stop.category && <span style={{ fontSize: "10px", background: "#f0f7f2", color: "#2d5a3d", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>{stop.category}</span>}
-                            {stop.district && <span style={{ fontSize: "10px", background: "#f3f0ff", color: "#6b21a8", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>📍 {stop.district}</span>}
-                            {stop.duration_min && <span style={{ fontSize: "10px", background: "#fff7ed", color: "#c96420", borderRadius: "4px", padding: "1px 7px", fontWeight: "600" }}>⏱ {stop.duration_min} phút</span>}
-                          </div>
-
-                          {/* Cuisine + dishes to try (real OSM data) */}
-                          {stop.cuisine && (
-                            <div style={{ fontSize: "12px", color: "#1e4230", fontWeight: "700", marginBottom: "5px" }}>
-                              🍽️ {stop.cuisine}
-                              {stop.must_try?.length > 0 && (
-                                <span style={{ fontWeight: "500", color: "#6b8576" }}> · Món nên thử: {stop.must_try.join(", ")}</span>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Generic blurb for non-food spots */}
-                          {!stop.cuisine && CATEGORY_BLURB[stop.category_code] && (
-                            <div style={{ fontSize: "12px", color: "#6b8576", lineHeight: 1.5, marginBottom: "5px" }}>{CATEGORY_BLURB[stop.category_code]}</div>
-                          )}
-
-                          {/* Amenity highlights (real OSM tags) */}
-                          {stop.highlights?.length > 0 && (
-                            <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "6px" }}>
-                              {stop.highlights.map(h => (
-                                <span key={h} style={{ fontSize: "10px", background: "#eef5f0", color: "#2d5a3d", borderRadius: "5px", padding: "2px 7px", fontWeight: "600" }}>{h}</span>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Practical info */}
-                          {(stop.opening_hours || stop.address || stop.phone) && (
-                            <div style={{ fontSize: "11px", color: "#999", lineHeight: 1.7, marginBottom: "6px" }}>
-                              {stop.opening_hours && <div>🕐 {stop.opening_hours}</div>}
-                              {stop.address && <div>📍 {stop.address}</div>}
-                              {stop.phone && <div>📞 {stop.phone}</div>}
-                            </div>
-                          )}
-
-                          {stop.reason && <div style={{ fontSize: "12px", color: "#888", lineHeight: 1.5, fontStyle: "italic", marginBottom: "4px" }}>💡 {stop.reason}</div>}
-                          {price > 0 && <div style={{ fontSize: "13px", fontWeight: "700", color: "#1e4230" }}>💰 {price.toLocaleString("vi-VN")} VNĐ</div>}
-                        </div>
                       </div>
-                      {/* Travel connector */}
-                      {!isLast && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "8px 0 8px 20px" }}>
-                          <div style={{ width: "2px", height: "24px", background: "#c8e0d0" }} />
-                          {travelNext && <div style={{ fontSize: "10px", color: "#7aaa8e", fontWeight: "600", background: "#f0f7f2", borderRadius: "6px", padding: "2px 10px", border: "1px dashed #b8d8c4" }}>🚗 ~{travelNext} phút di chuyển</div>}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
