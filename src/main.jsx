@@ -1083,23 +1083,32 @@ function Reveal({ children, className = "" }) {
   );
 }
 
-const heroMessages = [
-  { sub: "Landmark 81 → Nguyễn Huệ → Ốc Đào", main: ["Đi qua ánh đèn", "ven sông Sài Gòn."] },
-  { sub: "AI itinerary engine", main: ["Designed For Your Vibe,", "Built For Your Route."] },
-  { sub: "Bưu Điện → Secret Garden → Bến Thành", main: ["Khám phá Sài Gòn", "theo cách của bạn."] },
-];
+const heroMessages = {
+  vi: [
+    { sub: "Landmark 81 → Nguyễn Huệ → Ốc Đào", main: ["Đi qua ánh đèn", "ven sông Sài Gòn."] },
+    { sub: "AI itinerary engine", main: ["Designed For Your Vibe,", "Built For Your Route."] },
+    { sub: "Bưu Điện → Secret Garden → Bến Thành", main: ["Khám phá Sài Gòn", "theo cách của bạn."] },
+  ],
+  en: [
+    { sub: "Landmark 81 → Nguyễn Huệ → Ốc Đào", main: ["Through the lights", "along the Saigon River."] },
+    { sub: "AI itinerary engine", main: ["Designed For Your Vibe,", "Built For Your Route."] },
+    { sub: "Bưu Điện → Secret Garden → Bến Thành", main: ["Discover Saigon", "your way."] },
+  ],
+};
 
 function HeroCyclingText() {
+  const { lang } = useT();
+  const messages = heroMessages[lang] ?? heroMessages.vi;
   const [idx, setIdx] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setIdx((i) => (i + 1) % heroMessages.length), 3600);
+    const id = setInterval(() => setIdx((i) => (i + 1) % messages.length), 3600);
     return () => clearInterval(id);
-  }, []);
-  const { sub, main } = heroMessages[idx];
+  }, [messages.length]);
+  const { sub, main } = messages[idx];
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={idx}
+        key={`${lang}-${idx}`}
         initial={{ opacity: 0, y: 44 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -30 }}
@@ -2072,6 +2081,7 @@ function FloatingChatBot() {
 
 
 function Home({ user }) {
+  const { t } = useT();
 
   return (
     <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="overflow-hidden bg-[#fdf8f3]">
@@ -2087,20 +2097,16 @@ function Home({ user }) {
             <div className="hero-cycling-wrapper">
               <HeroCyclingText />
             </div>
-            <p className="hero-city-description">
-              Góc nhìn WanderHUB đồng hành cùng bạn trên hành trình khám phá thành phố: lướt qua tuyến ven sông Sài Gòn,
-              ngắm Landmark 81 phản chiếu trên mặt nước dưới ánh nắng ấm áp, nối tiếp các điểm cafe, ăn tối và check-in
-              đúng gu của bạn.
-            </p>
+            <p className="hero-city-description">{t("hero.desc")}</p>
             <div className="flex gap-4 mt-8 pointer-events-auto">
               <NavLink to={!user ? "/auth" : hasPlan() ? "/planner" : "/pricing"} className="btn btn-primary hero-main-cta">
-                Lên lịch trình ngay <ArrowRight size={18} />
+                {t("hero.cta.plan")} <ArrowRight size={18} />
               </NavLink>
-              <button 
+              <button
                 onClick={() => document.getElementById("experience-section")?.scrollIntoView({ behavior: "smooth" })}
                 className="btn btn-glass hero-main-cta"
               >
-                Xem Trải Nghiệm Đô Thị
+                {t("hero.cta.explore")}
               </button>
             </div>
           </div>
@@ -2129,8 +2135,8 @@ function Home({ user }) {
       <section className="editorial-section bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="section-eyebrow">Nền tảng WanderHUB</span>
-            <h2 className="section-title-large">Ba bước – Một hành trình.</h2>
+            <span className="section-eyebrow">{t("home.how.eyebrow")}</span>
+            <h2 className="section-title-large">{t("home.how.title")}</h2>
             <p className="text-stone-600">Từ khi chọn mood đến khi bước xuống xe, WanderHUB lo hết.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -2169,7 +2175,7 @@ function Home({ user }) {
           </div>
           <div className="text-center mt-10">
             <NavLink to={!user ? "/auth" : hasPlan() ? "/planner" : "/pricing"} className="btn btn-primary inline-flex items-center gap-2">
-              Thử tạo lịch trình ngay <ArrowRight size={16} />
+              {t("home.how.cta")} <ArrowRight size={16} />
             </NavLink>
           </div>
         </div>
@@ -2182,8 +2188,8 @@ function Home({ user }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <Reveal>
-              <span className="section-eyebrow">Thương hiệu WanderHUB</span>
-              <h2 className="section-title-large">Một góc nhìn lịch lãm về khám phá đô thị.</h2>
+              <span className="section-eyebrow">{t("home.about.eyebrow")}</span>
+              <h2 className="section-title-large">{t("home.about.title")}</h2>
               <p className="text-stone-600 leading-relaxed mb-6">
                 Chúng tôi tin rằng việc du ngoạn quanh thành phố Hồ Chí Minh không đơn giản là đi từ A đến B. Đó là sự khám phá
                 những ngóc ngách ẩn giấu, thưởng thức ly cà phê phin đúng điệu và cảm nhận nhịp đập năng động của Sài Gòn.
@@ -5282,6 +5288,7 @@ function Reviews() {
 }
 
 function PopularRecommendations() {
+  const { t } = useT();
   const [popular, setPopular] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -5306,7 +5313,7 @@ function PopularRecommendations() {
     return (
       <div className="py-16 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan mx-auto"></div>
-        <p className="text-sm text-stone-500 mt-2">Đang tải lịch trình đề xuất...</p>
+        <p className="text-sm text-stone-500 mt-2">{t("popular.loading")}</p>
       </div>
     );
   }
@@ -5317,9 +5324,9 @@ function PopularRecommendations() {
     <section className="editorial-section bg-[#fbf7f1] border-y border-[#2d5a3d]/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="section-eyebrow">Xu hướng khám phá Sài Gòn</span>
-          <h2 className="section-title-large">Lịch trình được yêu thích nhất</h2>
-          <p className="text-stone-600">Được đông đảo người dùng lựa chọn và xếp hạng cao. Click để trải nghiệm ngay.</p>
+          <span className="section-eyebrow">{t("home.popular.eyebrow")}</span>
+          <h2 className="section-title-large">{t("home.popular.title")}</h2>
+          <p className="text-stone-600">{t("home.popular.sub")}</p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-3">
@@ -5346,7 +5353,7 @@ function PopularRecommendations() {
                     </div>
                     {itinerary.select_count && (
                       <div className="absolute bottom-4 right-4 bg-[#2d5a3d] text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
-                        🔥 {itinerary.select_count} lượt chọn
+                        🔥 {itinerary.select_count} {t("popular.select_count")}
                       </div>
                     )}
                   </div>
