@@ -79,6 +79,79 @@ import {
   apiGetAdminFeedbacks
 } from "./api";
 
+const AnalyticsIcon = ({ className, active }) => (
+  <svg viewBox="0 0 24 24" width="24" height="24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="luxuryGradAnalytics" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={active ? "#ffffff" : "#2d5a3d"} />
+        <stop offset="100%" stopColor={active ? "#f5e3b5" : "#bf9b30"} />
+      </linearGradient>
+    </defs>
+    <rect x="3" y="3" width="18" height="18" rx="4.5" stroke="url(#luxuryGradAnalytics)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="7" y="11" width="2.5" height="6" rx="1.25" fill="url(#luxuryGradAnalytics)" />
+    <rect x="11" y="7" width="2.5" height="10" rx="1.25" fill="url(#luxuryGradAnalytics)" />
+    <rect x="15" y="9.5" width="2.5" height="7.5" rx="1.25" fill="url(#luxuryGradAnalytics)" />
+  </svg>
+);
+
+const CommunityIcon = ({ className, active }) => (
+  <svg viewBox="0 0 24 24" width="24" height="24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="luxuryGradCommunity" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={active ? "#ffffff" : "#2d5a3d"} />
+        <stop offset="100%" stopColor={active ? "#f5e3b5" : "#bf9b30"} />
+      </linearGradient>
+    </defs>
+    <circle cx="8.5" cy="8" r="3" stroke="url(#luxuryGradCommunity)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M3.5 18c0-2.5 2-4 5-4s5 1.5 5 4" stroke="url(#luxuryGradCommunity)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="15.5" cy="7.5" r="2.2" stroke="url(#luxuryGradCommunity)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 15.5c.8-1 2-1.5 3.5-1.5s3.5.7 3.5 2.5" stroke="url(#luxuryGradCommunity)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const SmartAIIcon = ({ className, active }) => (
+  <svg viewBox="0 0 24 24" width="24" height="24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="luxuryGradSmartAI" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={active ? "#ffffff" : "#2d5a3d"} />
+        <stop offset="100%" stopColor={active ? "#f5e3b5" : "#bf9b30"} />
+      </linearGradient>
+    </defs>
+    <path d="M12 3L15 9L21 12L15 15L12 21L9 15L3 12L9 9Z" stroke="url(#luxuryGradSmartAI)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="12" r="2" fill="url(#luxuryGradSmartAI)" />
+    <circle cx="5" cy="5" r="1" fill="url(#luxuryGradSmartAI)" />
+    <circle cx="19" cy="19" r="1" fill="url(#luxuryGradSmartAI)" />
+  </svg>
+);
+
+const ReviewsIcon = ({ className, active }) => (
+  <svg viewBox="0 0 24 24" width="24" height="24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="luxuryGradReviews" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={active ? "#ffffff" : "#2d5a3d"} />
+        <stop offset="100%" stopColor={active ? "#f5e3b5" : "#bf9b30"} />
+      </linearGradient>
+    </defs>
+    <path d="M21 11.5c0 3.8-3.5 7-8 7-1.3 0-2.5-.3-3.6-.8L4 19.5l1.3-4C4.4 14.5 4 13.1 4 11.5 4 7.7 7.5 4.5 12 4.5s8 3.2 8 7z" stroke="url(#luxuryGradReviews)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 7.5l1 2.4 2.6.2-2 1.7.6 2.5-2.2-1.3-2.2 1.3.6-2.5-2-1.7 2.6-.2z" fill="url(#luxuryGradReviews)" />
+  </svg>
+);
+
+const SupportIcon = ({ className, active }) => (
+  <svg viewBox="0 0 24 24" width="24" height="24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="luxuryGradSupport" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={active ? "#ffffff" : "#2d5a3d"} />
+        <stop offset="100%" stopColor={active ? "#f5e3b5" : "#bf9b30"} />
+      </linearGradient>
+    </defs>
+    <path d="M4 11V10a8 8 0 0 1 16 0v1" stroke="url(#luxuryGradSupport)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="2" y="11" width="3" height="5" rx="1.5" stroke="url(#luxuryGradSupport)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="19" y="11" width="3" height="5" rx="1.5" stroke="url(#luxuryGradSupport)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M19 13.5c0 3.5-3 5.5-7 5.5" stroke="url(#luxuryGradSupport)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const navItems = [
   ["Trang chủ", "/"],
   ["Về WanderHUB", "/about"],
@@ -5040,22 +5113,23 @@ function AdminDashboard({ user }) {
         <div className="grid gap-8 lg:grid-cols-[250px_1fr]">
           <div className="flex flex-col gap-2 bg-[#fbf7f1] p-4 rounded-3xl border border-stone-200/60 h-fit">
             {[
-              { id: "overview", label: "📊 Tổng quan", icon: Compass },
-              { id: "users", label: "👥 Người dùng", icon: Users },
-              { id: "itineraries", label: "🗺️ Lịch trình", icon: MapPin },
-              { id: "feedback", label: "💬 Ý kiến & Đánh giá", icon: ThumbsUp },
-              { id: "contact", label: "✉️ Liên hệ / Hỗ trợ", icon: Settings }
+              { id: "overview", label: "Tổng quan", icon: AnalyticsIcon },
+              { id: "users", label: "Người dùng", icon: CommunityIcon },
+              { id: "itineraries", label: "Lịch trình", icon: SmartAIIcon },
+              { id: "feedback", label: "Ý kiến & Đánh giá", icon: ReviewsIcon },
+              { id: "contact", label: "Liên hệ / Hỗ trợ", icon: SupportIcon }
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition ${
+                className={`w-full text-left px-4 py-3.5 rounded-2xl text-sm font-semibold transition flex items-center gap-3 ${
                   activeTab === tab.id
                     ? "bg-[#2d5a3d] text-white shadow-sm"
                     : "text-[#5a7a60] hover:bg-[#2d5a3d]/5"
                 }`}
               >
-                {tab.label}
+                <tab.icon className="w-5 h-5 transition-transform duration-200" active={activeTab === tab.id} />
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>
