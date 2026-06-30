@@ -1926,7 +1926,7 @@ function Home({ user }) {
         </div>
       </section>
 
-      <PopularRecommendations />
+      {user && <PopularRecommendations />}
 
       {/* SECTION 3: ABOUT WANDERHUB */}
       <section className="editorial-section">
