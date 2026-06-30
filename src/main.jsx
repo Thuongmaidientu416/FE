@@ -51,7 +51,32 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import { processUserMessage } from "./ai-llm/index";
-import { apiLogin, apiRegister, apiGenerateItinerary, apiRerouteItinerary, apiSubmitContact, apiTrackInteraction, apiSelectPlan, apiGetMyPlan, apiGetMe, apiGetVehicleAvailability, apiGetVehicleImage, apiBookVehicle, apiGetItinerary, clearToken, setToken } from "./api";
+import {
+  apiLogin,
+  apiRegister,
+  apiGenerateItinerary,
+  apiRerouteItinerary,
+  apiSubmitContact,
+  apiTrackInteraction,
+  apiSelectPlan,
+  apiGetMyPlan,
+  apiGetMe,
+  apiGetVehicleAvailability,
+  apiGetVehicleImage,
+  apiBookVehicle,
+  apiGetItinerary,
+  clearToken,
+  setToken,
+  apiGetPopularItineraries,
+  apiGetMyHistory,
+  apiGetAdminStats,
+  apiGetAdminUsers,
+  apiUpdateUserRole,
+  apiUpdateUserPlan,
+  apiGetAdminContacts,
+  apiGetAdminItineraries,
+  apiGetAdminFeedbacks
+} from "./api";
 
 const navItems = [
   ["Trang chủ", "/"],
@@ -401,12 +426,14 @@ const PLAN_BADGE_STYLES = {
 
 function Navbar({ user, userPlan, onLogout }) {
   const [open, setOpen] = useState(false);
+  const displayedNavItems = user ? [...navItems, ["Lịch sử", "/history"]] : navItems;
+
   return (
     <header className="site-nav fixed left-4 right-4 top-4 z-50">
       <div className="nav-glass mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo />
         <nav className="hidden items-center gap-7 lg:flex">
-          {navItems.map(([label, href]) => (
+          {displayedNavItems.map(([label, href]) => (
             <NavLink
               id={`nav-link-${href.replace("/", "") || "home"}`}
               key={href}
@@ -422,6 +449,15 @@ function Navbar({ user, userPlan, onLogout }) {
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
             <>
+              {user.role === "admin" && (
+                <NavLink
+                  id="nav-btn-admin"
+                  to="/admin"
+                  className="mr-2 text-xs font-semibold px-2.5 py-1 rounded-full border border-[#c96420]/30 bg-[#c96420]/5 text-[#c96420] hover:bg-[#c96420]/10 transition"
+                >
+                  🛡️ Admin Panel
+                </NavLink>
+              )}
               <span className="text-sm font-semibold text-[#1e4230]">Chào, {user.name}!</span>
               {userPlan && (
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${PLAN_BADGE_STYLES[userPlan.plan_key] || PLAN_BADGE_STYLES.basic}`}>
@@ -450,7 +486,7 @@ function Navbar({ user, userPlan, onLogout }) {
       {open && (
         <div className="nav-mobile mx-auto mt-3 max-w-7xl px-4 py-4 lg:hidden">
           <div className="flex flex-col gap-3">
-            {[...navItems, ["FAQ", "/faq"], ["Điều khoản", "/terms"]].map(([label, href]) => (
+            {[...displayedNavItems, ["FAQ", "/faq"], ["Điều khoản", "/terms"]].map(([label, href]) => (
               <NavLink
                 id={`nav-mobile-link-${href.replace("/", "")}`}
                 key={href}
@@ -463,6 +499,11 @@ function Navbar({ user, userPlan, onLogout }) {
             ))}
             {user ? (
               <>
+                {user.role === "admin" && (
+                  <NavLink id="nav-mobile-btn-admin" to="/admin" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-[#c96420] font-bold">
+                    🛡️ Admin Control
+                  </NavLink>
+                )}
                 <span className="px-3 py-2 text-sm font-semibold text-[#1e4230]">Chào, {user.name}!</span>
                 <button onClick={() => { onLogout(); setOpen(false); }} className="btn btn-ghost w-full justify-center">
                   Đăng xuất
@@ -1636,6 +1677,8 @@ function Home({ user }) {
           </div>
         </div>
       </section>
+
+      <PopularRecommendations />
 
       {/* SECTION 3: ABOUT WANDERHUB */}
       <section className="editorial-section">
@@ -4692,6 +4735,557 @@ function Reviews() {
   );
 }
 
+function PopularRecommendations() {
+  const [popular, setPopular] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    apiGetPopularItineraries()
+      .then(setPopular)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="py-16 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan mx-auto"></div>
+        <p className="text-sm text-stone-500 mt-2">Đang tải lịch trình đề xuất...</p>
+      </div>
+    );
+  }
+
+  if (popular.length === 0) return null;
+
+  return (
+    <section className="editorial-section bg-[#fbf7f1] border-y border-[#2d5a3d]/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="section-eyebrow">Xu hướng khám phá Sài Gòn</span>
+          <h2 className="section-title-large">Lịch trình được yêu thích nhất</h2>
+          <p className="text-stone-600">Được đông đảo người dùng lựa chọn và xếp hạng cao. Click để trải nghiệm ngay.</p>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-3">
+          {popular.map((itinerary, i) => {
+            const firstStopImage = itinerary.stops?.[0]?.image_url || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop";
+            return (
+              <motion.div
+                key={itinerary.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="bg-white rounded-3xl overflow-hidden border border-stone-200/60 shadow-sm flex flex-col justify-between group hover:shadow-md transition"
+              >
+                <div>
+                  <div className="relative h-48 overflow-hidden bg-stone-100">
+                    <img
+                      src={firstStopImage}
+                      alt={itinerary.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    />
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#1e4230] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                      {itinerary.mood_code || "Chill"}
+                    </div>
+                    {itinerary.select_count && (
+                      <div className="absolute bottom-4 right-4 bg-[#2d5a3d] text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
+                        🔥 {itinerary.select_count} lượt chọn
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="p-6">
+                    <h3 className="text-lg font-bold text-[#1e4230] mb-3 line-clamp-1">{itinerary.title}</h3>
+                    <div className="flex gap-x-3 text-xs text-stone-500 mb-4">
+                      <span>📍 {itinerary.district_preference}</span>
+                      <span>⏱️ {itinerary.total_duration}</span>
+                      <span>💰 {itinerary.total_cost}</span>
+                    </div>
+
+                    <div className="space-y-2 border-t border-stone-100 pt-4">
+                      <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Hành trình:</p>
+                      {itinerary.stops?.slice(0, 3).map((stop, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-sm text-stone-700">
+                          <span className="w-5 h-5 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center text-xs font-bold">
+                            {stop.step}
+                          </span>
+                          <span className="font-medium line-clamp-1">{stop.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 pt-0">
+                  <button
+                    onClick={() => navigate(`/planner?itinerary=${itinerary.id}`)}
+                    className="btn btn-primary w-full text-center py-2.5 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 group-hover:bg-[#1e4230]"
+                  >
+                    Xem Chi Tiết & Đi Ngay <ArrowRight size={15} />
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HistoryPage({ user }) {
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    apiGetMyHistory()
+      .then((data) => {
+        setHistory(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Không thể tải lịch sử chuyến đi.");
+        setLoading(false);
+      });
+  }, [user]);
+
+  if (!user) {
+    return (
+      <PageShell eyebrow="Lịch sử chuyến đi" title="Lịch sử của bạn">
+        <div className="text-center py-20 bg-white rounded-3xl border border-stone-100 shadow-sm px-6">
+          <Calendar size={48} className="mx-auto text-stone-300 mb-4" />
+          <h3 className="text-xl font-semibold text-[#1e4230] mb-2">Bạn chưa đăng nhập</h3>
+          <p className="text-stone-500 mb-6">Đăng nhập để lưu và xem lại các lịch trình đã đi của bạn.</p>
+          <NavLink to="/auth" className="btn btn-primary">Đăng nhập ngay</NavLink>
+        </div>
+      </PageShell>
+    );
+  }
+
+  return (
+    <PageShell eyebrow="Lịch sử hành trình" title="Chuyến đi đã chốt">
+      {loading ? (
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan mx-auto"></div>
+          <p className="text-stone-500 mt-4">Đang tải lịch sử hành trình...</p>
+        </div>
+      ) : error ? (
+        <div className="text-center py-20 text-red-500">{error}</div>
+      ) : history.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-3xl border border-stone-100 shadow-sm px-6">
+          <Calendar size={48} className="mx-auto text-stone-300 mb-4" />
+          <h3 className="text-xl font-semibold text-[#1e4230] mb-2">Chưa có chuyến đi nào</h3>
+          <p className="text-stone-500 mb-6">Bạn chưa lưu hay chốt lịch trình nào. Hãy bắt đầu chuyến đi đầu tiên nhé!</p>
+          <NavLink to="/planner" className="btn btn-primary">Lên lịch ngay</NavLink>
+        </div>
+      ) : (
+        <div className="grid gap-8 md:grid-cols-2">
+          {history.map((itinerary) => (
+            <motion.div
+              key={itinerary.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-3xl border border-[#2d5a3d]/10 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between"
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan/10 text-cyan uppercase tracking-wider">
+                    {itinerary.mood_code || "Chill"}
+                  </span>
+                  <span className="text-xs text-stone-400">
+                    {new Date(itinerary.created_at || Date.now()).toLocaleDateString("vi-VN", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-bold text-[#1e4230] mb-2">{itinerary.title}</h3>
+                
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-500 mb-6">
+                  <span>📍 {itinerary.district_preference || "TP.HCM"}</span>
+                  <span>⏱️ {itinerary.total_duration}</span>
+                  <span>💰 {itinerary.total_cost}</span>
+                  <span>🚗 {itinerary.transport_mode}</span>
+                </div>
+
+                <div className="border-t border-stone-100 pt-4">
+                  <h4 className="text-xs font-bold text-[#1e4230] uppercase tracking-wider mb-3">Lịch trình chi tiết:</h4>
+                  <div className="space-y-3 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-stone-100">
+                    {(itinerary.stops || []).map((stop, idx) => (
+                      <div key={idx} className="flex gap-4 relative">
+                        <div className="w-6 h-6 rounded-full bg-[#2d5a3d] text-white flex items-center justify-center text-xs font-semibold z-10 shrink-0">
+                          {stop.step}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#1e4230]">{stop.title}</p>
+                          <p className="text-xs text-stone-400">
+                            {stop.arrival_time} • {stop.category} • {stop.district}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 bg-stone-50 border-t border-stone-100 flex items-center justify-between">
+                <button
+                  onClick={() => navigate(`/planner?itinerary=${itinerary.id}`)}
+                  className="btn btn-primary w-full text-center flex items-center justify-center gap-2"
+                >
+                  <MapPin size={16} /> Xem Lại Lịch Trình & Đặt Xe
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </PageShell>
+  );
+}
+
+function AdminDashboard({ user }) {
+  const [stats, setStats] = useState(null);
+  const [usersList, setUsersList] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [itineraries, setItineraries] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [updatingUserId, setUpdatingUserId] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user || user.role !== "admin") {
+      navigate("/");
+      return;
+    }
+    
+    Promise.all([
+      apiGetAdminStats(),
+      apiGetAdminUsers(),
+      apiGetAdminContacts(),
+      apiGetAdminItineraries(),
+      apiGetAdminFeedbacks()
+    ]).then(([statsData, usersData, contactsData, itinerariesData, feedbacksData]) => {
+      setStats(statsData);
+      setUsersList(usersData);
+      setContacts(contactsData);
+      setItineraries(itinerariesData);
+      setFeedbacks(feedbacksData);
+      setLoading(false);
+    }).catch(err => {
+      console.error(err);
+      alert("Lỗi tải dữ liệu quản trị. Bạn có chắc mình có quyền Admin?");
+      setLoading(false);
+    });
+  }, [user, navigate]);
+
+  const handleRoleChange = async (userId, currentRole) => {
+    const newRole = currentRole === "admin" ? "user" : "admin";
+    if (!window.confirm(`Xác nhận thay đổi vai trò của người dùng này thành ${newRole}?`)) return;
+    
+    setUpdatingUserId(userId);
+    try {
+      await apiUpdateUserRole(userId, newRole);
+      setUsersList(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      const newStats = await apiGetAdminStats();
+      setStats(newStats);
+    } catch (err) {
+      alert("Không thể thay đổi vai trò.");
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  const handlePlanChange = async (userId, planName) => {
+    let planKey = "basic";
+    if (planName === "Premium") planKey = "premium";
+    else if (planName === "International Tourist") planKey = "international";
+
+    setUpdatingUserId(userId);
+    try {
+      await apiUpdateUserPlan(userId, planName, planKey);
+      setUsersList(prev => prev.map(u => u.id === userId ? { ...u, plan_name: planName } : u));
+      const newStats = await apiGetAdminStats();
+      setStats(newStats);
+    } catch (err) {
+      alert("Không thể cập nhật gói.");
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  if (!user || user.role !== "admin") return null;
+
+  return (
+    <PageShell eyebrow="🛡️ Trang quản trị hệ thống" title="WanderHUB Admin Console">
+      {loading ? (
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan mx-auto"></div>
+          <p className="text-stone-500 mt-4">Đang tải dữ liệu hệ thống...</p>
+        </div>
+      ) : (
+        <div className="grid gap-8 lg:grid-cols-[250px_1fr]">
+          <div className="flex flex-col gap-2 bg-[#fbf7f1] p-4 rounded-3xl border border-stone-200/60 h-fit">
+            {[
+              { id: "overview", label: "📊 Tổng quan", icon: Compass },
+              { id: "users", label: "👥 Người dùng", icon: Users },
+              { id: "itineraries", label: "🗺️ Lịch trình", icon: MapPin },
+              { id: "feedback", label: "💬 Ý kiến & Đánh giá", icon: ThumbsUp },
+              { id: "contact", label: "✉️ Liên hệ / Hỗ trợ", icon: Settings }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition ${
+                  activeTab === tab.id
+                    ? "bg-[#2d5a3d] text-white shadow-sm"
+                    : "text-[#5a7a60] hover:bg-[#2d5a3d]/5"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white p-8 rounded-3xl border border-stone-200/60 shadow-sm">
+            {activeTab === "overview" && stats && (
+              <div className="space-y-8 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#1e4230]">Số liệu tổng quan</h3>
+                
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    { label: "Tổng người dùng", val: stats.metrics.users, color: "bg-blue-50 text-blue-600" },
+                    { label: "Lịch trình đã tạo", val: stats.metrics.itineraries, color: "bg-green-50 text-green-600" },
+                    { label: "Yêu cầu đặt xe", val: stats.metrics.bookings, color: "bg-orange-50 text-orange-600" },
+                    { label: "Yêu cầu liên hệ", val: stats.metrics.contacts, color: "bg-purple-50 text-purple-600" }
+                  ].map((card, i) => (
+                    <div key={i} className={`p-6 rounded-2xl ${card.color.split(" ")[0]} border border-stone-100 flex flex-col justify-between`}>
+                      <span className="text-sm font-semibold opacity-75">{card.label}</span>
+                      <strong className="text-3xl font-black mt-2">{card.val}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid gap-8 md:grid-cols-2 pt-6">
+                  <div className="border border-stone-100 p-6 rounded-2xl bg-stone-50/50">
+                    <h4 className="font-bold text-[#1e4230] mb-4">💡 Breakdown theo Mood</h4>
+                    <div className="space-y-3">
+                      {Object.entries(stats.breakdown.vibes).length === 0 ? (
+                        <p className="text-sm text-stone-400">Chưa có lịch trình.</p>
+                      ) : (
+                        Object.entries(stats.breakdown.vibes).map(([vibe, count]) => (
+                          <div key={vibe} className="flex justify-between items-center text-sm border-b border-stone-100 pb-2">
+                            <span className="font-medium capitalize">{vibe}</span>
+                            <span className="font-bold text-stone-600">{count} chuyến</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border border-stone-100 p-6 rounded-2xl bg-stone-50/50">
+                    <h4 className="font-bold text-[#1e4230] mb-4">💎 Breakdown theo Gói dịch vụ</h4>
+                    <div className="space-y-3">
+                      {Object.entries(stats.breakdown.plans).length === 0 ? (
+                        <p className="text-sm text-stone-400">Chưa có người dùng đăng ký gói.</p>
+                      ) : (
+                        Object.entries(stats.breakdown.plans).map(([plan, count]) => (
+                          <div key={plan} className="flex justify-between items-center text-sm border-b border-stone-100 pb-2">
+                            <span className="font-medium">{plan}</span>
+                            <span className="font-bold text-stone-600">{count} người</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "users" && (
+              <div className="space-y-6 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#1e4230] mb-4">Quản lý người dùng</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-stone-200 text-[#5a7a60] font-semibold">
+                        <th className="py-3 px-4">Tên</th>
+                        <th className="py-3 px-4">Email</th>
+                        <th className="py-3 px-4">Vai trò</th>
+                        <th className="py-3 px-4">Gói dịch vụ</th>
+                        <th className="py-3 px-4">Tháng này</th>
+                        <th className="py-3 px-4 text-right">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-100">
+                      {usersList.map(u => (
+                        <tr key={u.id} className="hover:bg-stone-50/40">
+                          <td className="py-3 px-4 font-medium text-stone-800">{u.name}</td>
+                          <td className="py-3 px-4 text-stone-600">{u.email}</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${u.role === "admin" ? "bg-red-100 text-red-700" : "bg-stone-100 text-stone-600"}`}>
+                              {u.role}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="font-medium text-stone-700">{u.plan_name || "Free"}</span>
+                          </td>
+                          <td className="py-3 px-4 text-stone-500">{u.usage_this_month || 0} lần tạo</td>
+                          <td className="py-3 px-4 text-right space-x-2">
+                            <button
+                              disabled={updatingUserId === u.id}
+                              onClick={() => handleRoleChange(u.id, u.role)}
+                              className="text-xs bg-stone-100 text-stone-700 hover:bg-stone-200 px-2 py-1 rounded transition disabled:opacity-50"
+                            >
+                              Toggle Role
+                            </button>
+                            <select
+                              disabled={updatingUserId === u.id}
+                              value={u.plan_name || "Free"}
+                              onChange={(e) => handlePlanChange(u.id, e.target.value)}
+                              className="text-xs bg-[#2d5a3d]/5 text-[#2d5a3d] hover:bg-[#2d5a3d]/10 px-2 py-1 rounded outline-none border-none transition"
+                            >
+                              <option value="Free">Gói Free</option>
+                              <option value="Basic">Gói Basic</option>
+                              <option value="Premium">Gói Premium</option>
+                              <option value="International Tourist">Gói International</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "itineraries" && (
+              <div className="space-y-6 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#1e4230] mb-4">Danh sách lịch trình đã tạo</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-stone-200 text-[#5a7a60] font-semibold">
+                        <th className="py-3 px-4">ID</th>
+                        <th className="py-3 px-4">Tiêu đề</th>
+                        <th className="py-3 px-4">Người tạo</th>
+                        <th className="py-3 px-4">Khu vực</th>
+                        <th className="py-3 px-4">Mood</th>
+                        <th className="py-3 px-4">Chi phí</th>
+                        <th className="py-3 px-4">Ngày tạo</th>
+                        <th className="py-3 px-4 text-right">Chi tiết</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-100">
+                      {itineraries.map(it => (
+                        <tr key={it.id} className="hover:bg-stone-50/40">
+                          <td className="py-3 px-4 text-stone-400">#{it.id}</td>
+                          <td className="py-3 px-4 font-medium text-stone-800">{it.title}</td>
+                          <td className="py-3 px-4">
+                            <div className="text-stone-800">{it.user_name || "Guest"}</div>
+                            <div className="text-xs text-stone-400">{it.user_email}</div>
+                          </td>
+                          <td className="py-3 px-4 text-stone-600">{it.district_preference}</td>
+                          <td className="py-3 px-4">
+                            <span className="px-2 py-0.5 rounded bg-cyan/10 text-cyan text-xs uppercase font-bold">{it.mood_code}</span>
+                          </td>
+                          <td className="py-3 px-4 font-semibold text-stone-700">
+                            {it.total_cost_estimated ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(it.total_cost_estimated) : "N/A"}
+                          </td>
+                          <td className="py-3 px-4 text-stone-500">
+                            {new Date(it.created_at).toLocaleDateString("vi-VN")}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <button
+                              onClick={() => navigate(`/planner?itinerary=${it.id}`)}
+                              className="text-xs text-cyan hover:underline"
+                            >
+                              Xem
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "feedback" && (
+              <div className="space-y-6 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#1e4230] mb-4">Phản hồi & Đánh giá</h3>
+                {feedbacks.length === 0 ? (
+                  <p className="text-stone-500 py-6">Chưa có phản hồi hay đánh giá nào từ người dùng.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {feedbacks.map(f => (
+                      <div key={f.id} className="p-5 rounded-2xl border border-stone-150 bg-stone-50/30">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <strong className="text-[#1e4230]">{f.user_name}</strong>
+                            <span className="text-xs text-stone-400 ml-2">({f.user_email})</span>
+                          </div>
+                          <span className="text-xs text-stone-400">{new Date(f.created_at || Date.now()).toLocaleDateString("vi-VN")}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-orange-500 mb-2">
+                          {Array.from({ length: 5 }).map((_, idx) => (
+                            <span key={idx}>{idx < f.rating ? "★" : "☆"}</span>
+                          ))}
+                          <span className="text-stone-500 text-xs ml-2 font-medium">Lịch trình: {f.itinerary_title}</span>
+                        </div>
+                        <p className="text-sm text-stone-600 italic">"{f.comment}"</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "contact" && (
+              <div className="space-y-6 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#1e4230] mb-4">Danh sách hỗ trợ & Liên hệ</h3>
+                {contacts.length === 0 ? (
+                  <p className="text-stone-500 py-6">Không có thư liên hệ hỗ trợ nào.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {contacts.map(c => (
+                      <div key={c.id} className="p-6 rounded-2xl border border-stone-150 bg-[#fdf8f3]">
+                        <div className="flex justify-between items-start mb-3 border-b border-stone-100 pb-2">
+                          <div>
+                            <h4 className="font-bold text-stone-800 text-base">{c.subject}</h4>
+                            <p className="text-xs text-stone-500">
+                              Người gửi: <span className="font-semibold">{c.name}</span> &lt;{c.email}&gt;
+                            </p>
+                          </div>
+                          <span className="text-xs text-stone-400">{new Date(c.created_at).toLocaleDateString("vi-VN")}</span>
+                        </div>
+                        <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed">{c.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </PageShell>
+  );
+}
+
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -4770,6 +5364,8 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/auth" element={<Auth setUser={setUser} />} />
           <Route path="/planner" element={<PlannerV2 userPlan={userPlan} setUserPlan={setUserPlan} />} />
+          <Route path="/history" element={<HistoryPage user={user} />} />
+          <Route path="/admin" element={<AdminDashboard user={user} />} />
         </Routes>
       </AnimatePresence>
       <Footer user={user} />

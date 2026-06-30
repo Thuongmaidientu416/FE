@@ -185,3 +185,50 @@ export async function apiSubmitContact(name, email, subject, message) {
     body: JSON.stringify({ name, email, subject, message }),
   });
 }
+
+// ── Itinerary Extensions ─────────────────────────────────────────
+
+export async function apiGetPopularItineraries() {
+  return request('/api/itinerary/popular');
+}
+
+export async function apiGetMyHistory() {
+  return request('/api/itinerary/history/me');
+}
+
+// ── Admin Dashboard ──────────────────────────────────────────────
+
+export async function apiGetAdminStats() {
+  return request('/api/admin/stats');
+}
+
+export async function apiGetAdminUsers() {
+  return request('/api/admin/users');
+}
+
+export async function apiUpdateUserRole(userId, role) {
+  return request(`/api/admin/users/${userId}/role`, {
+    method: 'PUT',
+    body: JSON.stringify({ role }),
+  });
+}
+
+export async function apiUpdateUserPlan(userId, planName, planKey = 'basic') {
+  return request(`/api/admin/users/${userId}/plan`, {
+    method: 'PUT',
+    body: JSON.stringify({ plan_name: planName, plan_key: planKey }),
+  });
+}
+
+export async function apiGetAdminContacts() {
+  return request('/api/admin/contacts');
+}
+
+export async function apiGetAdminItineraries() {
+  return request('/api/admin/itineraries');
+}
+
+export async function apiGetAdminFeedbacks() {
+  return request('/api/admin/feedbacks');
+}
+
