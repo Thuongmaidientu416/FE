@@ -938,7 +938,7 @@ function Navbar({ user, userPlan, onLogout }) {
 
   const displayedNavItems = user
     ? [...NAV_ITEMS, { key: "nav.history", href: "/history" }]
-    : NAV_ITEMS.filter(({ href }) => href !== "/pricing");
+    : NAV_ITEMS;
 
   return (
     <header className="site-nav fixed left-4 right-4 top-4 z-50">
