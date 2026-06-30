@@ -156,6 +156,7 @@ const navItems = [
   ["Trang chủ", "/"],
   ["Về WanderHUB", "/about"],
   ["Khám phá", "/explore"],
+  ["Gói dịch vụ", "/pricing"],
   ["Đánh giá", "/reviews"],
   ["Liên hệ", "/contact"],
 ];
