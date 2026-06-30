@@ -1,4 +1,4 @@
-// WanderHUB - Entrypoint (Redeploy trigger)
+﻿// WanderHUB - Entrypoint (Redeploy trigger)
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import L from "leaflet";
@@ -453,6 +453,12 @@ const TRANSLATIONS = {
     "common.book_driver": "Đặt xe ngay",
     "common.view_again": "Xem Lại",
     "common.start_plan": "Lên lịch ngay",
+    "planner.mood.helper": "Theo bảng moods trong database",
+    "planner.district.helper": "Chạm để chọn quận, không cần gõ",
+    "planner.interests.helper": "Checkbox chọn nhiều mục để cá nhân hóa route",
+    "planner.transport.walk": "Đi bộ thong thả",
+    "planner.transport.motorbike": "Tự lái xe máy",
+    "planner.transport.hire": "Thuê xe",
   },
   en: {
     "nav.home": "Home",
@@ -571,6 +577,12 @@ const TRANSLATIONS = {
     "common.book_driver": "Book a Ride",
     "common.view_again": "View Again",
     "common.start_plan": "Plan Now",
+    "planner.mood.helper": "Browse moods from our database",
+    "planner.district.helper": "Tap to select a district",
+    "planner.interests.helper": "Select multiple to personalize your route",
+    "planner.transport.walk": "Walk & explore",
+    "planner.transport.motorbike": "Self-ride motorbike",
+    "planner.transport.hire": "Hire a driver",
   },
 };
 
@@ -3614,6 +3626,7 @@ const LOCAL_PHRASES = {
 
 
 function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, setShowQrCode, selectedStops, routeCost, routeDuration, selectedMood, district }) {
+  const { t, isEn } = useT();
   const mapContainerRef = useRef(null);
   const leafletInstanceRef = useRef(null);
   const [activeIndex] = useState(0);
@@ -3845,9 +3858,9 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
           <div style={{ background: "linear-gradient(135deg,#1a3a2a,#2d5a3d,#3a7a52)", padding: "20px 22px 16px", flexShrink: 0 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "9px", fontWeight: "700", letterSpacing: "2.5px", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", marginBottom: "5px" }}>✦ WanderHUB · Lịch trình cá nhân</div>
+                <div style={{ fontSize: "9px", fontWeight: "700", letterSpacing: "2.5px", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", marginBottom: "5px" }}>{t("modal.header.label")}</div>
                 <div style={{ fontSize: "19px", fontWeight: "900", color: "white", lineHeight: 1.2 }}>{selectedMood?.label || "Hành trình"} · {district?.name}</div>
-                <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", marginTop: "3px" }}>{selectedStops.length} điểm dừng · {routeDuration} · {transport}</div>
+                <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", marginTop: "3px" }}>{selectedStops.length} {t("modal.stops")} · {routeDuration} · {transport}</div>
               </div>
               <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
                 <button onClick={() => setShowItineraryModal(false)} style={{ background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: "50%", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "white", fontSize: "15px" }}>✕</button>
@@ -3871,12 +3884,12 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
               {vehicleStatus === "booked" && bookedDriver && (
                 <div style={{ background: "#1e4230", color: "white", padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
                   <div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", marginBottom: "2px" }}>Tài xế đã xác nhận</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", marginBottom: "2px" }}>{t("modal.driver.confirmed")}</div>
                     <div style={{ fontSize: "15px", fontWeight: "800" }}>{bookedDriver.name} · ⭐ {bookedDriver.rating}</div>
                     <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "2px" }}>{bookedDriver.plate} · ETA ~{bookedDriver.eta_minutes} phút</div>
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", marginBottom: "2px" }}>Giá xe</div>
+                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", marginBottom: "2px" }}>{t("modal.driver.fare")}</div>
                     <div style={{ fontSize: "18px", fontWeight: "900", color: "#86efac" }}>{bookedPrice.toLocaleString("vi-VN")} VNĐ</div>
                   </div>
                 </div>
@@ -3884,7 +3897,7 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
 
               {/* Stop list — card grid */}
               <div style={{ padding: "22px" }}>
-                <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", color: "#aaa", textTransform: "uppercase", marginBottom: "16px" }}>Chi tiết hành trình</div>
+                <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", color: "#aaa", textTransform: "uppercase", marginBottom: "16px" }}>{t("modal.trip.detail")}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px" }}>
                   {selectedStops.map((stop, idx) => {
                     const travelNext = rideLegs[idx + 1]?.travelFromPrevious;
@@ -3983,10 +3996,10 @@ function JourneyTracker({ rideLegs, transport, totalRideMinutes, itineraryId, se
                   size={116} level="M" includeMargin={false} fgColor="#1e4230" />
               </div>
               <div style={{ fontSize: "10px", fontWeight: "700", color: "#2d5a3d", textAlign: "center", lineHeight: 1.3 }}>
-                📱 Quét để {itineraryId ? "mở & chia sẻ" : "xem"}<br/>lịch trình
+                📱 {t("modal.qr.scan")} {itineraryId ? t("modal.qr.open") : t("modal.qr.view")}<br/>{t("modal.qr.label")}
               </div>
               {itineraryId && (
-                <button onClick={() => setShowQrCode(true)} style={{ fontSize: "10px", color: "#c96420", fontWeight: "700", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Phóng to QR ↗</button>
+                <button onClick={() => setShowQrCode(true)} style={{ fontSize: "10px", color: "#c96420", fontWeight: "700", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>{t("modal.qr.expand")}</button>
               )}
             </div>
           </div>
@@ -4697,7 +4710,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
           <div className="planner-field">
             <div className="planner-field-head">
               <span>{t("planner.mood.label")}</span>
-              <small>Theo bảng moods trong database</small>
+              <small>{t("planner.mood.helper")}</small>
             </div>
             <div className="choice-grid mood-choice-grid">
               {moodOptions.map(({ code, label, hint, icon: Icon }) => (
@@ -4713,7 +4726,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
           <div className="planner-field">
             <div className="planner-field-head">
               <span>{t("planner.district.label")}</span>
-              <small>Chạm để chọn quận, không cần gõ</small>
+              <small>{t("planner.district.helper")}</small>
             </div>
             <div className="district-grid">
               {districtOptions.map((item) => (
@@ -4754,7 +4767,7 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
           <div className="planner-field">
             <div className="planner-field-head">
               <span>{t("planner.interests.label")}</span>
-              <small>Checkbox chọn nhiều mục để cá nhân hóa route</small>
+              <small>{t("planner.interests.helper")}</small>
             </div>
             <div className="interest-grid">
               {interestOptions.map(({ code, label, icon: Icon }) => {
@@ -4773,9 +4786,13 @@ function PlannerV2({ userPlan = null, setUserPlan = null }) {
           <div className="planner-field">
             <div className="planner-field-head"><span>{t("planner.transport.label")}</span></div>
             <div className="transport-row">
-              {["Thuê xe", "Đi bộ thong thả", "Tự lái xe máy"].map((item) => (
-                <button key={item} type="button" className={`transport-chip ${transport === item ? "is-active" : ""}`} onClick={() => setTransport(item)}>
-                  <Car size={16} /> {item}
+              {[
+                { value: "Thuê xe", label: t("planner.transport.hire") },
+                { value: "Đi bộ thong thả", label: t("planner.transport.walk") },
+                { value: "Tự lái xe máy", label: t("planner.transport.motorbike") },
+              ].map((item) => (
+                <button key={item.value} type="button" className={`transport-chip ${transport === item.value ? "is-active" : ""}`} onClick={() => setTransport(item.value)}>
+                  <Car size={16} /> {item.label}
                 </button>
               ))}
             </div>
