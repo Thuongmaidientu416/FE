@@ -5080,9 +5080,145 @@ function AdminDashboard({ user }) {
                   ))}
                 </div>
 
-                <div className="grid gap-8 md:grid-cols-2 pt-6">
-                  <div className="border border-stone-100 p-6 rounded-2xl bg-stone-50/50">
-                    <h4 className="font-bold text-[#1e4230] mb-4">💡 Breakdown theo Mood</h4>
+                {/* Charts Section */}
+                <div className="grid gap-8 lg:grid-cols-2 pt-6">
+                  {/* Revenue Line Chart */}
+                  <div className="border border-stone-150 p-6 rounded-3xl bg-stone-50/30">
+                    <div className="flex justify-between items-center mb-6">
+                      <div>
+                        <h4 className="font-bold text-[#1e4230] text-base">📈 Doanh thu hệ thống (6 tháng qua)</h4>
+                        <p className="text-xs text-stone-500">Ước tính từ phí đặt xe & đăng ký</p>
+                      </div>
+                      <span className="text-xs font-bold text-[#2d5a3d] bg-[#2d5a3d]/10 px-3 py-1 rounded-xl">
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+                          stats.breakdown.revenue_chart ? stats.breakdown.revenue_chart[stats.breakdown.revenue_chart.length - 1].revenue : 0
+                        )} (Tháng này)
+                      </span>
+                    </div>
+                    
+                    <div className="relative w-full h-[200px]">
+                      <svg viewBox="0 0 500 200" width="100%" height="100%" className="overflow-visible">
+                        <defs>
+                          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#2d5a3d" stopOpacity="0.25" />
+                            <stop offset="100%" stopColor="#2d5a3d" stopOpacity="0.00" />
+                          </linearGradient>
+                        </defs>
+                        
+                        {/* Horizontal Gridlines */}
+                        {[0, 0.5, 1].map((ratio, i) => {
+                          const y = 20 + ratio * 130;
+                          const val = (stats.breakdown.revenue_chart ? Math.max(...stats.breakdown.revenue_chart.map(d => d.revenue)) : 0) * (1 - ratio);
+                          return (
+                            <g key={i}>
+                              <line x1="60" y1={y} x2="480" y2={y} stroke="#e5e5e5" strokeDasharray="3 3" />
+                              <text x="50" y={y + 4} fontSize="10" textAnchor="end" fill="#888">
+                                {val >= 1000000 ? `${(val / 1000000).toFixed(0)}M` : val}
+                              </text>
+                            </g>
+                          );
+                        })}
+                        
+                        {/* Area path */}
+                        {(() => {
+                          const revenueData = stats.breakdown.revenue_chart || [];
+                          if (!revenueData.length) return null;
+                          const maxRev = Math.max(...revenueData.map(d => d.revenue), 1);
+                          const pts = revenueData.map((d, index) => {
+                            const x = 60 + (index / (revenueData.length - 1)) * 400;
+                            const y = 150 - (d.revenue / maxRev) * 115;
+                            return { x, y, label: d.month, val: d.revenue };
+                          });
+                          const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                          const areaPath = `${linePath} L ${pts[pts.length - 1].x} 150 L ${pts[0].x} 150 Z`;
+                          
+                          return (
+                            <>
+                              <path d={areaPath} fill="url(#chartGrad)" />
+                              <path d={linePath} fill="none" stroke="#2d5a3d" strokeWidth="3" strokeLinecap="round" />
+                              {pts.map((p, i) => (
+                                <g key={i} className="group/dot cursor-pointer">
+                                  <circle cx={p.x} cy={p.y} r="5" className="fill-[#2d5a3d] stroke-white stroke-2 transition-all duration-200 group-hover/dot:r-7" />
+                                  <text x={p.x} y="170" fontSize="10" textAnchor="middle" fill="#666">{p.label}</text>
+                                  {/* Tooltip */}
+                                  <title>{`${p.label}: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.val)}`}</title>
+                                </g>
+                              ))}
+                            </>
+                          );
+                        })()}
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Activity Bar Chart */}
+                  <div className="border border-stone-150 p-6 rounded-3xl bg-stone-50/30">
+                    <div className="flex justify-between items-center mb-6">
+                      <div>
+                        <h4 className="font-bold text-[#1e4230] text-base">📊 Đặt xe & Thành viên mới</h4>
+                        <p className="text-xs text-stone-500">So sánh lượt đặt xe và đăng ký mới</p>
+                      </div>
+                      <div className="flex gap-3 text-xs">
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-[#2d5a3d] rounded-full"></span> Đặt xe</span>
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-[#bf9b30] rounded-full"></span> Thành viên</span>
+                      </div>
+                    </div>
+                    
+                    <div className="relative w-full h-[200px]">
+                      <svg viewBox="0 0 500 200" width="100%" height="100%" className="overflow-visible">
+                        {/* Horizontal Gridlines */}
+                        {[0, 0.5, 1].map((ratio, i) => {
+                          const y = 20 + ratio * 130;
+                          const val = (stats.breakdown.revenue_chart ? Math.max(...stats.breakdown.revenue_chart.map(d => Math.max(d.bookings, d.users))) : 0) * (1 - ratio);
+                          return (
+                            <g key={i}>
+                              <line x1="40" y1={y} x2="480" y2={y} stroke="#e5e5e5" strokeDasharray="3 3" />
+                              <text x="30" y={y + 4} fontSize="10" textAnchor="end" fill="#888">
+                                {val.toFixed(0)}
+                              </text>
+                            </g>
+                          );
+                        })}
+                        
+                        {/* Bars path */}
+                        {(() => {
+                          const revenueData = stats.breakdown.revenue_chart || [];
+                          if (!revenueData.length) return null;
+                          const maxVal = Math.max(...revenueData.map(d => Math.max(d.bookings, d.users)), 1);
+                          
+                          return revenueData.map((d, index) => {
+                            const groupX = 60 + (index / (revenueData.length - 1)) * 390 + 10;
+                            const bH = (d.bookings / maxVal) * 115;
+                            const bY = 150 - bH;
+                            const uH = (d.users / maxVal) * 115;
+                            const uY = 150 - uH;
+                            
+                            return (
+                              <g key={index} className="cursor-pointer">
+                                {/* Bookings bar */}
+                                <rect x={groupX - 10} y={bY} width="8" height={bH} rx="2" fill="#2d5a3d" className="transition-all hover:opacity-80">
+                                  <title>{`Đặt xe: ${d.bookings} lượt`}</title>
+                                </rect>
+                                
+                                {/* Users bar */}
+                                <rect x={groupX + 2} y={uY} width="8" height={uH} rx="2" fill="#bf9b30" className="transition-all hover:opacity-80">
+                                  <title>{`Thành viên mới: ${d.users} người`}</title>
+                                </rect>
+                                
+                                <text x={groupX - 1} y="170" fontSize="10" textAnchor="middle" fill="#666">{d.month}</text>
+                              </g>
+                            );
+                          });
+                        })()}
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mood Breakdown Row */}
+                <div className="pt-6">
+                  <div className="border border-stone-150 p-6 rounded-3xl bg-stone-50/20 max-w-md">
+                    <h4 className="font-bold text-[#1e4230] mb-4">💡 Breakdown theo Mood chuyến đi</h4>
                     <div className="space-y-3">
                       {Object.entries(stats.breakdown.vibes).length === 0 ? (
                         <p className="text-sm text-stone-400">Chưa có lịch trình.</p>
@@ -5091,22 +5227,6 @@ function AdminDashboard({ user }) {
                           <div key={vibe} className="flex justify-between items-center text-sm border-b border-stone-100 pb-2">
                             <span className="font-medium capitalize">{vibe}</span>
                             <span className="font-bold text-stone-600">{count} chuyến</span>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="border border-stone-100 p-6 rounded-2xl bg-stone-50/50">
-                    <h4 className="font-bold text-[#1e4230] mb-4">💎 Breakdown theo Gói dịch vụ</h4>
-                    <div className="space-y-3">
-                      {Object.entries(stats.breakdown.plans).length === 0 ? (
-                        <p className="text-sm text-stone-400">Chưa có người dùng đăng ký gói.</p>
-                      ) : (
-                        Object.entries(stats.breakdown.plans).map(([plan, count]) => (
-                          <div key={plan} className="flex justify-between items-center text-sm border-b border-stone-100 pb-2">
-                            <span className="font-medium">{plan}</span>
-                            <span className="font-bold text-stone-600">{count} người</span>
                           </div>
                         ))
                       )}
@@ -5126,8 +5246,6 @@ function AdminDashboard({ user }) {
                         <th className="py-3 px-4">Tên</th>
                         <th className="py-3 px-4">Email</th>
                         <th className="py-3 px-4">Vai trò</th>
-                        <th className="py-3 px-4">Gói dịch vụ</th>
-                        <th className="py-3 px-4">Tháng này</th>
                         <th className="py-3 px-4 text-right">Thao tác</th>
                       </tr>
                     </thead>
@@ -5141,29 +5259,14 @@ function AdminDashboard({ user }) {
                               {u.role}
                             </span>
                           </td>
-                          <td className="py-3 px-4">
-                            <span className="font-medium text-stone-700">{u.plan_name || "Free"}</span>
-                          </td>
-                          <td className="py-3 px-4 text-stone-500">{u.usage_this_month || 0} lần tạo</td>
-                          <td className="py-3 px-4 text-right space-x-2">
+                          <td className="py-3 px-4 text-right">
                             <button
                               disabled={updatingUserId === u.id}
                               onClick={() => handleRoleChange(u.id, u.role)}
-                              className="text-xs bg-stone-100 text-stone-700 hover:bg-stone-200 px-2 py-1 rounded transition disabled:opacity-50"
+                              className="text-xs bg-stone-100 text-stone-700 hover:bg-stone-200 px-3 py-1.5 rounded-lg transition disabled:opacity-50 font-semibold"
                             >
                               Toggle Role
                             </button>
-                            <select
-                              disabled={updatingUserId === u.id}
-                              value={u.plan_name || "Free"}
-                              onChange={(e) => handlePlanChange(u.id, e.target.value)}
-                              className="text-xs bg-[#2d5a3d]/5 text-[#2d5a3d] hover:bg-[#2d5a3d]/10 px-2 py-1 rounded outline-none border-none transition"
-                            >
-                              <option value="Free">Gói Free</option>
-                              <option value="Basic">Gói Basic</option>
-                              <option value="Premium">Gói Premium</option>
-                              <option value="International Tourist">Gói International</option>
-                            </select>
                           </td>
                         </tr>
                       ))}
